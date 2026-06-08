@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://edipeek.com/sitemap.xml
