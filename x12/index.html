@@ -65,6 +65,8 @@
   .tag b{color:var(--accent)}
   header .spacer{flex:1}
   header .ghbtn{font-size:12px;color:var(--ink-dim);border:1px solid var(--border);padding:6px 12px;border-radius:6px}
+  .kofi-btn{font-size:12px;color:#13c3ff;border:1px solid rgba(19,195,255,.4);background:rgba(19,195,255,.08);padding:6px 12px;border-radius:6px;text-decoration:none;white-space:nowrap;transition:.15s}
+  .kofi-btn:hover{background:rgba(19,195,255,.16);text-decoration:none}
 
   main{max-width:1180px;margin:0 auto;padding:26px 22px 80px}
 
@@ -207,6 +209,7 @@
   <div class="spacer"></div>
   <a class="ghbtn" href="/" style="text-decoration:none">⌂ Home</a>
   <a class="ghbtn" href="../edifact/" style="text-decoration:none">EDIFACT →</a>
+  <a class="kofi-btn" href="https://ko-fi.com/edipeek" target="_blank" rel="noopener">☕ Support</a>
 </header>
 
 <main>
@@ -313,12 +316,13 @@
       <details><summary>Is my EDI data uploaded anywhere?</summary><div class="ans">No. Parsing happens entirely in your browser using JavaScript. The file content never touches a server, which is why this is safe for confidential trading-partner data.</div></details>
       <details><summary>Which transaction sets are supported?</summary><div class="ans">The parser labels the structural envelope (ISA, GS, ST, SE, GE, IEA) and the most common business segments. Unknown segments are still shown with their raw elements so nothing is lost.</div></details>
       <details><summary>Does it work with both ~ and newline terminators?</summary><div class="ans">Yes. The delimiters are read directly from the ISA segment when present, and the tool falls back to common defaults otherwise.</div></details>
-      <details><summary>Is it really free?</summary><div class="ans">Yes, free with no sign-up. The site is supported by ads.</div></details>
+      <details><summary>Is it really free?</summary><div class="ans">Yes, completely free with no sign-up and no limits. The site is supported by ads, and if it saves you time you can optionally <a href="https://ko-fi.com/edipeek" target="_blank" rel="noopener">leave a tip on Ko-fi</a> to help keep it running and ad-light. Tips are always voluntary, and every feature works whether or not you donate.</div></details>
     </div>
   </section>
 </main>
 
 <footer>
+  <div style="margin-bottom:12px"><a class="kofi-btn" href="https://ko-fi.com/edipeek" target="_blank" rel="noopener" style="display:inline-block">☕ Support EdiPeek — keep it free</a></div>
   <div style="margin-bottom:10px"><a href="/" style="color:var(--accent-2)">Home</a> &middot; <a href="/about/" style="color:var(--accent-2)">About</a> &middot; <a href="/contact/" style="color:var(--accent-2)">Contact</a> &middot; <a href="/privacy/" style="color:var(--accent-2)">Privacy</a> &middot; <a href="/terms/" style="color:var(--accent-2)">Terms</a></div>
   EDIX12.view — a free in-browser EDI X12 parser. Not affiliated with any standards body.
   Files are processed locally and never uploaded.
