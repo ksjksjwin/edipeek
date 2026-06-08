@@ -3,100 +3,855 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Free Online EDI Viewer — X12 &amp; UN/EDIFACT Parser (No Upload)</title>
-<meta name="description" content="Free in-browser EDI viewers. Parse and read X12 (850, 810, 856, 837, 835) and UN/EDIFACT (ORDERS, INVOIC, DESADV) messages instantly. Files never leave your computer.">
-<link rel="canonical" href="https://example.com/">
-<meta property="og:title" content="Free Online EDI Viewer — X12 & UN/EDIFACT">
-<meta property="og:description" content="Read raw EDI in your browser. X12 and EDIFACT, with plain-English business summaries. No upload, no signup.">
+<title>EDI X12 Viewer — Free Online EDI 850, 810, 856, 820 Parser (No Upload)</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<meta name="description" content="Paste raw EDI X12 and read it instantly. Free online EDI parser and viewer for 850, 810, 856 ASN, 820 and more. 100% in your browser — files never leave your computer.">
+<meta name="keywords" content="EDI X12 viewer, EDI parser online, read EDI file, EDI 850 viewer, EDI 856 ASN parser, EDI 810 invoice, X12 segment decoder">
+<link rel="canonical" href="https://edipeek.com/">
+<meta property="og:title" content="EDI X12 Viewer — Read Any X12 File in Your Browser">
+<meta property="og:description" content="Paste raw EDI X12, get a clean human-readable breakdown. Free, no signup, files stay on your device.">
+<meta property="og:type" content="website">
+
+<!-- ===== Google AdSense (replace ca-pub-XXXX with your publisher ID after approval) ===== -->
+<!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script> -->
+
 <style>
   :root{
-    --bg:#0d1117;--panel:#161b22;--panel-2:#1c2330;--border:#2a3340;
-    --ink:#e6edf3;--ink-dim:#8b97a7;--green:#3fb950;--blue:#58a6ff;
-    --mono:"JetBrains Mono","SF Mono",ui-monospace,Menlo,Consolas,monospace;
+    --bg:#0d1117;
+    --panel:#161b22;
+    --panel-2:#1c2330;
+    --border:#2a3340;
+    --ink:#e6edf3;
+    --ink-dim:#8b97a7;
+    --accent:#3fb950;      /* terminal green */
+    --accent-2:#58a6ff;    /* link blue */
+    --warn:#d29922;
+    --seg:#f0883e;
+    --mono:"JetBrains Mono","SF Mono",ui-monospace,"Cascadia Code",Menlo,Consolas,monospace;
+    --sans:"Space Mono",var(--mono);
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  html,body{background:var(--bg);color:var(--ink);font-family:var(--mono);line-height:1.5;font-size:15px}
-  body{background-image:radial-gradient(circle at 20% -10%,rgba(63,185,80,.07),transparent 45%),radial-gradient(circle at 90% 0%,rgba(88,166,255,.07),transparent 40%);min-height:100vh}
-  a{text-decoration:none;color:inherit}
-  header{border-bottom:1px solid var(--border);padding:18px 22px;display:flex;align-items:center;gap:12px}
-  .logo{font-weight:700;font-size:18px;letter-spacing:-.5px}
-  .logo .b{color:var(--blue)}.logo .g{color:var(--green)}
-  .blink{color:var(--green);animation:blink 1.2s steps(2,start) infinite}
+  html,body{background:var(--bg);color:var(--ink);font-family:var(--mono);font-size:15px;line-height:1.5}
+  body{
+    background-image:
+      radial-gradient(circle at 15% -10%, rgba(63,185,80,.07), transparent 45%),
+      radial-gradient(circle at 100% 0%, rgba(88,166,255,.06), transparent 40%);
+    min-height:100vh;
+  }
+  a{color:var(--accent-2);text-decoration:none}
+  a:hover{text-decoration:underline}
+
+  header{
+    border-bottom:1px solid var(--border);
+    padding:18px 22px;
+    display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+    background:rgba(13,17,23,.7);backdrop-filter:blur(6px);
+    position:sticky;top:0;z-index:10;
+  }
+  .logo{
+    font-weight:700;font-size:18px;letter-spacing:-.5px;
+    display:flex;align-items:center;gap:9px;color:var(--ink);text-decoration:none;
+  }
+  .logo:hover{text-decoration:none}
+  .logo:hover .logo-mark{transform:scale(1.08) rotate(-6deg)}
+  .logo-mark{color:var(--accent);transition:transform .2s ease;flex-shrink:0}
+  .logo-text{display:inline-flex;align-items:center}
+  .logo .blink{color:var(--accent);animation:blink 1.2s steps(2,start) infinite}
   @keyframes blink{to{opacity:0}}
-  main{max-width:960px;margin:0 auto;padding:60px 22px 80px}
-  h1{font-size:32px;letter-spacing:-1px;line-height:1.15;margin-bottom:14px}
-  h1 .g{color:var(--green)}h1 .b{color:var(--blue)}
-  .sub{color:var(--ink-dim);max-width:620px;margin-bottom:14px;font-size:16px}
-  .privacy{color:var(--green);font-size:13px;display:inline-flex;gap:8px;align-items:center;border:1px solid rgba(63,185,80,.3);background:rgba(63,185,80,.06);padding:7px 12px;border-radius:8px;margin-bottom:44px}
-  .cards{display:grid;grid-template-columns:1fr 1fr;gap:18px}
-  @media(max-width:760px){.cards{grid-template-columns:1fr}}
-  .card{display:block;background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:26px;transition:.18s}
-  .card:hover{transform:translateY(-3px)}
-  .card.x12:hover{border-color:var(--green);box-shadow:0 10px 40px -18px rgba(63,185,80,.5)}
-  .card.edi:hover{border-color:var(--blue);box-shadow:0 10px 40px -18px rgba(88,166,255,.5)}
-  .card .badge{display:inline-block;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;padding:4px 10px;border-radius:99px;margin-bottom:16px}
-  .card.x12 .badge{color:var(--green);border:1px solid rgba(63,185,80,.4);background:rgba(63,185,80,.07)}
-  .card.edi .badge{color:var(--blue);border:1px solid rgba(88,166,255,.4);background:rgba(88,166,255,.07)}
-  .card h2{font-size:21px;margin-bottom:8px;letter-spacing:-.4px}
-  .card p{color:var(--ink-dim);font-size:14px;margin-bottom:16px;min-height:60px}
-  .card .types{color:var(--ink-dim);font-size:12px;line-height:1.9}
-  .card .types b{color:var(--ink)}
-  .card .go{margin-top:18px;font-size:13px;font-weight:700}
-  .card.x12 .go{color:var(--green)}.card.edi .go{color:var(--blue)}
-  .why{margin-top:54px;border-top:1px solid var(--border);padding-top:32px}
-  .why h3{font-size:16px;margin-bottom:14px}
-  .why ul{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  @media(max-width:760px){.why ul{grid-template-columns:1fr}}
-  .why li{color:var(--ink-dim);font-size:14px;padding-left:22px;position:relative}
-  .why li:before{content:"\25B8";position:absolute;left:0;color:var(--green)}
-  footer{border-top:1px solid var(--border);padding:24px 22px;text-align:center;color:var(--ink-dim);font-size:12px;margin-top:40px}
+  .tag{
+    font-size:11px;color:var(--ink-dim);border:1px solid var(--border);
+    padding:3px 8px;border-radius:99px;
+  }
+  .tag b{color:var(--accent)}
+  header .spacer{flex:1}
+  header .ghbtn{font-size:12px;color:var(--ink-dim);border:1px solid var(--border);padding:6px 12px;border-radius:6px}
+
+  main{max-width:1180px;margin:0 auto;padding:26px 22px 80px}
+
+  .hero h1{font-size:26px;letter-spacing:-1px;margin-bottom:8px;line-height:1.2}
+  .hero h1 .hl{color:var(--accent)}
+  .hero p{color:var(--ink-dim);max-width:680px;margin-bottom:6px}
+  .hero .privacy{color:var(--accent);font-size:13px;margin-top:10px;display:inline-flex;align-items:center;gap:8px;
+    border:1px solid rgba(63,185,80,.3);background:rgba(63,185,80,.06);padding:7px 12px;border-radius:8px}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:24px}
+  @media(max-width:880px){.grid{grid-template-columns:1fr}}
+
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+  .card-head{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:10px 14px;border-bottom:1px solid var(--border);background:var(--panel-2);
+  }
+  .card-head .ttl{font-size:12px;color:var(--ink-dim);text-transform:uppercase;letter-spacing:1.5px}
+  .card-head .dots{display:flex;gap:6px}
+  .dot{width:11px;height:11px;border-radius:50%}
+  .dot.r{background:#ff5f56}.dot.y{background:#ffbd2e}.dot.g{background:#27c93f}
+
+  textarea{
+    width:100%;height:420px;background:#0a0e13;color:var(--ink);border:0;
+    padding:16px;font-family:var(--mono);font-size:13px;line-height:1.6;resize:vertical;outline:none;
+  }
+  .out{height:420px;overflow:auto;padding:14px 16px}
+  .out::-webkit-scrollbar{width:10px}
+  .out::-webkit-scrollbar-thumb{background:var(--border);border-radius:6px}
+
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid var(--border);background:var(--panel-2)}
+  button{
+    font-family:var(--mono);font-size:12px;cursor:pointer;
+    background:var(--panel);color:var(--ink);border:1px solid var(--border);
+    padding:7px 13px;border-radius:7px;transition:.15s;
+  }
+  button:hover{border-color:var(--accent);color:var(--accent)}
+  button.primary{background:var(--accent);color:#07210e;border-color:var(--accent);font-weight:700}
+  button.primary:hover{filter:brightness(1.1);color:#07210e}
+
+  /* parsed output */
+  .meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:14px}
+  .meta .m{background:var(--panel-2);border:1px solid var(--border);border-radius:8px;padding:8px 10px}
+  .meta .m .k{font-size:10px;color:var(--ink-dim);text-transform:uppercase;letter-spacing:1px}
+  .meta .m .v{font-size:14px;color:var(--ink);margin-top:2px;word-break:break-all}
+
+  .seg{margin-bottom:6px;border:1px solid var(--border);border-radius:8px;background:var(--panel-2);overflow:hidden}
+  .seg-head{display:flex;align-items:center;gap:10px;padding:8px 11px;cursor:pointer;user-select:none}
+  .seg-head:hover{background:#222b38}
+  .seg-id{font-weight:700;color:var(--seg);min-width:34px}
+  .seg-name{color:var(--ink);font-size:13px}
+  .seg-raw{margin-left:auto;color:var(--ink-dim);font-size:11px;max-width:45%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .seg-body{display:none;padding:4px 11px 11px;border-top:1px dashed var(--border)}
+  .seg.open .seg-body{display:block}
+  .seg.open .seg-head{background:#222b38}
+  .ele{display:grid;grid-template-columns:70px 1fr;gap:10px;padding:5px 0;font-size:13px;border-bottom:1px dotted #243042}
+  .ele:last-child{border-bottom:0}
+  .ele .epos{color:var(--accent-2);font-size:12px}
+  .ele .edesc{color:var(--ink-dim);font-size:11px;display:block;margin-top:2px}
+  .ele .eval{color:var(--ink);word-break:break-all}
+  .ele .eval .decode{color:var(--accent);font-size:11px}
+
+  .placeholder{color:var(--ink-dim);text-align:center;padding-top:140px;font-size:13px}
+  .placeholder .big{font-size:34px;opacity:.25;margin-bottom:12px}
+
+  /* tabs */
+  .tabs{display:flex;gap:2px;padding:0 14px;background:var(--panel-2);border-bottom:1px solid var(--border)}
+  .tab{
+    font-family:var(--mono);font-size:12px;cursor:pointer;background:transparent;border:0;
+    border-bottom:2px solid transparent;color:var(--ink-dim);padding:11px 14px;border-radius:0;
+  }
+  .tab:hover{color:var(--ink)}
+  .tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+  .view{display:none}
+  .view.active{display:block}
+
+  /* business summary */
+  .bizwrap{padding:18px 18px}
+  .biz-headline{
+    font-size:15px;color:var(--ink);line-height:1.7;background:var(--panel-2);
+    border:1px solid var(--border);border-left:3px solid var(--accent);
+    border-radius:8px;padding:16px 18px;margin-bottom:18px;
+  }
+  .biz-headline b{color:var(--accent)}
+  .biz-headline .amt{color:var(--warn)}
+  .biz-section{margin-bottom:16px}
+  .biz-section .lbl{font-size:10px;color:var(--ink-dim);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:7px}
+  .biz-row{display:flex;gap:10px;padding:6px 0;border-bottom:1px dotted #243042;font-size:13px}
+  .biz-row:last-child{border-bottom:0}
+  .biz-row .rk{color:var(--ink-dim);min-width:130px}
+  .biz-row .rv{color:var(--ink)}
+  .biz-items{width:100%;border-collapse:collapse;font-size:13px;margin-top:4px}
+  .biz-items th{text-align:left;color:var(--ink-dim);font-size:10px;text-transform:uppercase;letter-spacing:1px;padding:6px 8px;border-bottom:1px solid var(--border)}
+  .biz-items td{padding:7px 8px;border-bottom:1px dotted #243042;color:var(--ink)}
+  .biz-items td.num{text-align:right;font-variant-numeric:tabular-nums}
+  .biz-note{font-size:11px;color:var(--ink-dim);margin-top:14px;line-height:1.6}
+
+  .stat{font-size:12px;color:var(--ink-dim);padding:8px 14px;border-top:1px solid var(--border);background:var(--panel-2)}
+  .err{color:#ff7b72;font-size:13px;padding:14px}
+
+  /* ad slots */
+  .adslot{
+    margin:26px 0;min-height:90px;border:1px dashed var(--border);border-radius:10px;
+    display:flex;align-items:center;justify-content:center;color:var(--ink-dim);font-size:11px;
+    background:repeating-linear-gradient(45deg,transparent,transparent 10px,rgba(255,255,255,.012) 10px,rgba(255,255,255,.012) 20px);
+  }
+
+  /* SEO content */
+  .seo{margin-top:54px;border-top:1px solid var(--border);padding-top:34px}
+  .seo h2{font-size:18px;margin:26px 0 10px;color:var(--ink);letter-spacing:-.3px}
+  .seo h3{font-size:14px;margin:18px 0 6px;color:var(--accent)}
+  .seo p,.seo li{color:var(--ink-dim);font-size:14px;margin-bottom:8px;max-width:820px}
+  .seo ul{padding-left:20px}
+  .seo code{background:var(--panel-2);border:1px solid var(--border);padding:1px 6px;border-radius:4px;color:var(--ink);font-size:12px}
+  .faq details{border:1px solid var(--border);border-radius:8px;padding:0;margin-bottom:8px;background:var(--panel);overflow:hidden}
+  .faq summary{padding:13px 15px;cursor:pointer;color:var(--ink);font-size:14px;list-style:none}
+  .faq summary::-webkit-details-marker{display:none}
+  .faq summary:before{content:"▸ ";color:var(--accent)}
+  .faq details[open] summary:before{content:"▾ "}
+  .faq .ans{padding:0 15px 14px;color:var(--ink-dim);font-size:13px}
+
+  footer{border-top:1px solid var(--border);padding:24px 22px;text-align:center;color:var(--ink-dim);font-size:12px}
 </style>
 </head>
 <body>
+
 <header>
-  <span class="logo">EDI<span class="g">.</span><span class="b">view</span><span class="blink">_</span></span>
+  <a class="logo" href="/" title="EdiPeek home" aria-label="EdiPeek home">
+    <svg class="logo-mark" viewBox="0 0 28 28" width="26" height="26" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/>
+      <line x1="17.6" y1="17.6" x2="25" y2="25" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+      <line x1="8" y1="10" x2="16" y2="10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.9"/>
+      <line x1="8" y1="13" x2="14" y2="13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+      <line x1="8" y1="16" x2="15" y2="16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
+    </svg>
+    <span class="logo-text">EDI<span style="color:var(--accent)">PEEK</span><span class="blink" style="color:var(--accent)">_</span></span>
+  </a>
+  <span class="tag" style="color:var(--accent);border-color:rgba(63,185,80,.35)"><b>X12</b></span>
+  <span class="tag">● 100% in-browser · no upload</span>
+  <div class="spacer"></div>
+  <a class="ghbtn" href="/" style="text-decoration:none">⌂ Home</a>
+  <a class="ghbtn" href="../edifact/" style="text-decoration:none">EDIFACT →</a>
 </header>
+
 <main>
-  <h1>Read raw <span class="g">EDI</span> in your <span class="b">browser</span>.</h1>
-  <p class="sub">Paste an EDI message and get a clean, human-readable breakdown of every segment, plus a plain-English summary of what the transaction actually means. Two standards, one place.</p>
-  <div class="privacy">&#128274; Your file never leaves your computer. All parsing happens locally in your browser.</div>
+  <section class="hero">
+    <h1>Read any <span class="hl">EDI X12</span> file in seconds.</h1>
+    <p>Paste a raw EDI transaction — <b>850, 810, 856 (ASN), 820, 855, 997</b> and more — and get a clean, human-readable breakdown of every segment and element.</p>
+    <div class="privacy">🔒 Your file never leaves your computer. All parsing happens locally in your browser.</div>
+  </section>
 
-  <div class="cards">
-    <a class="card x12" href="x12/">
-      <span class="badge">North America</span>
-      <h2>ANSI X12 Viewer</h2>
-      <p>The North American EDI standard. Purchase orders, invoices, shipping notices, healthcare claims and more.</p>
-      <div class="types">
-        <b>Supply chain:</b> 850, 855, 856, 810, 846, 940/945<br>
-        <b>Healthcare:</b> 837, 835, 270/271, 276/277, 834<br>
-        <b>Finance &amp; transport:</b> 820, 204, 210, 214, 990
-      </div>
-      <div class="go">Open X12 viewer &#8594;</div>
-    </a>
+  <!-- Top ad slot -->
+  <div class="adslot">Ad slot (728×90) — insert AdSense unit here</div>
 
-    <a class="card edi" href="edifact/">
-      <span class="badge">International / EU</span>
-      <h2>UN/EDIFACT Viewer</h2>
-      <p>The international EDI standard used across Europe and worldwide. Orders, invoices, despatch, transport and customs.</p>
-      <div class="types">
-        <b>Supply chain:</b> ORDERS, ORDRSP, INVOIC, PRICAT, DELFOR<br>
-        <b>Logistics:</b> DESADV, IFTMIN, IFTSTA, COPARN<br>
-        <b>Finance &amp; customs:</b> REMADV, PAYMUL, CUSDEC, CUSRES
+  <div class="grid">
+    <div class="card">
+      <div class="card-head">
+        <span class="ttl">Paste raw EDI X12</span>
+        <span class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></span>
       </div>
-      <div class="go">Open EDIFACT viewer &#8594;</div>
-    </a>
+      <div class="toolbar">
+        <button class="primary" id="parseBtn">▶ Parse</button>
+        <button id="sampleBtn">Sample: 850 PO</button>
+        <button id="sample837Btn">Sample: 837 Claim</button>
+        <button id="clearBtn">Clear</button>
+      </div>
+      <textarea id="input" spellcheck="false" placeholder="ISA*00*          *00*          *ZZ*SENDERID       *ZZ*RECEIVERID     *...&#10;&#10;Paste your EDI here, then hit Parse.&#10;&#10;Segment terminators (~ or newline) and element separators (*) are auto-detected."></textarea>
+      <div class="stat" id="inStat">Waiting for input…</div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <span class="ttl">Human-readable output</span>
+        <span class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></span>
+      </div>
+      <div class="tabs">
+        <button class="tab active" data-view="segView">Segments</button>
+        <button class="tab" data-view="bizView">💬 Business Summary</button>
+      </div>
+      <div class="toolbar" id="segTools">
+        <button id="expandBtn">Expand all</button>
+        <button id="collapseBtn">Collapse all</button>
+        <button id="copyBtn">Copy as text</button>
+      </div>
+      <div class="out" id="output">
+        <div id="segView" class="view active">
+          <div class="placeholder"><div class="big">⌖</div>Parsed segments will appear here.<br>Paste an EDI file or load the sample.</div>
+        </div>
+        <div id="bizView" class="view">
+          <div class="placeholder"><div class="big">💬</div>A plain-English summary of the transaction<br>will appear here after you parse a file.</div>
+        </div>
+      </div>
+      <div class="stat" id="outStat">—</div>
+    </div>
   </div>
 
-  <div class="why">
-    <h3>Why this tool</h3>
+  <!-- Mid ad slot -->
+  <div class="adslot">Ad slot (responsive) — insert AdSense unit here</div>
+
+  <!-- SEO / content section: critical for AdSense approval (needs real content) -->
+  <section class="seo">
+    <h2>What is this EDI X12 viewer?</h2>
+    <p>EDI (Electronic Data Interchange) X12 files are the standard way businesses exchange purchase orders, invoices, shipping notices and payments. The raw format is a dense string of segments separated by <code>~</code> and elements separated by <code>*</code> — almost impossible to read by eye. This free tool parses that raw text and labels every segment and element so you can actually understand it. Nothing is uploaded: the parsing runs entirely in your browser, which means even sensitive trading-partner data stays on your machine.</p>
+
+    <h2>Supported transaction sets</h2>
+    <p>This viewer auto-detects the transaction type from the <code>ST</code> segment and produces a plain-English business summary for the most common sets across industries. Any other transaction set still gets a full segment-by-segment breakdown.</p>
+    <h3>Supply chain &amp; retail</h3>
     <ul>
-      <li>100% in-browser, sensitive trading-partner data never gets uploaded</li>
-      <li>Auto-detects delimiters from the ISA / UNA service string</li>
-      <li>Plain-English business summary, not just a segment dump</li>
-      <li>Free, no sign-up, works on mobile and desktop</li>
+      <li><b>850</b> — Purchase Order</li>
+      <li><b>855</b> — Purchase Order Acknowledgment</li>
+      <li><b>860</b> — Purchase Order Change Request</li>
+      <li><b>856</b> — Advance Ship Notice (ASN)</li>
+      <li><b>810</b> — Invoice</li>
+      <li><b>846</b> — Inventory Inquiry / Advice</li>
+      <li><b>940 / 945</b> — Warehouse Shipping Order / Advice</li>
     </ul>
-  </div>
+    <h3>Healthcare (HIPAA)</h3>
+    <ul>
+      <li><b>837</b> — Health Care Claim</li>
+      <li><b>835</b> — Health Care Claim Payment / Remittance</li>
+      <li><b>270 / 271</b> — Eligibility &amp; Benefit Inquiry / Response</li>
+      <li><b>276 / 277</b> — Claim Status Request / Response</li>
+      <li><b>834</b> — Benefit Enrollment &amp; Maintenance</li>
+    </ul>
+    <h3>Finance</h3>
+    <ul>
+      <li><b>820</b> — Payment Order / Remittance Advice</li>
+    </ul>
+    <h3>Transportation &amp; logistics</h3>
+    <ul>
+      <li><b>204</b> — Motor Carrier Load Tender</li>
+      <li><b>210</b> — Motor Carrier Freight Invoice</li>
+      <li><b>214</b> — Transportation Carrier Shipment Status</li>
+      <li><b>990</b> — Response to a Load Tender</li>
+    </ul>
+    <h3>Acknowledgments</h3>
+    <ul>
+      <li><b>997 / 999</b> — Functional / Implementation Acknowledgment</li>
+    </ul>
+
+    <h2>How to read an EDI X12 file</h2>
+    <p>Every X12 interchange is wrapped in an <code>ISA</code>/<code>IEA</code> envelope, then one or more functional groups (<code>GS</code>/<code>GE</code>), and inside those, transaction sets (<code>ST</code>/<code>SE</code>). The <code>ST</code> segment tells you which transaction type you are looking at. This viewer auto-detects the delimiters from the ISA segment and walks the structure for you.</p>
+
+    <div class="faq">
+      <h2>Frequently asked questions</h2>
+      <details><summary>Is my EDI data uploaded anywhere?</summary><div class="ans">No. Parsing happens entirely in your browser using JavaScript. The file content never touches a server, which is why this is safe for confidential trading-partner data.</div></details>
+      <details><summary>Which transaction sets are supported?</summary><div class="ans">The parser labels the structural envelope (ISA, GS, ST, SE, GE, IEA) and the most common business segments. Unknown segments are still shown with their raw elements so nothing is lost.</div></details>
+      <details><summary>Does it work with both ~ and newline terminators?</summary><div class="ans">Yes. The delimiters are read directly from the ISA segment when present, and the tool falls back to common defaults otherwise.</div></details>
+      <details><summary>Is it really free?</summary><div class="ans">Yes, free with no sign-up. The site is supported by ads.</div></details>
+    </div>
+  </section>
 </main>
-<footer>EDI.view, free in-browser EDI parsers. Not affiliated with any standards body. Files are processed locally and never uploaded.</footer>
+
+<footer>
+  <div style="margin-bottom:10px"><a href="/" style="color:var(--accent-2)">Home</a> &middot; <a href="/about/" style="color:var(--accent-2)">About</a> &middot; <a href="/contact/" style="color:var(--accent-2)">Contact</a> &middot; <a href="/privacy/" style="color:var(--accent-2)">Privacy</a> &middot; <a href="/terms/" style="color:var(--accent-2)">Terms</a></div>
+  EDIX12.view — a free in-browser EDI X12 parser. Not affiliated with any standards body.
+  Files are processed locally and never uploaded.
+</footer>
+
+<script>
+/* ---------- Minimal X12 segment + element dictionary ----------
+   Enough to be genuinely useful; expand over time for SEO depth. */
+const SEG = {
+  ISA:{name:"Interchange Control Header",el:{1:"Auth Info Qualifier",2:"Auth Info",3:"Security Qualifier",4:"Security Info",5:"Sender ID Qualifier",6:"Interchange Sender ID",7:"Receiver ID Qualifier",8:"Interchange Receiver ID",9:"Interchange Date (YYMMDD)",10:"Interchange Time (HHMM)",11:"Repetition Sep",12:"Version Number",13:"Interchange Control Number",14:"Ack Requested",15:"Usage Indicator",16:"Component Element Sep"}},
+  GS:{name:"Functional Group Header",el:{1:"Functional ID Code",2:"App Sender Code",3:"App Receiver Code",4:"Date (CCYYMMDD)",5:"Time",6:"Group Control Number",7:"Responsible Agency",8:"Version/Release"}},
+  ST:{name:"Transaction Set Header",el:{1:"Transaction Set ID",2:"Transaction Set Control Number"}},
+  BEG:{name:"Beginning Segment for PO",el:{1:"Transaction Set Purpose",2:"PO Type",3:"PO Number",4:"Release Number",5:"Date"}},
+  BIG:{name:"Beginning Segment for Invoice",el:{1:"Invoice Date",2:"Invoice Number",3:"PO Date",4:"PO Number"}},
+  BSN:{name:"Beginning Segment for Ship Notice",el:{1:"Transaction Set Purpose",2:"Shipment ID",3:"Date",4:"Time",5:"Hierarchical Structure Code"}},
+  BPR:{name:"Beginning Segment for Payment Order",el:{1:"Transaction Handling",2:"Monetary Amount",3:"Credit/Debit Flag",4:"Payment Method"}},
+  REF:{name:"Reference Information",el:{1:"Reference ID Qualifier",2:"Reference ID"}},
+  DTM:{name:"Date/Time Reference",el:{1:"Date/Time Qualifier",2:"Date",3:"Time"}},
+  N1:{name:"Party Identification",el:{1:"Entity ID Code",2:"Name",3:"ID Code Qualifier",4:"ID Code"}},
+  N2:{name:"Additional Name",el:{1:"Name"}},
+  N3:{name:"Address Information",el:{1:"Address Line 1",2:"Address Line 2"}},
+  N4:{name:"Geographic Location",el:{1:"City",2:"State/Province",3:"Postal Code",4:"Country"}},
+  PER:{name:"Administrative Contact",el:{1:"Contact Function",2:"Name",3:"Comm Number Qualifier",4:"Comm Number"}},
+  PO1:{name:"Purchase Order Baseline Item",el:{1:"Line Number",2:"Quantity",3:"Unit of Measure",4:"Unit Price",5:"Basis of Unit Price",6:"Product ID Qualifier",7:"Product ID"}},
+  IT1:{name:"Invoice Baseline Item",el:{1:"Line Number",2:"Quantity Invoiced",3:"Unit of Measure",4:"Unit Price",5:"Basis of Unit Price",6:"Product ID Qualifier",7:"Product ID"}},
+  PID:{name:"Product/Item Description",el:{1:"Item Description Type",2:"Product Characteristic",3:"Agency Code",4:"Product Description Code",5:"Description"}},
+  HL:{name:"Hierarchical Level",el:{1:"Hierarchical ID",2:"Parent ID",3:"Level Code",4:"Child Code"}},
+  TD1:{name:"Carrier Details (Quantity)",el:{1:"Packaging Code",2:"Lading Quantity"}},
+  TD5:{name:"Carrier Details (Routing)",el:{1:"Routing Sequence",2:"ID Qualifier",3:"Carrier ID",4:"Transport Method"}},
+  LIN:{name:"Item Identification",el:{1:"Line Number",2:"Product ID Qualifier",3:"Product ID"}},
+  SN1:{name:"Item Detail (Shipment)",el:{1:"Assigned ID",2:"Quantity Shipped",3:"Unit of Measure"}},
+  CTT:{name:"Transaction Totals",el:{1:"Number of Line Items",2:"Hash Total"}},
+  AMT:{name:"Monetary Amount",el:{1:"Amount Qualifier",2:"Monetary Amount"}},
+  // --- Healthcare (HIPAA) segments ---
+  BHT:{name:"Beginning of Hierarchical Transaction",el:{1:"Hierarchical Structure Code",2:"Transaction Set Purpose",3:"Reference ID",4:"Date",5:"Time",6:"Transaction Type"}},
+  NM1:{name:"Individual or Organizational Name",el:{1:"Entity ID Code",2:"Entity Type (1=Person,2=Org)",3:"Last Name / Org Name",4:"First Name",5:"Middle Name",8:"ID Code Qualifier",9:"ID Code (NPI/Member ID)"}},
+  CLM:{name:"Health Claim",el:{1:"Claim Submitter ID",2:"Total Claim Charge Amount",5:"Facility Code",6:"Provider Signature",7:"Assignment of Benefits",8:"Benefits Assignment",9:"Release of Information"}},
+  CLP:{name:"Claim Payment Information",el:{1:"Claim Submitter ID",2:"Claim Status Code",3:"Total Charge Amount",4:"Amount Paid",5:"Patient Responsibility",6:"Claim Filing Indicator",7:"Payer Claim Control Number"}},
+  SVC:{name:"Service Payment Information",el:{1:"Procedure Code",2:"Line Charge Amount",3:"Line Paid Amount",4:"Revenue Code",5:"Units Paid"}},
+  SV1:{name:"Professional Service",el:{1:"Procedure Code",2:"Line Charge Amount",3:"Unit of Measure",4:"Service Unit Count"}},
+  DTP:{name:"Date or Time Period",el:{1:"Date/Time Qualifier",2:"Date Format",3:"Date Value"}},
+  EB:{name:"Eligibility or Benefit Information",el:{1:"Eligibility/Benefit Info Code",2:"Coverage Level",3:"Service Type",4:"Insurance Type",5:"Plan Coverage Description"}},
+  EQ:{name:"Eligibility or Benefit Inquiry",el:{1:"Service Type Code",2:"Medical Procedure ID",3:"Coverage Level"}},
+  STC:{name:"Status Information",el:{1:"Health Care Claim Status",2:"Status Date",3:"Action Code",4:"Total Claim Charge",5:"Claim Payment Amount"}},
+  INS:{name:"Insured Benefit (Enrollment)",el:{1:"Yes/No Member Indicator",2:"Relationship Code",3:"Maintenance Type",4:"Maintenance Reason"}},
+  TRN:{name:"Trace / Reassociation",el:{1:"Trace Type Code",2:"Reference ID",3:"Originating Company ID"}},
+  // --- Transportation segments ---
+  B10:{name:"Beginning Segment (Carrier Status)",el:{1:"Reference ID",2:"Shipment ID",3:"SCAC"}},
+  B2:{name:"Beginning Segment (Motor Carrier Load Tender)",el:{1:"(reserved)",2:"SCAC",4:"Shipment ID",5:"Weight Unit"}},
+  B3:{name:"Beginning Segment (Freight Invoice)",el:{2:"Invoice Number",3:"Shipment ID",4:"Shipment Method",5:"Weight Unit",7:"Net Amount Due"}},
+  L11:{name:"Business Instructions / Reference",el:{1:"Reference ID",2:"Reference Qualifier"}},
+  AT7:{name:"Shipment Status Details",el:{1:"Status Reason Code",2:"Status Reason",5:"Date",6:"Time"}},
+  MS3:{name:"Interline Information",el:{1:"SCAC",2:"Routing Sequence",3:"City"}},
+  SE:{name:"Transaction Set Trailer",el:{1:"Number of Segments",2:"Transaction Set Control Number"}},
+  GE:{name:"Functional Group Trailer",el:{1:"Number of Transaction Sets",2:"Group Control Number"}},
+  IEA:{name:"Interchange Control Trailer",el:{1:"Number of Functional Groups",2:"Interchange Control Number"}},
+};
+
+/* small code lookups that make output feel "smart" */
+const ST_TYPES={
+  // Supply chain / retail
+  "850":"Purchase Order","855":"PO Acknowledgment","860":"PO Change Request","865":"PO Change Ack",
+  "856":"Advance Ship Notice (ASN)","810":"Invoice","846":"Inventory Advice",
+  "940":"Warehouse Shipping Order","943":"Warehouse Stock Transfer","944":"Warehouse Stock Receipt","945":"Warehouse Shipping Advice",
+  // Finance
+  "820":"Payment Order / Remittance","823":"Lockbox","824":"Application Advice",
+  // Healthcare (HIPAA)
+  "837":"Health Care Claim","835":"Health Care Claim Payment/Remittance","834":"Benefit Enrollment & Maintenance",
+  "270":"Eligibility/Benefit Inquiry","271":"Eligibility/Benefit Response",
+  "276":"Claim Status Request","277":"Claim Status Response","278":"Health Services Review",
+  // Transportation
+  "204":"Motor Carrier Load Tender","210":"Motor Carrier Freight Invoice","214":"Transportation Carrier Shipment Status","990":"Response to Load Tender",
+  // Acknowledgment
+  "997":"Functional Acknowledgment","999":"Implementation Acknowledgment"
+};
+const N1_ENTITY={"BY":"Buyer","SE":"Seller","ST":"Ship To","BT":"Bill To","SF":"Ship From","VN":"Vendor","SU":"Supplier","RI":"Remit To","SH":"Shipper","CN":"Consignee","CA":"Carrier"};
+const NM1_ENTITY={"41":"Submitter","40":"Receiver","85":"Billing Provider","87":"Pay-to Provider","82":"Rendering Provider","IL":"Insured/Subscriber","QC":"Patient","PR":"Payer","2B":"Third-Party Admin","1P":"Provider","DN":"Referring Provider","77":"Service Facility"};
+
+function decodeHint(seg,pos,val){
+  if(seg==="ST"&&pos===1&&ST_TYPES[val]) return ST_TYPES[val];
+  if(seg==="N1"&&pos===1&&N1_ENTITY[val]) return N1_ENTITY[val];
+  if(seg==="NM1"&&pos===1&&NM1_ENTITY[val]) return NM1_ENTITY[val];
+  if(seg==="NM1"&&pos===2) return val==="1"?"Person":(val==="2"?"Organization":"");
+  if(seg==="ISA"&&pos===15) return val==="P"?"Production":(val==="T"?"Test":"");
+  return "";
+}
+
+let segments=[];
+
+function detectDelims(raw){
+  let elem="*", segT="~", comp=":";
+  const i=raw.indexOf("ISA");
+  if(i!==-1 && raw.length>=i+4){
+    // Element separator is the character immediately after "ISA"
+    elem=raw[i+3];
+    // ISA is fixed-length: 16 elements. The segment terminator is the single
+    // character that comes right after the 16th element (the usage indicator
+    // is element 15, component separator is element 16, then terminator).
+    // Rather than rely on exact spacing, find the end of the ISA segment by
+    // counting element separators from the ISA start.
+    let p=i+3, count=0;
+    while(p<raw.length && count<16){ if(raw[p]===elem) count++; p++; }
+    // p now points just past the 16th element separator -> next char is the
+    // component element separator (element 16's single char), then terminator
+    if(p<raw.length){
+      comp=raw[p];          // component element separator
+      segT=raw[p+1]||"~";   // segment terminator
+    }
+  }
+  // sanity: terminator should not equal element sep; fall back if odd
+  if(segT===elem || !segT.trim() && segT!=="\n") segT="~";
+  if(raw.indexOf(segT)===-1) segT="\n";
+  return {elem,segT,comp};
+}
+
+function parse(){
+  const raw=document.getElementById("input").value.trim();
+  const out=document.getElementById("segView");
+  const outStat=document.getElementById("outStat");
+  if(!raw){out.innerHTML='<div class="err">Nothing to parse — paste an EDI X12 file first.</div>';document.getElementById("bizView").innerHTML='<div class="err">Nothing to summarize.</div>';outStat.textContent="—";return;}
+
+  try{
+    const {elem,segT}=detectDelims(raw);
+    // split on segment terminator OR newline, strip whitespace/CRLF
+    let parts=raw.split(new RegExp("["+escapeRe(segT)+"\\r\\n]+")).map(s=>s.trim()).filter(Boolean);
+    segments=parts.map(p=>{
+      const fields=p.split(elem);
+      return {id:fields[0].toUpperCase(),fields:fields};
+    });
+
+    // metadata summary
+    let stType="", senderId="", receiverId="", icn="";
+    segments.forEach(s=>{
+      if(s.id==="ST"&&s.fields[1]) stType=s.fields[1];
+      if(s.id==="ISA"){senderId=(s.fields[6]||"").trim();receiverId=(s.fields[8]||"").trim();icn=(s.fields[13]||"").trim();}
+    });
+
+    let html="";
+    if(stType||senderId){
+      html+='<div class="meta">';
+      if(stType) html+=metaCard("Transaction",stType+(ST_TYPES[stType]?" · "+ST_TYPES[stType]:""));
+      if(senderId) html+=metaCard("Sender",senderId);
+      if(receiverId) html+=metaCard("Receiver",receiverId);
+      if(icn) html+=metaCard("Control #",icn);
+      html+=metaCard("Segments",String(segments.length));
+      html+='</div>';
+    }
+
+    segments.forEach((s,idx)=>{
+      const def=SEG[s.id];
+      const segName=def?def.name:"Unknown / custom segment";
+      const rawLine=s.fields.join(elem);
+      let body="";
+      for(let i=1;i<s.fields.length;i++){
+        const val=s.fields[i];
+        const desc=def&&def.el[i]?def.el[i]:"Element "+i;
+        const hint=decodeHint(s.id,i,val);
+        body+='<div class="ele"><div class="epos">'+s.id+String(i).padStart(2,"0")+
+              '<span class="edesc">'+esc(desc)+'</span></div>'+
+              '<div class="eval">'+(val===""?'<span style="color:var(--ink-dim)">∅ empty</span>':esc(val))+
+              (hint?' <span class="decode">→ '+esc(hint)+'</span>':'')+'</div></div>';
+      }
+      html+='<div class="seg" data-i="'+idx+'">'+
+            '<div class="seg-head"><span class="seg-id">'+esc(s.id)+'</span>'+
+            '<span class="seg-name">'+esc(segName)+'</span>'+
+            '<span class="seg-raw">'+esc(rawLine)+'</span></div>'+
+            '<div class="seg-body">'+(body||'<div style="color:var(--ink-dim);font-size:12px;padding:4px 0">No elements.</div>')+'</div></div>';
+    });
+
+    out.innerHTML=html;
+    bindSegs();
+    buildBizSummary(stType);
+    outStat.textContent=segments.length+" segments parsed · delimiters: element \""+elem+"\" · terminator \""+(segT==="\n"?"\\n":segT)+"\"";
+  }catch(e){
+    out.innerHTML='<div class="err">Could not parse this input. Make sure it is raw EDI X12 text. ('+esc(e.message)+')</div>';
+  }
+}
+
+function metaCard(k,v){return '<div class="m"><div class="k">'+esc(k)+'</div><div class="v">'+esc(v)+'</div></div>';}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function escapeRe(s){return s.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");}
+
+function bindSegs(){
+  document.querySelectorAll(".seg-head").forEach(h=>{
+    h.addEventListener("click",()=>h.parentElement.classList.toggle("open"));
+  });
+}
+
+/* ---------- Business Summary ---------- */
+// helpers to read values out of the parsed segments
+function findSeg(id){return segments.find(s=>s.id===id);}
+function findAll(id){return segments.filter(s=>s.id===id);}
+function f(seg,i){return seg&&seg.fields[i]!==undefined?String(seg.fields[i]).trim():"";}
+
+function fmtDate(raw){
+  if(!raw) return "";
+  const d=raw.replace(/\D/g,"");
+  if(d.length===8) return d.slice(0,4)+"-"+d.slice(4,6)+"-"+d.slice(6,8);     // CCYYMMDD
+  if(d.length===6) return "20"+d.slice(0,2)+"-"+d.slice(2,4)+"-"+d.slice(4,6); // YYMMDD
+  return raw;
+}
+function money(v){
+  if(v===""||v===undefined) return "";
+  const n=parseFloat(v);
+  if(isNaN(n)) return v;
+  return n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+function partyName(code){
+  // prefer a named N1 party with matching entity code
+  const n1=findAll("N1").find(s=>f(s,1)===code);
+  if(n1 && f(n1,2)) return f(n1,2);
+  return "";
+}
+// healthcare parties live in NM1 segments (entity code in element 1)
+function nmName(code){
+  const nm=findAll("NM1").find(s=>f(s,1)===code);
+  if(!nm) return "";
+  const last=f(nm,3), first=f(nm,4);
+  const type=f(nm,2);
+  if(type==="1"&&(last||first)) return (first?first+" ":"")+last; // person
+  return last; // organization name sits in element 3
+}
+
+function buildBizSummary(stType){
+  const biz=document.getElementById("bizView");
+  if(!segments.length){biz.innerHTML='<div class="err">Nothing to summarize.</div>';return;}
+
+  const typeName=ST_TYPES[stType]||("transaction "+(stType||"?"));
+  const isa=findSeg("ISA");
+  const senderRaw=f(isa,6), receiverRaw=f(isa,8);
+  const usage=f(isa,15)==="P"?"Production":(f(isa,15)==="T"?"Test":"");
+
+  // resolve readable party names where possible, else fall back to ISA IDs
+  let fromName=partyName("SF")||partyName("SE")||partyName("VN")||partyName("SU")||senderRaw||"the sender";
+  let toName  =partyName("ST")||partyName("BY")||partyName("BT")||receiverRaw||"the receiver";
+
+  let headline="", rows=[], itemsHtml="", note="";
+
+  if(stType==="850"){ // Purchase Order
+    const beg=findSeg("BEG");
+    const po=f(beg,3), date=fmtDate(f(beg,5));
+    const items=findAll("PO1");
+    // for a PO, the buyer is the ordering party; ship-to is secondary
+    const buyer=partyName("BY")||partyName("BT")||receiverRaw||"the buyer";
+    const supplier=partyName("SE")||partyName("VN")||partyName("SU")||partyName("SF")||senderRaw||"the supplier";
+    fromName=supplier; toName=buyer;
+    let totalQty=0, totalVal=0;
+    items.forEach(it=>{const q=parseFloat(f(it,2))||0;const p=parseFloat(f(it,4))||0;totalQty+=q;totalVal+=q*p;});
+    headline=`<b>${esc(toName)}</b> placed purchase order <b>${esc(po||"(no number)")}</b> with <b>${esc(fromName)}</b>`+             (date?` on <b>${esc(date)}</b>`:"")+
+             `, ordering <b>${items.length}</b> line item${items.length!==1?"s":""}`+
+             (totalQty?` for a total of <b>${totalQty.toLocaleString()}</b> units`:"")+
+             (totalVal?` worth about <span class="amt">${money(totalVal)}</span>`:"")+`.`;
+    rows=[["Document type","Purchase Order (EDI 850)"],["PO number",po||"—"],["Order date",date||"—"],["Buyer",toName],["Supplier",fromName]];
+    itemsHtml=itemTable(items,["PO1"]);
+    note="An 850 is a buyer telling a supplier what they want to purchase. The supplier typically responds with an 855 (acknowledgment) and later an 856 (ship notice) and 810 (invoice).";
+  }
+  else if(stType==="810"){ // Invoice
+    const big=findSeg("BIG");
+    const inv=f(big,2), invDate=fmtDate(f(big,1)), po=f(big,4);
+    const items=findAll("IT1");
+    const tot=findAll("TDS")[0]||findAll("AMT").find(s=>true);
+    headline=`<b>${esc(fromName)}</b> issued invoice <b>${esc(inv||"(no number)")}</b> to <b>${esc(toName)}</b>`+
+             (invDate?` dated <b>${esc(invDate)}</b>`:"")+
+             (po?`, referencing purchase order <b>${esc(po)}</b>`:"")+
+             `, covering <b>${items.length}</b> line item${items.length!==1?"s":""}.`;
+    rows=[["Document type","Invoice (EDI 810)"],["Invoice number",inv||"—"],["Invoice date",invDate||"—"],["Against PO",po||"—"],["Seller",fromName],["Bill to",toName]];
+    itemsHtml=itemTable(items,["IT1"]);
+    note="An 810 is the supplier's bill for goods or services, usually sent after the 856 ship notice. It is matched against the original 850 PO during accounts-payable reconciliation.";
+  }
+  else if(stType==="856"){ // ASN
+    const bsn=findSeg("BSN");
+    const ship=f(bsn,2), date=fmtDate(f(bsn,3));
+    const items=findAll("SN1").concat(findAll("LIN"));
+    let totalQty=0; findAll("SN1").forEach(it=>{totalQty+=parseFloat(f(it,2))||0;});
+    headline=`<b>${esc(fromName)}</b> notified <b>${esc(toName)}</b> that shipment <b>${esc(ship||"(no ID)")}</b> is on its way`+
+             (date?`, shipped on <b>${esc(date)}</b>`:"")+
+             (totalQty?`, containing about <b>${totalQty.toLocaleString()}</b> units`:"")+`.`;
+    rows=[["Document type","Advance Ship Notice (EDI 856)"],["Shipment ID",ship||"—"],["Ship date",date||"—"],["Ship from",fromName],["Ship to",toName]];
+    itemsHtml=itemTable(findAll("SN1"),["SN1"]);
+    note="An 856 (ASN) tells the buyer what is in an incoming shipment and how it is packed, so the warehouse can receive it efficiently before the truck arrives.";
+  }
+  else if(stType==="820"){ // Payment / Remittance
+    const bpr=findSeg("BPR");
+    const amt=money(f(bpr,2)), method=f(bpr,4);
+    headline=`<b>${esc(senderRaw||"The payer")}</b> sent a payment/remittance of <span class="amt">${esc(amt||"(amount n/a)")}</span> to <b>${esc(receiverRaw||"the payee")}</b>`+
+             (method?` via <b>${esc(method)}</b>`:"")+`.`;
+    rows=[["Document type","Payment Order / Remittance (EDI 820)"],["Amount",amt||"—"],["Payment method",method||"—"],["Payer",senderRaw||"—"],["Payee",receiverRaw||"—"]];
+    note="An 820 communicates that a payment has been made and which invoices it covers, helping the receiver apply cash correctly in their AR system.";
+  }
+  else if(stType==="997"||stType==="999"){ // Functional / Implementation Ack
+    headline=`<b>${esc(senderRaw||"The receiver")}</b> sent a${stType==="999"?"n implementation":" functional"} acknowledgment to <b>${esc(receiverRaw||"the sender")}</b>, confirming that a previously transmitted EDI document was received.`;
+    rows=[["Document type",(stType==="999"?"Implementation":"Functional")+" Acknowledgment (EDI "+stType+")"],["From",senderRaw||"—"],["To",receiverRaw||"—"]];
+    note="A "+stType+" is a technical receipt. It confirms the file arrived and was structurally valid — it does not mean the business agreed to the contents.";
+  }
+
+  /* ---------- Supply chain (additional) ---------- */
+  else if(stType==="855"){ // PO Acknowledgment
+    const bak=findSeg("BAK"); const po=f(bak,3)||f(findSeg("PRF"),1);
+    const supplier=partyName("SU")||partyName("VN")||partyName("SE")||senderRaw||"the supplier";
+    const buyer=partyName("BY")||receiverRaw||"the buyer";
+    headline=`<b>${esc(supplier)}</b> acknowledged purchase order <b>${esc(po||"(no number)")}</b> from <b>${esc(buyer)}</b>, confirming whether the order is accepted, rejected, or changed.`;
+    rows=[["Document type","PO Acknowledgment (EDI 855)"],["PO number",po||"—"],["Supplier",supplier],["Buyer",buyer]];
+    note="An 855 is the supplier's response to an 850, telling the buyer which lines are accepted, backordered, or rejected before shipment.";
+  }
+  else if(stType==="860"){ // PO Change
+    const beg=findSeg("BCH"); const po=f(beg,3);
+    headline=`<b>${esc(toName)}</b> requested changes to purchase order <b>${esc(po||"(no number)")}</b> sent to <b>${esc(fromName)}</b>.`;
+    rows=[["Document type","PO Change Request (EDI 860)"],["PO number",po||"—"],["Buyer",toName],["Supplier",fromName]];
+    note="An 860 modifies an order already placed via an 850 — changing quantities, dates, or cancelling lines.";
+  }
+  else if(stType==="846"){ // Inventory Advice
+    const items=findAll("LIN");
+    headline=`<b>${esc(senderRaw||"The sender")}</b> reported inventory availability to <b>${esc(receiverRaw||"the receiver")}</b>`+(items.length?`, covering <b>${items.length}</b> item${items.length!==1?"s":""}`:"")+`.`;
+    rows=[["Document type","Inventory Inquiry/Advice (EDI 846)"],["Reported by",senderRaw||"—"],["Reported to",receiverRaw||"—"]];
+    note="An 846 communicates on-hand stock levels — often used by suppliers/3PLs to tell partners what is available.";
+  }
+  else if(stType==="940"||stType==="945"){ // Warehouse shipping
+    const w=findSeg("W05")||findSeg("W06"); const ship=f(findSeg("W06"),2)||f(w,2);
+    const is940=stType==="940";
+    headline=`<b>${esc(senderRaw||"The sender")}</b> sent a warehouse ${is940?"shipping order":"shipping advice"} to <b>${esc(receiverRaw||"the receiver")}</b>`+(ship?`, referencing shipment <b>${esc(ship)}</b>`:"")+`.`;
+    rows=[["Document type",(is940?"Warehouse Shipping Order":"Warehouse Shipping Advice")+" (EDI "+stType+")"],["From",senderRaw||"—"],["To",receiverRaw||"—"]];
+    note=is940?"A 940 instructs a 3PL/warehouse to ship goods to a customer.":"A 945 is the warehouse confirming what was actually shipped, back to the depositor.";
+  }
+
+  /* ---------- Healthcare (HIPAA) ---------- */
+  else if(stType==="837"){ // Health Care Claim
+    const submitter=nmName("41")||senderRaw||"the submitter";
+    const payer=nmName("PR")||"the payer";
+    const billing=nmName("85");
+    const patient=nmName("QC")||nmName("IL");
+    const claims=findAll("CLM");
+    let total=0; claims.forEach(c=>{total+=parseFloat(f(c,2))||0;});
+    headline=`<b>${esc(billing||submitter)}</b> submitted <b>${claims.length||1}</b> health care claim${claims.length!==1?"s":""} to <b>${esc(payer)}</b>`+
+             (patient?` for patient <b>${esc(patient)}</b>`:"")+
+             (total?`, totaling <span class="amt">${money(total)}</span> in charges`:"")+`.`;
+    rows=[["Document type","Health Care Claim (EDI 837)"],["Submitter",submitter],["Billing provider",billing||"—"],["Payer",payer],["Patient",patient||"—"],["Claim count",String(claims.length||1)]];
+    if(total) rows.push(["Total charges",money(total)]);
+    itemsHtml=claimTable(claims);
+    note="An 837 is a provider billing a payer (insurer) for services rendered. The payer responds with an 835 (payment/remittance). PHI in this file is sensitive — note that nothing here is uploaded.";
+  }
+  else if(stType==="835"){ // Claim Payment / Remittance
+    const bpr=findSeg("BPR");
+    const paid=money(f(bpr,2)); const method=f(bpr,4);
+    const payer=nmName("PR")||senderRaw||"the payer";
+    const payee=nmName("PE")||receiverRaw||"the provider";
+    const clps=findAll("CLP");
+    let totalPaid=0; clps.forEach(c=>{totalPaid+=parseFloat(f(c,4))||0;});
+    headline=`<b>${esc(payer)}</b> paid <b>${esc(payee)}</b> <span class="amt">${esc(paid||money(totalPaid)||"(amount n/a)")}</span>`+
+             (method?` via <b>${esc(method)}</b>`:"")+
+             (clps.length?`, covering <b>${clps.length}</b> claim${clps.length!==1?"s":""}`:"")+`.`;
+    rows=[["Document type","Claim Payment/Remittance (EDI 835)"],["Payer",payer],["Payee (provider)",payee],["Total paid",paid||money(totalPaid)||"—"],["Payment method",method||"—"],["Claims paid",String(clps.length)]];
+    itemsHtml=clpTable(clps);
+    note="An 835 is the insurer's electronic remittance advice — it explains how each 837 claim was adjudicated: what was paid, denied, or applied to patient responsibility.";
+  }
+  else if(stType==="270"||stType==="271"){ // Eligibility inquiry / response
+    const isReq=stType==="270";
+    const payer=nmName("PR")||(isReq?receiverRaw:senderRaw)||"the payer";
+    const provider=nmName("1P")||nmName("85")||(isReq?senderRaw:receiverRaw)||"the provider";
+    const patient=nmName("IL")||nmName("QC");
+    headline=isReq
+      ? `<b>${esc(provider)}</b> asked <b>${esc(payer)}</b> whether <b>${esc(patient||"a patient")}</b> is eligible for benefits.`
+      : `<b>${esc(payer)}</b> responded to <b>${esc(provider)}</b> with eligibility and benefit details for <b>${esc(patient||"the patient")}</b>.`;
+    rows=[["Document type",(isReq?"Eligibility Inquiry (EDI 270)":"Eligibility Response (EDI 271)")],["Provider",provider],["Payer",payer],["Patient",patient||"—"]];
+    if(!isReq){
+      const ebs=findAll("EB").slice(0,8).map(e=>f(e,5)||f(e,1)).filter(Boolean);
+      if(ebs.length) note="Benefits reported: "+ebs.join("; ")+".";
+    }
+    if(!note) note=isReq?"A 270 asks an insurer to confirm a patient's coverage before service.":"A 271 is the insurer's answer to a 270 — confirming active coverage and benefit levels.";
+  }
+  else if(stType==="276"||stType==="277"){ // Claim status request / response
+    const isReq=stType==="276";
+    const provider=nmName("1P")||nmName("41")||"the provider";
+    const payer=nmName("PR")||nmName("40")||"the payer";
+    const stc=findSeg("STC");
+    headline=isReq
+      ? `<b>${esc(provider)}</b> asked <b>${esc(payer)}</b> for the status of a submitted claim.`
+      : `<b>${esc(payer)}</b> reported claim status back to <b>${esc(provider)}</b>`+(stc&&f(stc,1)?` (status: <b>${esc(f(stc,1))}</b>)`:"")+`.`;
+    rows=[["Document type",(isReq?"Claim Status Request (EDI 276)":"Claim Status Response (EDI 277)")],["Provider",provider],["Payer",payer]];
+    note=isReq?"A 276 asks where a previously submitted 837 claim stands.":"A 277 reports whether a claim is pending, paid, or denied.";
+  }
+  else if(stType==="834"){ // Benefit Enrollment
+    const sponsor=nmName("P5")||nmName("IN")||senderRaw||"the plan sponsor";
+    const payer=nmName("IN")||receiverRaw||"the insurer";
+    const members=findAll("INS").length;
+    headline=`<b>${esc(sponsor)}</b> sent benefit enrollment and maintenance to <b>${esc(payer)}</b>`+(members?`, covering <b>${members}</b> member record${members!==1?"s":""}`:"")+`.`;
+    rows=[["Document type","Benefit Enrollment & Maintenance (EDI 834)"],["Sponsor",sponsor],["Insurer",payer],["Member records",String(members)]];
+    note="An 834 tells an insurer who to enroll, change, or terminate in a health plan — typically sent by an employer or benefits administrator.";
+  }
+
+  /* ---------- Transportation ---------- */
+  else if(stType==="204"){ // Load Tender
+    const shipper=partyName("SH")||senderRaw||"the shipper";
+    const carrier=partyName("CA")||receiverRaw||"the carrier";
+    const b2=findSeg("B2"); const shipId=f(b2,4)||f(findSeg("L11"),1);
+    headline=`<b>${esc(shipper)}</b> offered a shipment load tender to carrier <b>${esc(carrier)}</b>`+(shipId?`, shipment <b>${esc(shipId)}</b>`:"")+`.`;
+    rows=[["Document type","Motor Carrier Load Tender (EDI 204)"],["Shipper",shipper],["Carrier",carrier],["Shipment ID",shipId||"—"]];
+    note="A 204 offers a load to a trucking carrier. The carrier replies with a 990 to accept or decline.";
+  }
+  else if(stType==="210"){ // Freight Invoice
+    const b3=findSeg("B3"); const inv=f(b3,2); const amt=money(f(b3,7)); const shipId=f(b3,3);
+    const carrier=partyName("CA")||senderRaw||"the carrier";
+    const payer=partyName("BT")||receiverRaw||"the payer";
+    headline=`Carrier <b>${esc(carrier)}</b> billed <b>${esc(payer)}</b> freight invoice <b>${esc(inv||"(no number)")}</b>`+(amt?` for <span class="amt">${esc(amt)}</span>`:"")+(shipId?`, shipment <b>${esc(shipId)}</b>`:"")+`.`;
+    rows=[["Document type","Motor Carrier Freight Invoice (EDI 210)"],["Invoice number",inv||"—"],["Amount due",amt||"—"],["Shipment ID",shipId||"—"],["Carrier",carrier],["Bill to",payer]];
+    note="A 210 is a carrier's freight bill for transportation services.";
+  }
+  else if(stType==="214"){ // Shipment Status
+    const b10=findSeg("B10"); const shipId=f(b10,2); const scac=f(b10,3);
+    const at7=findSeg("AT7"); const statusCode=f(at7,1); const date=fmtDate(f(at7,5));
+    const carrier=partyName("CA")||senderRaw||"the carrier";
+    headline=`Carrier <b>${esc(carrier)}</b> reported a status update for shipment <b>${esc(shipId||"(no ID)")}</b>`+(statusCode?` (status code <b>${esc(statusCode)}</b>)`:"")+(date?` on <b>${esc(date)}</b>`:"")+`.`;
+    rows=[["Document type","Transportation Carrier Shipment Status (EDI 214)"],["Shipment ID",shipId||"—"],["SCAC",scac||"—"],["Status code",statusCode||"—"],["Status date",date||"—"]];
+    note="A 214 is a tracking update — the carrier telling the shipper where the freight is (picked up, in transit, delivered, etc.).";
+  }
+  else if(stType==="990"){ // Response to Load Tender
+    const b1=findSeg("B1"); const shipId=f(b1,2); const resp=f(b1,4);
+    const accepted=resp==="A";
+    const carrier=partyName("CA")||senderRaw||"the carrier";
+    headline=`Carrier <b>${esc(carrier)}</b> ${accepted?"accepted":(resp==="D"?"declined":"responded to")} the load tender`+(shipId?` for shipment <b>${esc(shipId)}</b>`:"")+`.`;
+    rows=[["Document type","Response to Load Tender (EDI 990)"],["Shipment ID",shipId||"—"],["Response",accepted?"Accepted":(resp==="D"?"Declined":resp||"—")],["Carrier",carrier]];
+    note="A 990 is the carrier's yes/no reply to a 204 load tender.";
+  }
+
+  else { // generic fallback for unsupported transaction sets
+    headline=`This is an EDI <b>${esc(stType||"document")}</b> (${esc(typeName)}) exchanged from <b>${esc(senderRaw||"a sender")}</b> to <b>${esc(receiverRaw||"a receiver")}</b>. A detailed plain-English summary isn't available for this transaction type yet, but the full segment breakdown is in the Segments tab.`;
+    rows=[["Transaction set",stType||"—"],["Sender",senderRaw||"—"],["Receiver",receiverRaw||"—"]];
+  }
+
+  // dates referenced anywhere (DTM)
+  const dtms=findAll("DTM").map(s=>fmtDate(f(s,2))).filter(Boolean);
+
+  let html='<div class="bizwrap">';
+  html+='<div class="biz-headline">'+headline+'</div>';
+  if(usage==="Test") html+='<div class="biz-note" style="color:var(--warn)">⚠ This is a TEST interchange (ISA usage indicator = T), not live production data.</div>';
+
+  html+='<div class="biz-section"><div class="lbl">Key details</div>';
+  rows.forEach(r=>{html+='<div class="biz-row"><span class="rk">'+esc(r[0])+'</span><span class="rv">'+esc(r[1])+'</span></div>';});
+  html+='</div>';
+
+  if(itemsHtml){
+    const lbl = (stType==="837")?"Claims" : (stType==="835")?"Claims paid" : "Line items";
+    html+='<div class="biz-section"><div class="lbl">'+lbl+'</div>'+itemsHtml+'</div>';
+  }
+
+  if(note) html+='<div class="biz-note">ℹ '+esc(note)+'</div>';
+  html+='</div>';
+  biz.innerHTML=html;
+}
+
+function itemTable(items,kinds){
+  if(!items.length) return "";
+  let rows="";
+  items.forEach(it=>{
+    const line=f(it,1), qty=f(it,2), uom=f(it,3), price=f(it,4);
+    // product id is usually field 7 for PO1/IT1; description comes from a following PID
+    const idx=segments.indexOf(it);
+    let desc="";
+    for(let j=idx+1;j<segments.length;j++){
+      if(segments[j].id==="PID"){desc=f(segments[j],5);break;}
+      if(["PO1","IT1","SN1","LIN","CTT","SE"].includes(segments[j].id)) break;
+    }
+    const pid=f(it,7)||f(it,3);
+    rows+='<tr><td>'+esc(line||"—")+'</td><td>'+esc(desc||pid||"—")+'</td>'+
+          '<td class="num">'+esc(qty||"—")+(uom?" "+esc(uom):"")+'</td>'+
+          '<td class="num">'+(price?money(price):"—")+'</td></tr>';
+  });
+  return '<table class="biz-items"><thead><tr><th>Line</th><th>Item</th><th class="num">Qty</th><th class="num">Unit price</th></tr></thead><tbody>'+rows+'</tbody></table>';
+}
+
+// 837 claims (CLM segments)
+function claimTable(claims){
+  if(!claims.length) return "";
+  let rows="";
+  claims.forEach(c=>{
+    const id=f(c,1), charge=f(c,2);
+    // count service lines (SV1/SV2/SVC) until next CLM
+    const idx=segments.indexOf(c); let lines=0;
+    for(let j=idx+1;j<segments.length;j++){
+      if(segments[j].id==="CLM") break;
+      if(["SV1","SV2","SV3","SVC"].includes(segments[j].id)) lines++;
+    }
+    rows+='<tr><td>'+esc(id||"—")+'</td><td class="num">'+lines+'</td><td class="num">'+(charge?money(charge):"—")+'</td></tr>';
+  });
+  return '<table class="biz-items"><thead><tr><th>Claim ID</th><th class="num">Service lines</th><th class="num">Charge</th></tr></thead><tbody>'+rows+'</tbody></table>';
+}
+
+// 835 claim payments (CLP segments)
+function clpTable(clps){
+  if(!clps.length) return "";
+  const STATUS={"1":"Processed as primary","2":"Processed as secondary","3":"Processed as tertiary","4":"Denied","19":"Processed as primary, forwarded","22":"Reversal of previous payment"};
+  let rows="";
+  clps.forEach(c=>{
+    const id=f(c,1), status=f(c,2), charge=f(c,3), paid=f(c,4), pr=f(c,5);
+    rows+='<tr><td>'+esc(id||"—")+'</td><td>'+esc(STATUS[status]||status||"—")+'</td>'+
+          '<td class="num">'+(charge?money(charge):"—")+'</td>'+
+          '<td class="num">'+(paid?money(paid):"—")+'</td>'+
+          '<td class="num">'+(pr?money(pr):"—")+'</td></tr>';
+  });
+  return '<table class="biz-items"><thead><tr><th>Claim</th><th>Status</th><th class="num">Charged</th><th class="num">Paid</th><th class="num">Patient resp.</th></tr></thead><tbody>'+rows+'</tbody></table>';
+}
+
+/* tab switching */
+document.querySelectorAll(".tab").forEach(t=>{
+  t.addEventListener("click",()=>{
+    document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+    document.querySelectorAll(".view").forEach(x=>x.classList.remove("active"));
+    t.classList.add("active");
+    document.getElementById(t.dataset.view).classList.add("active");
+    // segment-only tools (expand/collapse/copy) only make sense on Segments tab
+    document.getElementById("segTools").style.display = t.dataset.view==="segView" ? "flex" : "none";
+  });
+});
+
+document.getElementById("parseBtn").onclick=parse;
+document.getElementById("expandBtn").onclick=()=>document.querySelectorAll(".seg").forEach(s=>s.classList.add("open"));
+document.getElementById("collapseBtn").onclick=()=>document.querySelectorAll(".seg").forEach(s=>s.classList.remove("open"));
+document.getElementById("clearBtn").onclick=()=>{document.getElementById("input").value="";document.getElementById("segView").innerHTML='<div class="placeholder"><div class="big">⌖</div>Parsed segments will appear here.</div>';document.getElementById("bizView").innerHTML='<div class="placeholder"><div class="big">💬</div>A plain-English summary will appear here after you parse.</div>';document.getElementById("inStat").textContent="Waiting for input…";document.getElementById("outStat").textContent="—";};
+document.getElementById("copyBtn").onclick=()=>{
+  let txt=segments.map(s=>{const d=SEG[s.id];let l=s.id+" ("+(d?d.name:"unknown")+")\n";for(let i=1;i<s.fields.length;i++){const dd=d&&d.el[i]?d.el[i]:"Element "+i;l+="   "+s.id+String(i).padStart(2,"0")+" "+dd+": "+s.fields[i]+"\n";}return l;}).join("\n");
+  if(!txt){return;}
+  navigator.clipboard.writeText(txt).then(()=>{const b=document.getElementById("copyBtn");b.textContent="✓ Copied";setTimeout(()=>b.textContent="Copy as text",1500);});
+};
+
+document.getElementById("input").addEventListener("input",function(){
+  const len=this.value.length;
+  document.getElementById("inStat").textContent=len?len+" characters":"Waiting for input…";
+});
+
+const SAMPLE="ISA*00*          *00*          *ZZ*ACME           *ZZ*BIGRETAILER     *240115*1430*U*00401*000000123*0*P*:~GS*PO*ACME*BIGRETAILER*20240115*1430*123*X*004010~ST*850*0001~BEG*00*SA*PO-99831**20240115~REF*DP*DEPT042~N1*BY*BIG RETAILER INC*92*0048~N3*123 COMMERCE ST~N4*CHICAGO*IL*60601*US~N1*ST*WAREHOUSE 7*92*0048W7~PO1*1*100*EA*12.50**UP*012345678905~PID*F****BLUE WIDGET 12IN~PO1*2*50*EA*8.75**UP*012345678912~PID*F****RED GADGET SMALL~CTT*2~SE*12*0001~GE*1*123~IEA*1*000000123~";
+document.getElementById("sampleBtn").onclick=()=>{document.getElementById("input").value=SAMPLE;document.getElementById("inStat").textContent=SAMPLE.length+" characters";parse();};
+
+const SAMPLE837="ISA*00*          *00*          *ZZ*CLINICSUBMIT    *ZZ*BLUECROSSPAYER  *240220*0900*U*00501*000000456*0*P*:~GS*HC*CLINICSUBMIT*BLUECROSSPAYER*20240220*0900*456*X*005010X222A1~ST*837*0001*005010X222A1~BHT*0019*00*REF12345*20240220*0900*CH~NM1*41*2*RIVERSIDE MEDICAL GROUP*****46*9988776~NM1*40*2*BLUE CROSS BLUE SHIELD*****46*BCBS001~NM1*85*2*RIVERSIDE MEDICAL GROUP*****XX*1234567890~NM1*PR*2*BLUE CROSS BLUE SHIELD*****PI*BCBS001~NM1*IL*1*DOE*JOHN****MI*ZGP9876543~NM1*QC*1*DOE*JOHN~CLM*PATIENT-A*450.00***11:B:1*Y*A*Y*Y~SV1*HC:99213*125.00*UN*1~SV1*HC:85025*325.00*UN*1~CLM*PATIENT-A2*200.00***11:B:1*Y*A*Y*Y~SV1*HC:99214*200.00*UN*1~SE*14*0001~GE*1*456~IEA*1*000000456~";
+document.getElementById("sample837Btn").onclick=()=>{document.getElementById("input").value=SAMPLE837;document.getElementById("inStat").textContent=SAMPLE837.length+" characters";parse();};
+</script>
 </body>
 </html>
