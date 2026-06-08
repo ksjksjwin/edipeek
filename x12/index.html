@@ -4,9 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>EDI X12 Viewer — Free Online EDI 850, 810, 856, 820 Parser (No Upload)</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <meta name="description" content="Paste raw EDI X12 and read it instantly. Free online EDI parser and viewer for 850, 810, 856 ASN, 820 and more. 100% in your browser — files never leave your computer.">
 <meta name="keywords" content="EDI X12 viewer, EDI parser online, read EDI file, EDI 850 viewer, EDI 856 ASN parser, EDI 810 invoice, X12 segment decoder">
-<link rel="canonical" href="https://example.com/">
+<link rel="canonical" href="https://edipeek.com/">
 <meta property="og:title" content="EDI X12 Viewer — Read Any X12 File in Your Browser">
 <meta property="og:description" content="Paste raw EDI X12, get a clean human-readable breakdown. Free, no signup, files stay on your device.">
 <meta property="og:type" content="website">
@@ -49,8 +50,12 @@
   }
   .logo{
     font-weight:700;font-size:18px;letter-spacing:-.5px;
-    display:flex;align-items:center;gap:10px;
+    display:flex;align-items:center;gap:9px;color:var(--ink);text-decoration:none;
   }
+  .logo:hover{text-decoration:none}
+  .logo:hover .logo-mark{transform:scale(1.08) rotate(-6deg)}
+  .logo-mark{color:var(--accent);transition:transform .2s ease;flex-shrink:0}
+  .logo-text{display:inline-flex;align-items:center}
   .logo .blink{color:var(--accent);animation:blink 1.2s steps(2,start) infinite}
   @keyframes blink{to{opacity:0}}
   .tag{
@@ -187,10 +192,21 @@
 <body>
 
 <header>
-  <div class="logo">EDI<span style="color:var(--accent)">X12</span>.view<span class="blink" style="color:var(--accent)">_</span></div>
-  <span class="tag"><b>●</b> 100% in-browser · no upload</span>
+  <a class="logo" href="/" title="EdiPeek home" aria-label="EdiPeek home">
+    <svg class="logo-mark" viewBox="0 0 28 28" width="26" height="26" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/>
+      <line x1="17.6" y1="17.6" x2="25" y2="25" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+      <line x1="8" y1="10" x2="16" y2="10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.9"/>
+      <line x1="8" y1="13" x2="14" y2="13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+      <line x1="8" y1="16" x2="15" y2="16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
+    </svg>
+    <span class="logo-text">EDI<span style="color:var(--accent)">PEEK</span><span class="blink" style="color:var(--accent)">_</span></span>
+  </a>
+  <span class="tag" style="color:var(--accent);border-color:rgba(63,185,80,.35)"><b>X12</b></span>
+  <span class="tag">● 100% in-browser · no upload</span>
   <div class="spacer"></div>
-  <a class="ghbtn" href="../edifact/" style="text-decoration:none">Need EDIFACT? →</a>
+  <a class="ghbtn" href="/" style="text-decoration:none">⌂ Home</a>
+  <a class="ghbtn" href="../edifact/" style="text-decoration:none">EDIFACT →</a>
 </header>
 
 <main>
@@ -303,6 +319,7 @@
 </main>
 
 <footer>
+  <div style="margin-bottom:10px"><a href="/" style="color:var(--accent-2)">Home</a> &middot; <a href="/about/" style="color:var(--accent-2)">About</a> &middot; <a href="/contact/" style="color:var(--accent-2)">Contact</a> &middot; <a href="/privacy/" style="color:var(--accent-2)">Privacy</a> &middot; <a href="/terms/" style="color:var(--accent-2)">Terms</a></div>
   EDIX12.view — a free in-browser EDI X12 parser. Not affiliated with any standards body.
   Files are processed locally and never uploaded.
 </footer>
