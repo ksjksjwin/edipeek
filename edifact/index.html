@@ -59,6 +59,8 @@
   header .spacer{flex:1}
   header .navlink{font-size:12px;color:var(--ink-dim);border:1px solid var(--border);padding:6px 12px;border-radius:6px}
   header .navlink:hover{border-color:var(--accent);color:var(--accent);text-decoration:none}
+  .kofi-btn{font-size:12px;color:#13c3ff;border:1px solid rgba(19,195,255,.4);background:rgba(19,195,255,.08);padding:6px 12px;border-radius:6px;text-decoration:none;white-space:nowrap;transition:.15s}
+  .kofi-btn:hover{background:rgba(19,195,255,.16);text-decoration:none}
 
   main{max-width:1180px;margin:0 auto;padding:26px 22px 80px}
 
@@ -176,6 +178,7 @@
   <div class="spacer"></div>
   <a class="navlink" href="/">⌂ Home</a>
   <a class="navlink" href="../x12/">X12 →</a>
+  <a class="kofi-btn" href="https://ko-fi.com/edipeek" target="_blank" rel="noopener">☕ Support</a>
 </header>
 
 <main>
@@ -286,12 +289,13 @@
       <details><summary>Is my EDIFACT data uploaded anywhere?</summary><div class="ans">No. Parsing happens entirely in your browser using JavaScript. The file content never touches a server, which is why this is safe for confidential trading-partner data.</div></details>
       <details><summary>What is the difference between EDIFACT and X12?</summary><div class="ans">X12 is the North American EDI standard (segments end in <code>~</code>, elements split by <code>*</code>). EDIFACT is the international standard used in Europe and elsewhere (segments end in <code>'</code>, elements by <code>+</code>, components by <code>:</code>). They carry the same kinds of business documents under different names — ORDERS ≈ 850, INVOIC ≈ 810, DESADV ≈ 856.</div></details>
       <details><summary>Does it handle the release (escape) character?</summary><div class="ans">Yes. The release character (default <code>?</code>) is honored, so escaped delimiters inside data values are not mistaken for real separators.</div></details>
-      <details><summary>Is it really free?</summary><div class="ans">Yes, free with no sign-up. The site is supported by ads.</div></details>
+      <details><summary>Is it really free?</summary><div class="ans">Yes, completely free with no sign-up and no limits. The site is supported by ads, and if it saves you time you can optionally <a href="https://ko-fi.com/edipeek" target="_blank" rel="noopener">leave a tip on Ko-fi</a> to help keep it running and ad-light. Tips are always voluntary, and every feature works whether or not you donate.</div></details>
     </div>
   </section>
 </main>
 
 <footer>
+  <div style="margin-bottom:12px"><a class="kofi-btn" href="https://ko-fi.com/edipeek" target="_blank" rel="noopener" style="display:inline-block">☕ Support EdiPeek — keep it free</a></div>
   <div style="margin-bottom:10px"><a href="/">Home</a> &middot; <a href="/about/">About</a> &middot; <a href="/contact/">Contact</a> &middot; <a href="/privacy/">Privacy</a> &middot; <a href="/terms/">Terms</a></div>
   UN/EDIFACT.view — a free in-browser EDIFACT parser. Not affiliated with UN/CEFACT.
   Files are processed locally and never uploaded. · <a href="../x12/">X12 viewer</a>
