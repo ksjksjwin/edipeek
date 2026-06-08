@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UN/EDIFACT Viewer — Free Online ORDERS, INVOIC, DESADV Parser (No Upload)</title>
+<meta name="description" content="Paste raw UN/EDIFACT and read it instantly. Free online EDIFACT parser and viewer for ORDERS, INVOIC, DESADV, IFTMIN, CUSDEC and more. 100% in your browser — files never leave your computer.">
+<meta name="keywords" content="EDIFACT viewer, EDIFACT parser online, read EDIFACT file, ORDERS message, INVOIC EDIFACT, DESADV parser, UN EDIFACT decoder, UNB UNH segment">
+<link rel="canonical" href="https://example.com/edifact/">
+<meta property="og:title" content="UN/EDIFACT Viewer — Read Any EDIFACT Message in Your Browser">
+<meta property="og:description" content="Paste raw UN/EDIFACT, get a clean human-readable breakdown. Free, no signup, files stay on your device.">
+<meta property="og:type" content="website">
+
+<!-- ===== Google AdSense (replace ca-pub-XXXX with your publisher ID after approval) ===== -->
+<!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script> -->
+
+<style>
+  :root{
+    --bg:#0d1117;
+    --panel:#161b22;
+    --panel-2:#1c2330;
+    --border:#2a3340;
+    --ink:#e6edf3;
+    --ink-dim:#8b97a7;
+    --accent:#58a6ff;      /* EDIFACT = blue accent (X12 page is green) */
+    --accent-2:#3fb950;
+    --warn:#d29922;
+    --seg:#bc8cff;         /* segment tag = violet */
+    --mono:"JetBrains Mono","SF Mono",ui-monospace,"Cascadia Code",Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--ink);font-family:var(--mono);font-size:15px;line-height:1.5}
+  body{
+    background-image:
+      radial-gradient(circle at 15% -10%, rgba(88,166,255,.08), transparent 45%),
+      radial-gradient(circle at 100% 0%, rgba(188,140,255,.06), transparent 40%);
+    min-height:100vh;
+  }
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+
+  header{
+    border-bottom:1px solid var(--border);
+    padding:18px 22px;
+    display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+    background:rgba(13,17,23,.7);backdrop-filter:blur(6px);
+    position:sticky;top:0;z-index:10;
+  }
+  .logo{font-weight:700;font-size:18px;letter-spacing:-.5px;display:flex;align-items:center;gap:10px}
+  .logo .blink{color:var(--accent);animation:blink 1.2s steps(2,start) infinite}
+  @keyframes blink{to{opacity:0}}
+  .tag{font-size:11px;color:var(--ink-dim);border:1px solid var(--border);padding:3px 8px;border-radius:99px}
+  .tag b{color:var(--accent)}
+  header .spacer{flex:1}
+  header .navlink{font-size:12px;color:var(--ink-dim);border:1px solid var(--border);padding:6px 12px;border-radius:6px}
+  header .navlink:hover{border-color:var(--accent);color:var(--accent);text-decoration:none}
+
+  main{max-width:1180px;margin:0 auto;padding:26px 22px 80px}
+
+  .hero h1{font-size:26px;letter-spacing:-1px;margin-bottom:8px;line-height:1.2}
+  .hero h1 .hl{color:var(--accent)}
+  .hero p{color:var(--ink-dim);max-width:680px;margin-bottom:6px}
+  .hero .privacy{color:var(--accent);font-size:13px;margin-top:10px;display:inline-flex;align-items:center;gap:8px;
+    border:1px solid rgba(88,166,255,.3);background:rgba(88,166,255,.06);padding:7px 12px;border-radius:8px}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:24px}
+  @media(max-width:880px){.grid{grid-template-columns:1fr}}
+
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+  .card-head{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border);background:var(--panel-2)}
+  .card-head .ttl{font-size:12px;color:var(--ink-dim);text-transform:uppercase;letter-spacing:1.5px}
+  .card-head .dots{display:flex;gap:6px}
+  .dot{width:11px;height:11px;border-radius:50%}
+  .dot.r{background:#ff5f56}.dot.y{background:#ffbd2e}.dot.g{background:#27c93f}
+
+  textarea{width:100%;height:420px;background:#0a0e13;color:var(--ink);border:0;padding:16px;font-family:var(--mono);font-size:13px;line-height:1.6;resize:vertical;outline:none}
+  .out{height:420px;overflow:auto;padding:14px 16px}
+  .out::-webkit-scrollbar{width:10px}
+  .out::-webkit-scrollbar-thumb{background:var(--border);border-radius:6px}
+
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid var(--border);background:var(--panel-2)}
+  button{font-family:var(--mono);font-size:12px;cursor:pointer;background:var(--panel);color:var(--ink);border:1px solid var(--border);padding:7px 13px;border-radius:7px;transition:.15s}
+  button:hover{border-color:var(--accent);color:var(--accent)}
+  button.primary{background:var(--accent);color:#06223f;border-color:var(--accent);font-weight:700}
+  button.primary:hover{filter:brightness(1.1);color:#06223f}
+
+  .tabs{display:flex;gap:2px;padding:0 14px;background:var(--panel-2);border-bottom:1px solid var(--border)}
+  .tab{font-family:var(--mono);font-size:12px;cursor:pointer;background:transparent;border:0;border-bottom:2px solid transparent;color:var(--ink-dim);padding:11px 14px;border-radius:0}
+  .tab:hover{color:var(--ink)}
+  .tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+  .view{display:none}
+  .view.active{display:block}
+
+  .meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:14px}
+  .meta .m{background:var(--panel-2);border:1px solid var(--border);border-radius:8px;padding:8px 10px}
+  .meta .m .k{font-size:10px;color:var(--ink-dim);text-transform:uppercase;letter-spacing:1px}
+  .meta .m .v{font-size:14px;color:var(--ink);margin-top:2px;word-break:break-all}
+
+  .seg{margin-bottom:6px;border:1px solid var(--border);border-radius:8px;background:var(--panel-2);overflow:hidden}
+  .seg-head{display:flex;align-items:center;gap:10px;padding:8px 11px;cursor:pointer;user-select:none}
+  .seg-head:hover{background:#222b38}
+  .seg-id{font-weight:700;color:var(--seg);min-width:38px}
+  .seg-name{color:var(--ink);font-size:13px}
+  .seg-raw{margin-left:auto;color:var(--ink-dim);font-size:11px;max-width:42%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .seg-body{display:none;padding:4px 11px 11px;border-top:1px dashed var(--border)}
+  .seg.open .seg-body{display:block}
+  .seg.open .seg-head{background:#222b38}
+  .ele{display:grid;grid-template-columns:78px 1fr;gap:10px;padding:5px 0;font-size:13px;border-bottom:1px dotted #243042}
+  .ele:last-child{border-bottom:0}
+  .ele .epos{color:var(--accent);font-size:12px}
+  .ele .edesc{color:var(--ink-dim);font-size:11px;display:block;margin-top:2px}
+  .ele .eval{color:var(--ink);word-break:break-all}
+  .ele .eval .comp{color:var(--ink-dim)}
+  .ele .eval .decode{color:var(--accent-2);font-size:11px}
+
+  .placeholder{color:var(--ink-dim);text-align:center;padding-top:140px;font-size:13px}
+  .placeholder .big{font-size:34px;opacity:.25;margin-bottom:12px}
+
+  .bizwrap{padding:18px 18px}
+  .biz-headline{font-size:15px;color:var(--ink);line-height:1.7;background:var(--panel-2);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:8px;padding:16px 18px;margin-bottom:18px}
+  .biz-headline b{color:var(--accent)}
+  .biz-headline .amt{color:var(--warn)}
+  .biz-section{margin-bottom:16px}
+  .biz-section .lbl{font-size:10px;color:var(--ink-dim);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:7px}
+  .biz-row{display:flex;gap:10px;padding:6px 0;border-bottom:1px dotted #243042;font-size:13px}
+  .biz-row:last-child{border-bottom:0}
+  .biz-row .rk{color:var(--ink-dim);min-width:140px}
+  .biz-row .rv{color:var(--ink)}
+  .biz-items{width:100%;border-collapse:collapse;font-size:13px;margin-top:4px}
+  .biz-items th{text-align:left;color:var(--ink-dim);font-size:10px;text-transform:uppercase;letter-spacing:1px;padding:6px 8px;border-bottom:1px solid var(--border)}
+  .biz-items td{padding:7px 8px;border-bottom:1px dotted #243042;color:var(--ink)}
+  .biz-items td.num{text-align:right;font-variant-numeric:tabular-nums}
+  .biz-note{font-size:11px;color:var(--ink-dim);margin-top:14px;line-height:1.6}
+
+  .stat{font-size:12px;color:var(--ink-dim);padding:8px 14px;border-top:1px solid var(--border);background:var(--panel-2)}
+  .err{color:#ff7b72;font-size:13px;padding:14px}
+
+  .adslot{margin:26px 0;min-height:90px;border:1px dashed var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--ink-dim);font-size:11px;background:repeating-linear-gradient(45deg,transparent,transparent 10px,rgba(255,255,255,.012) 10px,rgba(255,255,255,.012) 20px)}
+
+  .seo{margin-top:54px;border-top:1px solid var(--border);padding-top:34px}
+  .seo h2{font-size:18px;margin:26px 0 10px;color:var(--ink);letter-spacing:-.3px}
+  .seo h3{font-size:14px;margin:18px 0 6px;color:var(--accent)}
+  .seo p,.seo li{color:var(--ink-dim);font-size:14px;margin-bottom:8px;max-width:820px}
+  .seo ul{padding-left:20px}
+  .seo code{background:var(--panel-2);border:1px solid var(--border);padding:1px 6px;border-radius:4px;color:var(--ink);font-size:12px}
+  .faq details{border:1px solid var(--border);border-radius:8px;padding:0;margin-bottom:8px;background:var(--panel);overflow:hidden}
+  .faq summary{padding:13px 15px;cursor:pointer;color:var(--ink);font-size:14px;list-style:none}
+  .faq summary::-webkit-details-marker{display:none}
+  .faq summary:before{content:"▸ ";color:var(--accent)}
+  .faq details[open] summary:before{content:"▾ "}
+  .faq .ans{padding:0 15px 14px;color:var(--ink-dim);font-size:13px}
+
+  footer{border-top:1px solid var(--border);padding:24px 22px;text-align:center;color:var(--ink-dim);font-size:12px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">UN<span style="color:var(--accent)">/EDIFACT</span>.view<span class="blink">_</span></div>
+  <span class="tag"><b>●</b> 100% in-browser · no upload</span>
+  <div class="spacer"></div>
+  <a class="navlink" href="../x12/">Need X12 instead? →</a>
+</header>
+
+<main>
+  <section class="hero">
+    <h1>Read any <span class="hl">UN/EDIFACT</span> message in seconds.</h1>
+    <p>Paste a raw EDIFACT interchange — <b>ORDERS, ORDRSP, INVOIC, DESADV, IFTMIN, CUSDEC, REMADV</b> and more — and get a clean, human-readable breakdown of every segment and element.</p>
+    <div class="privacy">🔒 Your file never leaves your computer. All parsing happens locally in your browser.</div>
+  </section>
+
+  <div class="adslot">Ad slot (728×90) — insert AdSense unit here</div>
+
+  <div class="grid">
+    <div class="card">
+      <div class="card-head">
+        <span class="ttl">Paste raw EDIFACT</span>
+        <span class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></span>
+      </div>
+      <div class="toolbar">
+        <button class="primary" id="parseBtn">▶ Parse</button>
+        <button id="sampleBtn">Sample: ORDERS</button>
+        <button id="sampleInvBtn">Sample: INVOIC</button>
+        <button id="clearBtn">Clear</button>
+      </div>
+      <textarea id="input" spellcheck="false" placeholder="UNA:+.? 'UNB+UNOC:3+SENDER:14+RECEIVER:14+240220:0900+REF1'UNH+1+ORDERS:D:96A:UN'...&#10;&#10;Paste your EDIFACT here, then hit Parse.&#10;&#10;Delimiters are auto-detected from the UNA segment (or default to : + . ? ')"></textarea>
+      <div class="stat" id="inStat">Waiting for input…</div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <span class="ttl">Human-readable output</span>
+        <span class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></span>
+      </div>
+      <div class="tabs">
+        <button class="tab active" data-view="segView">Segments</button>
+        <button class="tab" data-view="bizView">💬 Business Summary</button>
+      </div>
+      <div class="toolbar" id="segTools">
+        <button id="expandBtn">Expand all</button>
+        <button id="collapseBtn">Collapse all</button>
+        <button id="copyBtn">Copy as text</button>
+      </div>
+      <div class="out" id="output">
+        <div id="segView" class="view active">
+          <div class="placeholder"><div class="big">⌖</div>Parsed segments will appear here.<br>Paste an EDIFACT file or load a sample.</div>
+        </div>
+        <div id="bizView" class="view">
+          <div class="placeholder"><div class="big">💬</div>A plain-English summary of the message<br>will appear here after you parse.</div>
+        </div>
+      </div>
+      <div class="stat" id="outStat">—</div>
+    </div>
+  </div>
+
+  <div class="adslot">Ad slot (responsive) — insert AdSense unit here</div>
+
+  <section class="seo">
+    <h2>What is this UN/EDIFACT viewer?</h2>
+    <p>UN/EDIFACT (United Nations rules for Electronic Data Interchange For Administration, Commerce and Transport) is the international EDI standard used across Europe and most of the world outside North America. A raw EDIFACT interchange is a dense string of segments ending in <code>'</code>, with elements separated by <code>+</code> and components by <code>:</code> — unreadable by eye. This free tool parses that text, auto-detects the delimiters from the <code>UNA</code> service string, and labels every segment so you can understand it. Nothing is uploaded: parsing runs entirely in your browser, so even sensitive trading-partner data stays on your machine.</p>
+
+    <h2>Supported message types</h2>
+    <p>This viewer recognizes any EDIFACT message and shows a full segment breakdown. For the most common message types it also generates a plain-English business summary.</p>
+    <h3>Supply chain &amp; retail</h3>
+    <ul>
+      <li><b>ORDERS</b> — Purchase Order</li>
+      <li><b>ORDRSP</b> — Purchase Order Response</li>
+      <li><b>ORDCHG</b> — Purchase Order Change</li>
+      <li><b>INVOIC</b> — Invoice</li>
+      <li><b>PRICAT</b> — Price/Sales Catalogue</li>
+      <li><b>QUOTES</b> — Quotation</li>
+      <li><b>DELFOR / DELJIT</b> — Delivery Forecast / Just-in-Time schedule</li>
+      <li><b>SLSRPT</b> — Sales Data Report</li>
+    </ul>
+    <h3>Logistics &amp; transport</h3>
+    <ul>
+      <li><b>DESADV</b> — Despatch Advice (ASN equivalent)</li>
+      <li><b>RECADV</b> — Receiving Advice</li>
+      <li><b>IFTMIN</b> — Transport Instruction</li>
+      <li><b>IFTMBF / IFTMCS</b> — Booking Firm / Booking Confirmation</li>
+      <li><b>IFTSTA</b> — Transport Status</li>
+      <li><b>COPARN</b> — Container Announcement</li>
+      <li><b>PAXLST</b> — Passenger List</li>
+    </ul>
+    <h3>Finance</h3>
+    <ul>
+      <li><b>REMADV</b> — Remittance Advice</li>
+      <li><b>PAYMUL</b> — Multiple Payment Order</li>
+      <li><b>CREMUL</b> — Multiple Credit Advice</li>
+    </ul>
+    <h3>Customs &amp; government</h3>
+    <ul>
+      <li><b>CUSDEC</b> — Customs Declaration</li>
+      <li><b>CUSCAR</b> — Customs Cargo Report</li>
+      <li><b>CUSRES</b> — Customs Response</li>
+    </ul>
+    <h3>Utilities, medical &amp; control</h3>
+    <ul>
+      <li><b>UTILMD / UTILTS</b> — Utilities Master Data / Time Series</li>
+      <li><b>MEDPRE</b> — Medical Prescription</li>
+      <li><b>CONTRL</b> — Syntax &amp; Service Report (acknowledgment)</li>
+      <li><b>APERAK</b> — Application Error &amp; Acknowledgment</li>
+    </ul>
+
+    <h2>How to read an EDIFACT message</h2>
+    <p>An EDIFACT interchange is wrapped in a <code>UNB</code>/<code>UNZ</code> envelope. Inside it, each message is bounded by <code>UNH</code> (header — which names the message type, e.g. ORDERS) and <code>UNT</code> (trailer). An optional <code>UNA</code> service string at the very start declares the delimiters. This viewer reads the UNA automatically and walks the structure for you.</p>
+
+    <div class="faq">
+      <h2>Frequently asked questions</h2>
+      <details><summary>Is my EDIFACT data uploaded anywhere?</summary><div class="ans">No. Parsing happens entirely in your browser using JavaScript. The file content never touches a server, which is why this is safe for confidential trading-partner data.</div></details>
+      <details><summary>What is the difference between EDIFACT and X12?</summary><div class="ans">X12 is the North American EDI standard (segments end in <code>~</code>, elements split by <code>*</code>). EDIFACT is the international standard used in Europe and elsewhere (segments end in <code>'</code>, elements by <code>+</code>, components by <code>:</code>). They carry the same kinds of business documents under different names — ORDERS ≈ 850, INVOIC ≈ 810, DESADV ≈ 856.</div></details>
+      <details><summary>Does it handle the release (escape) character?</summary><div class="ans">Yes. The release character (default <code>?</code>) is honored, so escaped delimiters inside data values are not mistaken for real separators.</div></details>
+      <details><summary>Is it really free?</summary><div class="ans">Yes, free with no sign-up. The site is supported by ads.</div></details>
+    </div>
+  </section>
+</main>
+
+<footer>
+  UN/EDIFACT.view — a free in-browser EDIFACT parser. Not affiliated with UN/CEFACT.
+  Files are processed locally and never uploaded. · <a href="../x12/">X12 viewer</a>
+</footer>
+
+<script>
+/* ---------- EDIFACT segment dictionary ---------- */
+const SEG = {
+  UNA:{name:"Service String Advice",el:{}},
+  UNB:{name:"Interchange Header",el:{1:"Syntax ID / Version",2:"Sender ID",3:"Recipient ID",4:"Date / Time",5:"Interchange Control Reference",6:"Recipient Reference",7:"Application Reference"}},
+  UNG:{name:"Functional Group Header",el:{1:"Message Group ID",2:"Sender",3:"Recipient",4:"Date / Time",5:"Group Reference",7:"Controlling Agency",8:"Version"}},
+  UNH:{name:"Message Header",el:{1:"Message Reference Number",2:"Message Type / Version / Release / Agency"}},
+  BGM:{name:"Beginning of Message",el:{1:"Document Name Code",2:"Document Number",3:"Message Function",4:"Response Type"}},
+  DTM:{name:"Date / Time / Period",el:{1:"Qualifier : Value : Format"}},
+  NAD:{name:"Name and Address",el:{1:"Party Qualifier",2:"Party ID : Code List : Agency",3:"Name and Address",4:"Party Name",5:"Street",6:"City",7:"Country Subdivision",8:"Postcode",9:"Country"}},
+  RFF:{name:"Reference",el:{1:"Reference Qualifier : Number"}},
+  CTA:{name:"Contact Information",el:{1:"Contact Function",2:"Department / Name"}},
+  COM:{name:"Communication Contact",el:{1:"Comm Number : Channel Qualifier"}},
+  LIN:{name:"Line Item",el:{1:"Line Number",2:"Action Request",3:"Item Number : Type",4:"Sub-line",5:"Config Level"}},
+  PIA:{name:"Additional Product ID",el:{1:"Product ID Function",2:"Item Number : Type"}},
+  IMD:{name:"Item Description",el:{1:"Description Format",2:"Item Characteristic",3:"Description Code : : : Description"}},
+  QTY:{name:"Quantity",el:{1:"Qualifier : Quantity : Unit"}},
+  PRI:{name:"Price Details",el:{1:"Price Qualifier : Price : Type"}},
+  MOA:{name:"Monetary Amount",el:{1:"Qualifier : Amount : Currency"}},
+  PAT:{name:"Payment Terms",el:{1:"Payment Terms Qualifier"}},
+  PCD:{name:"Percentage Details",el:{1:"Qualifier : Percentage"}},
+  TAX:{name:"Duty / Tax / Fee Details",el:{1:"Tax Function",2:"Tax Type",6:"Tax Rate"}},
+  ALC:{name:"Allowance or Charge",el:{1:"Allowance/Charge Qualifier",2:"Settlement"}},
+  UNS:{name:"Section Control",el:{1:"Section Identification"}},
+  CNT:{name:"Control Total",el:{1:"Qualifier : Value"}},
+  TOD:{name:"Terms of Delivery / Transport",el:{1:"Delivery Terms Function",2:"Transport Location",3:"Incoterm"}},
+  TDT:{name:"Transport Information",el:{1:"Transport Stage Qualifier",2:"Means of Transport Journey ID",3:"Mode of Transport",8:"Transport ID"}},
+  LOC:{name:"Place / Location",el:{1:"Location Qualifier",2:"Location ID : Code List : Agency"}},
+  EQD:{name:"Equipment Details",el:{1:"Equipment Qualifier",2:"Equipment ID",3:"Size and Type"}},
+  PCI:{name:"Package Identification",el:{1:"Marking Instructions",2:"Marks and Labels"}},
+  GIN:{name:"Goods Identity Number",el:{1:"Identity Number Qualifier",2:"Identity Number"}},
+  CPS:{name:"Consignment Packing Sequence",el:{1:"Hierarchical ID",2:"Hierarchical Parent ID"}},
+  PAC:{name:"Package",el:{1:"Number of Packages",3:"Packaging Type"}},
+  MEA:{name:"Measurements",el:{1:"Measurement Purpose",2:"Property",3:"Unit : Value"}},
+  // Customs
+  DOC:{name:"Document / Message Details",el:{1:"Document Name : Code",2:"Document Identifier"}},
+  GIS:{name:"General Indicator",el:{1:"Processing Indicator"}},
+  // Acknowledgments
+  UCI:{name:"Interchange Response",el:{1:"Interchange Control Reference",4:"Action Code",5:"Syntax Error Code"}},
+  UCM:{name:"Message Response",el:{1:"Message Reference",3:"Action Code",4:"Syntax Error"}},
+  ERC:{name:"Application Error Information",el:{1:"Application Error Code"}},
+  FTX:{name:"Free Text",el:{1:"Text Subject Qualifier",4:"Free Text"}},
+  UNT:{name:"Message Trailer",el:{1:"Number of Segments",2:"Message Reference Number"}},
+  UNE:{name:"Functional Group Trailer",el:{1:"Number of Messages",2:"Group Reference"}},
+  UNZ:{name:"Interchange Trailer",el:{1:"Interchange Control Count",2:"Interchange Control Reference"}},
+};
+
+const MSG_TYPES={
+  ORDERS:"Purchase Order",ORDRSP:"Purchase Order Response",ORDCHG:"Purchase Order Change",
+  INVOIC:"Invoice",PRICAT:"Price/Sales Catalogue",QUOTES:"Quotation",
+  DELFOR:"Delivery Schedule (Forecast)",DELJIT:"Delivery Just-In-Time",SLSRPT:"Sales Data Report",
+  DESADV:"Despatch Advice",RECADV:"Receiving Advice",
+  IFTMIN:"Transport Instruction",IFTMBF:"Firm Booking",IFTMCS:"Booking Confirmation",IFTSTA:"Transport Status",
+  COPARN:"Container Announcement",PAXLST:"Passenger List",
+  REMADV:"Remittance Advice",PAYMUL:"Multiple Payment Order",CREMUL:"Multiple Credit Advice",
+  CUSDEC:"Customs Declaration",CUSCAR:"Customs Cargo Report",CUSRES:"Customs Response",
+  UTILMD:"Utilities Master Data",UTILTS:"Utilities Time Series",MEDPRE:"Medical Prescription",
+  CONTRL:"Syntax & Service Report",APERAK:"Application Error & Acknowledgment",
+};
+
+// NAD party qualifiers
+const NAD_PARTY={BY:"Buyer",SU:"Supplier",SE:"Seller",DP:"Delivery Party",SH:"Shipper",CN:"Consignee",CZ:"Consignor",IV:"Invoicee",PE:"Payee",PR:"Payer",ST:"Ship To",CA:"Carrier",MS:"Message Sender",MR:"Message Receiver",UC:"Ultimate Consignee",DEL:"Delivery"};
+// BGM message function codes (element 3 commonly)
+const MSG_FUNC={"9":"Original","7":"Duplicate","4":"Change","3":"Deletion","1":"Cancellation","5":"Replace","31":"Copy"};
+
+let segments=[]; // [{tag, els:[[comp,...],...], raw}]
+let DELIMS={comp:":",elem:"+",rel:"?",segT:"'"};
+
+function splitUnescaped(str,delim,relc){
+  const out=[];let c="";
+  for(let i=0;i<str.length;i++){
+    if(str[i]===relc){c+=(str[i+1]||"");i++;continue;}
+    if(str[i]===delim){out.push(c);c="";continue;}
+    c+=str[i];
+  }
+  out.push(c);return out;
+}
+
+function parseEdifact(raw){
+  raw=raw.trim();
+  let comp=":",elem="+",dec=".",rel="?",segT="'";
+  if(raw.startsWith("UNA")){
+    comp=raw[3];elem=raw[4];dec=raw[5];rel=raw[6];segT=raw[8];
+    raw=raw.slice(9).trim();
+  }
+  DELIMS={comp,elem,rel,segT};
+  const segs=[];let cur="";
+  for(let i=0;i<raw.length;i++){
+    const ch=raw[i];
+    if(ch===rel){cur+=ch+(raw[i+1]||"");i++;continue;}
+    if(ch===segT){if(cur.trim())segs.push(cur.trim());cur="";continue;}
+    if(ch==="\n"||ch==="\r")continue;
+    cur+=ch;
+  }
+  if(cur.trim())segs.push(cur.trim());
+  return segs.map(s=>{
+    const tag=s.slice(0,3).toUpperCase();
+    let rest=s.slice(3);
+    if(rest[0]===elem) rest=rest.slice(1);
+    const els=splitUnescaped(rest,elem,rel).map(e=>splitUnescaped(e,comp,rel));
+    return {tag,els,raw:s};
+  });
+}
+
+/* ---------- accessors ---------- */
+function findSeg(tag){return segments.find(s=>s.tag===tag);}
+function findAll(tag){return segments.filter(s=>s.tag===tag);}
+// e = element index (1-based), c = component index (0-based within element)
+function g(seg,e,c){
+  if(!seg||!seg.els[e-1]) return "";
+  const v=seg.els[e-1][c||0];
+  return v!==undefined?String(v).trim():"";
+}
+function msgType(){
+  const unh=findSeg("UNH");
+  return unh?g(unh,2,0).toUpperCase():"";
+}
+
+function fmtDate(raw){
+  if(!raw) return "";
+  const d=raw.replace(/\D/g,"");
+  if(d.length===8) return d.slice(0,4)+"-"+d.slice(4,6)+"-"+d.slice(6,8);   // CCYYMMDD (fmt 102)
+  if(d.length===6) return "20"+d.slice(0,2)+"-"+d.slice(2,4)+"-"+d.slice(4,6); // YYMMDD (fmt 101)
+  if(d.length===12) return d.slice(0,4)+"-"+d.slice(4,6)+"-"+d.slice(6,8)+" "+d.slice(8,10)+":"+d.slice(10,12);
+  return raw;
+}
+function money(v){if(v===""||v===undefined)return"";const n=parseFloat(v);return isNaN(n)?v:n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});}
+// readable party name from a NAD with given qualifier
+function nadName(q){
+  const nad=findAll("NAD").find(s=>g(s,1,0)===q);
+  if(!nad) return "";
+  // prefer literal name (element 4) else the coded party id (element 2 comp 0)
+  return g(nad,4,0)||g(nad,2,0)||"";
+}
+// pick first DTM whose qualifier matches one of the given codes
+function dtmBy(codes){
+  for(const s of findAll("DTM")){
+    const q=g(s,1,0);
+    if(codes.includes(q)) return fmtDate(g(s,1,1));
+  }
+  return "";
+}
+
+/* ---------- render segments ---------- */
+function parse(){
+  const raw=document.getElementById("input").value.trim();
+  const segView=document.getElementById("segView");
+  const outStat=document.getElementById("outStat");
+  if(!raw){segView.innerHTML='<div class="err">Nothing to parse — paste an EDIFACT message first.</div>';document.getElementById("bizView").innerHTML='<div class="err">Nothing to summarize.</div>';outStat.textContent="—";return;}
+
+  try{
+    segments=parseEdifact(raw);
+    if(!segments.length){segView.innerHTML='<div class="err">No segments found. Is this raw EDIFACT?</div>';return;}
+
+    const type=msgType();
+    const unb=findSeg("UNB");
+    const sender=unb?g(unb,2,0):"";
+    const receiver=unb?g(unb,3,0):"";
+    const ref=unb?g(unb,5,0):"";
+
+    let html="";
+    if(type||sender){
+      html+='<div class="meta">';
+      if(type) html+=metaCard("Message",type+(MSG_TYPES[type]?" · "+MSG_TYPES[type]:""));
+      if(sender) html+=metaCard("Sender",sender);
+      if(receiver) html+=metaCard("Recipient",receiver);
+      if(ref) html+=metaCard("Control Ref",ref);
+      html+=metaCard("Segments",String(segments.length));
+      html+='</div>';
+    }
+
+    segments.forEach((s,idx)=>{
+      const def=SEG[s.tag];
+      const segName=def?def.name:"Unknown / custom segment";
+      let body="";
+      s.els.forEach((comps,ei)=>{
+        const pos=ei+1;
+        const desc=def&&def.el[pos]?def.el[pos]:"Element "+pos;
+        // render components joined, with decode hints where useful
+        const compStr=comps.map((c,ci)=>{
+          const hint=decodeHint(s.tag,pos,ci,c);
+          if(c==="") return '<span class="comp">∅</span>';
+          return esc(c)+(hint?' <span class="decode">→ '+esc(hint)+'</span>':'');
+        }).join(' <span class="comp">:</span> ');
+        body+='<div class="ele"><div class="epos">'+s.tag+String(pos).padStart(2,"0")+
+              '<span class="edesc">'+esc(desc)+'</span></div>'+
+              '<div class="eval">'+(compStr||'<span class="comp">∅ empty</span>')+'</div></div>';
+      });
+      html+='<div class="seg" data-i="'+idx+'">'+
+            '<div class="seg-head"><span class="seg-id">'+esc(s.tag)+'</span>'+
+            '<span class="seg-name">'+esc(segName)+'</span>'+
+            '<span class="seg-raw">'+esc(s.raw)+'</span></div>'+
+            '<div class="seg-body">'+(body||'<div style="color:var(--ink-dim);font-size:12px;padding:4px 0">No elements.</div>')+'</div></div>';
+    });
+
+    segView.innerHTML=html;
+    bindSegs();
+    buildBizSummary(type);
+    outStat.textContent=segments.length+' segments · delimiters: element "'+DELIMS.elem+'" component "'+DELIMS.comp+'" terminator "'+DELIMS.segT+'"';
+  }catch(e){
+    segView.innerHTML='<div class="err">Could not parse this input. Make sure it is raw EDIFACT. ('+esc(e.message)+')</div>';
+  }
+}
+
+function metaCard(k,v){return '<div class="m"><div class="k">'+esc(k)+'</div><div class="v">'+esc(v)+'</div></div>';}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+
+function decodeHint(tag,pos,ci,val){
+  if(tag==="UNH"&&pos===2&&ci===0&&MSG_TYPES[val]) return MSG_TYPES[val];
+  if(tag==="NAD"&&pos===1&&ci===0&&NAD_PARTY[val]) return NAD_PARTY[val];
+  if(tag==="BGM"&&pos===3&&ci===0&&MSG_FUNC[val]) return MSG_FUNC[val];
+  return "";
+}
+
+function bindSegs(){
+  document.querySelectorAll(".seg-head").forEach(h=>{
+    h.addEventListener("click",()=>h.parentElement.classList.toggle("open"));
+  });
+}
+
+/* ---------- Business Summary ---------- */
+function buildBizSummary(type){
+  const biz=document.getElementById("bizView");
+  if(!segments.length){biz.innerHTML='<div class="err">Nothing to summarize.</div>';return;}
+
+  const typeName=MSG_TYPES[type]||("message "+(type||"?"));
+  const unb=findSeg("UNB");
+  const sender=unb?g(unb,2,0):"";
+  const receiver=unb?g(unb,3,0):"";
+  const bgm=findSeg("BGM");
+  const docNo=bgm?g(bgm,2,0):"";
+  const funcCode=bgm?g(bgm,3,0):"";
+  const funcName=MSG_FUNC[funcCode]||"";
+
+  let headline="",rows=[],itemsHtml="",note="";
+
+  const buyer=nadName("BY")||nadName("OB")||receiver||"the buyer";
+  const supplier=nadName("SU")||nadName("SE")||sender||"the supplier";
+
+  if(type==="ORDERS"||type==="ORDCHG"){
+    const items=lineItems();
+    let totalQty=0,totalVal=0;
+    items.forEach(it=>{totalQty+=it.qty||0;totalVal+=(it.qty||0)*(it.price||0);});
+    const date=dtmBy(["137","4","2"]);
+    const verb=type==="ORDCHG"?"changed":"placed";
+    headline='<b>'+esc(buyer)+'</b> '+verb+' purchase order <b>'+esc(docNo||"(no number)")+'</b> with <b>'+esc(supplier)+'</b>'+
+             (date?' on <b>'+esc(date)+'</b>':"")+
+             ', ordering <b>'+items.length+'</b> line item'+(items.length!==1?"s":"")+
+             (totalQty?' for a total of <b>'+totalQty.toLocaleString()+'</b> units':"")+
+             (totalVal?' worth about <span class="amt">'+money(totalVal)+'</span>':"")+'.';
+    rows=[["Message",(type==="ORDCHG"?"Purchase Order Change (ORDCHG)":"Purchase Order (ORDERS)")],["Order number",docNo||"—"],["Order date",date||"—"],["Buyer",buyer],["Supplier",supplier]];
+    if(funcName) rows.push(["Function",funcName]);
+    itemsHtml=lineItemTable(items);
+    note="ORDERS is the EDIFACT purchase order (the X12 850 equivalent). The supplier typically replies with ORDRSP, then DESADV (despatch) and INVOIC.";
+  }
+  else if(type==="ORDRSP"){
+    const items=lineItems();
+    headline='<b>'+esc(supplier)+'</b> responded to purchase order <b>'+esc(docNo||"(no number)")+'</b> from <b>'+esc(buyer)+'</b>, confirming, changing, or rejecting the ordered lines'+(items.length?' ('+items.length+' line item'+(items.length!==1?"s":"")+')':"")+'.';
+    rows=[["Message","Purchase Order Response (ORDRSP)"],["Order number",docNo||"—"],["Supplier",supplier],["Buyer",buyer]];
+    itemsHtml=lineItemTable(items);
+    note="ORDRSP is the supplier's answer to an ORDERS (the X12 855 equivalent).";
+  }
+  else if(type==="INVOIC"){
+    const items=lineItems();
+    const date=dtmBy(["137","3","35"]);
+    const totMoa=findAll("MOA").find(s=>["77","86","9"].includes(g(s,1,0)));
+    const total=totMoa?money(g(totMoa,1,1)):"";
+    headline='<b>'+esc(supplier)+'</b> issued invoice <b>'+esc(docNo||"(no number)")+'</b> to <b>'+esc(buyer)+'</b>'+
+             (date?' dated <b>'+esc(date)+'</b>':"")+
+             ', covering <b>'+items.length+'</b> line item'+(items.length!==1?"s":"")+
+             (total?' for a total of <span class="amt">'+esc(total)+'</span>':"")+'.';
+    rows=[["Message","Invoice (INVOIC)"],["Invoice number",docNo||"—"],["Invoice date",date||"—"],["Supplier",supplier],["Invoicee",nadName("IV")||buyer]];
+    if(total) rows.push(["Total amount",total]);
+    itemsHtml=lineItemTable(items);
+    note="INVOIC is the EDIFACT invoice (the X12 810 equivalent), matched against the original ORDERS during AP reconciliation.";
+  }
+  else if(type==="DESADV"){
+    const items=lineItems();
+    const date=dtmBy(["11","17","137"]);
+    let totalQty=0;items.forEach(it=>totalQty+=it.qty||0);
+    headline='<b>'+esc(supplier)+'</b> notified <b>'+esc(buyer)+'</b> of despatch <b>'+esc(docNo||"(no number)")+'</b>'+
+             (date?', shipped on <b>'+esc(date)+'</b>':"")+
+             (totalQty?', containing about <b>'+totalQty.toLocaleString()+'</b> units':"")+'.';
+    rows=[["Message","Despatch Advice (DESADV)"],["Despatch number",docNo||"—"],["Despatch date",date||"—"],["Ship from",supplier],["Ship to",nadName("ST")||nadName("DP")||buyer]];
+    itemsHtml=lineItemTable(items);
+    note="DESADV is the EDIFACT advance ship notice (the X12 856 / ASN equivalent), telling the buyer what is coming and how it is packed.";
+  }
+  else if(type==="RECADV"){
+    const items=lineItems();
+    headline='<b>'+esc(buyer)+'</b> confirmed receipt of goods from <b>'+esc(supplier)+'</b> in receiving advice <b>'+esc(docNo||"(no number)")+'</b>'+(items.length?' ('+items.length+' line item'+(items.length!==1?"s":"")+')':"")+'.';
+    rows=[["Message","Receiving Advice (RECADV)"],["Document number",docNo||"—"],["Receiver",buyer],["Supplier",supplier]];
+    itemsHtml=lineItemTable(items);
+    note="RECADV reports what was actually received against a despatch — used to flag shortages or damage.";
+  }
+  else if(type==="PRICAT"){
+    const items=lineItems();
+    headline='<b>'+esc(sender||"The sender")+'</b> sent a price/sales catalogue <b>'+esc(docNo||"")+'</b> to <b>'+esc(receiver||"the recipient")+'</b>'+(items.length?', listing <b>'+items.length+'</b> product'+(items.length!==1?"s":""):"")+'.';
+    rows=[["Message","Price/Sales Catalogue (PRICAT)"],["Catalogue number",docNo||"—"],["Sender",sender||"—"],["Recipient",receiver||"—"]];
+    itemsHtml=lineItemTable(items);
+    note="PRICAT distributes product and price master data from a supplier to its partners.";
+  }
+  else if(type==="QUOTES"){
+    const items=lineItems();
+    headline='<b>'+esc(supplier)+'</b> sent a quotation <b>'+esc(docNo||"")+'</b> to <b>'+esc(buyer)+'</b>'+(items.length?' for <b>'+items.length+'</b> item'+(items.length!==1?"s":""):"")+'.';
+    rows=[["Message","Quotation (QUOTES)"],["Quote number",docNo||"—"],["Supplier",supplier],["Buyer",buyer]];
+    itemsHtml=lineItemTable(items);
+    note="QUOTES provides pricing in response to a request, before a formal ORDERS is placed.";
+  }
+  else if(type==="DELFOR"||type==="DELJIT"){
+    const items=lineItems();
+    const jit=type==="DELJIT";
+    headline='<b>'+esc(buyer)+'</b> sent a '+(jit?"just-in-time delivery schedule":"delivery forecast")+' to <b>'+esc(supplier)+'</b>'+(items.length?', covering <b>'+items.length+'</b> item'+(items.length!==1?"s":""):"")+'.';
+    rows=[["Message",(jit?"Delivery JIT (DELJIT)":"Delivery Forecast (DELFOR)")],["Document number",docNo||"—"],["Buyer",buyer],["Supplier",supplier]];
+    itemsHtml=lineItemTable(items);
+    note=jit?"DELJIT gives precise short-term call-offs against a frame order — common in automotive.":"DELFOR communicates a rolling forecast of future requirements so the supplier can plan.";
+  }
+  else if(type==="SLSRPT"){
+    const items=lineItems();
+    headline='<b>'+esc(sender||"The sender")+'</b> reported point-of-sale / sell-through data to <b>'+esc(receiver||"the recipient")+'</b>'+(items.length?' for <b>'+items.length+'</b> product'+(items.length!==1?"s":""):"")+'.';
+    rows=[["Message","Sales Data Report (SLSRPT)"],["Document number",docNo||"—"],["Sender",sender||"—"],["Recipient",receiver||"—"]];
+    itemsHtml=lineItemTable(items);
+    note="SLSRPT shares retail sales data with suppliers, often for vendor-managed inventory.";
+  }
+  /* Logistics */
+  else if(type==="IFTMIN"||type==="IFTMBF"||type==="IFTMCS"){
+    const carrier=nadName("CA")||receiver||"the carrier";
+    const shipper=nadName("CZ")||nadName("SH")||sender||"the shipper";
+    const consignee=nadName("CN")||"";
+    const labels={IFTMIN:"transport instruction",IFTMBF:"firm booking request",IFTMCS:"booking confirmation"};
+    headline='<b>'+esc(shipper)+'</b> sent a '+labels[type]+' to carrier <b>'+esc(carrier)+'</b>'+(consignee?', delivering to <b>'+esc(consignee)+'</b>':"")+(docNo?' (ref <b>'+esc(docNo)+'</b>)':"")+'.';
+    rows=[["Message",MSG_TYPES[type]+" ("+type+")"],["Reference",docNo||"—"],["Shipper / consignor",shipper],["Carrier",carrier]];
+    if(consignee) rows.push(["Consignee",consignee]);
+    const tdt=findSeg("TDT");
+    if(tdt&&g(tdt,8,0)) rows.push(["Transport ID",g(tdt,8,0)]);
+    note="IFTMIN/IFTMBF/IFTMCS handle transport instructions and bookings between shipper and carrier.";
+  }
+  else if(type==="IFTSTA"){
+    const carrier=nadName("CA")||sender||"the carrier";
+    const status=findSeg("STS")||findSeg("LOC");
+    const where=findSeg("LOC")?g(findSeg("LOC"),2,0):"";
+    const date=dtmBy(["334","178","7"]);
+    headline='Carrier <b>'+esc(carrier)+'</b> reported a transport status update'+(docNo?' for consignment <b>'+esc(docNo)+'</b>':"")+(where?' at <b>'+esc(where)+'</b>':"")+(date?' on <b>'+esc(date)+'</b>':"")+'.';
+    rows=[["Message","Transport Status (IFTSTA)"],["Reference",docNo||"—"],["Carrier",carrier],["Location",where||"—"],["Status date",date||"—"]];
+    note="IFTSTA is a shipment tracking update (the X12 214 equivalent).";
+  }
+  else if(type==="COPARN"){
+    const eqd=findSeg("EQD");
+    const container=eqd?g(eqd,2,0):"";
+    headline='<b>'+esc(sender||"The sender")+'</b> sent a container announcement to <b>'+esc(receiver||"the terminal")+'</b>'+(container?', container <b>'+esc(container)+'</b>':"")+'.';
+    rows=[["Message","Container Announcement (COPARN)"],["Container",container||"—"],["Sender",sender||"—"],["Recipient",receiver||"—"]];
+    note="COPARN announces container movements to/from a port terminal.";
+  }
+  else if(type==="PAXLST"){
+    const count=findAll("NAD").filter(s=>g(s,1,0)==="FL"||g(s,1,0)==="").length;
+    headline='<b>'+esc(sender||"The sender")+'</b> transmitted a passenger list to <b>'+esc(receiver||"the authority")+'</b>.';
+    rows=[["Message","Passenger List (PAXLST)"],["Sender",sender||"—"],["Recipient",receiver||"—"]];
+    note="PAXLST sends advance passenger information to border/customs authorities.";
+  }
+  /* Finance */
+  else if(type==="REMADV"){
+    const payer=nadName("PR")||nadName("BY")||sender||"the payer";
+    const payee=nadName("PE")||nadName("SU")||receiver||"the payee";
+    const totMoa=findAll("MOA").find(s=>["9","12"].includes(g(s,1,0)));
+    const total=totMoa?money(g(totMoa,1,1)):"";
+    headline='<b>'+esc(payer)+'</b> sent a remittance advice to <b>'+esc(payee)+'</b>'+(total?' for <span class="amt">'+esc(total)+'</span>':"")+(docNo?' (ref <b>'+esc(docNo)+'</b>)':"")+', detailing which invoices the payment covers.';
+    rows=[["Message","Remittance Advice (REMADV)"],["Reference",docNo||"—"],["Payer",payer],["Payee",payee]];
+    if(total) rows.push(["Total amount",total]);
+    note="REMADV tells the payee which invoices a payment settles (the X12 820 equivalent).";
+  }
+  else if(type==="PAYMUL"||type==="CREMUL"){
+    const isPay=type==="PAYMUL";
+    headline='<b>'+esc(sender||"The sender")+'</b> sent a '+(isPay?"multiple payment order":"multiple credit advice")+' to <b>'+esc(receiver||"the bank")+'</b>'+(docNo?' (ref <b>'+esc(docNo)+'</b>)':"")+'.';
+    rows=[["Message",MSG_TYPES[type]+" ("+type+")"],["Reference",docNo||"—"],["Sender",sender||"—"],["Recipient",receiver||"—"]];
+    note=isPay?"PAYMUL instructs a bank to make multiple payments in one message.":"CREMUL advises the receiver of multiple credit entries.";
+  }
+  /* Customs */
+  else if(type==="CUSDEC"){
+    const declarant=nadName("DT")||nadName("CZ")||sender||"the declarant";
+    headline='<b>'+esc(declarant)+'</b> submitted a customs declaration <b>'+esc(docNo||"")+'</b> to <b>'+esc(receiver||"the customs authority")+'</b>.';
+    rows=[["Message","Customs Declaration (CUSDEC)"],["Declaration number",docNo||"—"],["Declarant",declarant],["Authority",receiver||"—"]];
+    note="CUSDEC declares goods to customs for import/export clearance.";
+  }
+  else if(type==="CUSCAR"){
+    headline='<b>'+esc(sender||"The carrier")+'</b> filed a customs cargo report'+(docNo?' <b>'+esc(docNo)+'</b>':"")+' with <b>'+esc(receiver||"customs")+'</b>.';
+    rows=[["Message","Customs Cargo Report (CUSCAR)"],["Reference",docNo||"—"],["Sender",sender||"—"],["Authority",receiver||"—"]];
+    note="CUSCAR reports cargo manifests to customs.";
+  }
+  else if(type==="CUSRES"){
+    headline='<b>'+esc(sender||"Customs")+'</b> returned a customs response to <b>'+esc(receiver||"the declarant")+'</b>'+(docNo?' (ref <b>'+esc(docNo)+'</b>)':"")+'.';
+    rows=[["Message","Customs Response (CUSRES)"],["Reference",docNo||"—"],["Authority",sender||"—"],["Declarant",receiver||"—"]];
+    note="CUSRES is the customs authority's reply to a declaration — accepted, rejected, or requiring action.";
+  }
+  /* Utilities / medical */
+  else if(type==="UTILMD"||type==="UTILTS"){
+    headline='<b>'+esc(sender||"The sender")+'</b> sent '+(type==="UTILMD"?"utilities master data":"utilities metering time series")+' to <b>'+esc(receiver||"the recipient")+'</b>'+(docNo?' (ref <b>'+esc(docNo)+'</b>)':"")+'.';
+    rows=[["Message",MSG_TYPES[type]+" ("+type+")"],["Reference",docNo||"—"],["Sender",sender||"—"],["Recipient",receiver||"—"]];
+    note=type==="UTILMD"?"UTILMD exchanges master data in energy markets (metering points, contracts).":"UTILTS exchanges metered consumption time-series data.";
+  }
+  else if(type==="MEDPRE"){
+    headline='A medical prescription message was sent from <b>'+esc(sender||"the prescriber")+'</b> to <b>'+esc(receiver||"the dispenser")+'</b>'+(docNo?' (ref <b>'+esc(docNo)+'</b>)':"")+'.';
+    rows=[["Message","Medical Prescription (MEDPRE)"],["Reference",docNo||"—"],["Sender",sender||"—"],["Recipient",receiver||"—"]];
+    note="MEDPRE carries prescription information between healthcare parties. Note: nothing here is uploaded.";
+  }
+  /* Acknowledgments */
+  else if(type==="CONTRL"){
+    const uci=findSeg("UCI");
+    const action=uci?g(uci,4,0):"";
+    headline='<b>'+esc(sender||"The receiver")+'</b> sent a CONTRL acknowledgment to <b>'+esc(receiver||"the sender")+'</b>, reporting whether a previously received interchange was syntactically accepted'+(action?' (action code <b>'+esc(action)+'</b>)':"")+'.';
+    rows=[["Message","Syntax & Service Report (CONTRL)"],["Sender",sender||"—"],["Recipient",receiver||"—"]];
+    note="CONTRL confirms an interchange was received and is syntactically valid (the X12 997 equivalent). It is technical, not a business agreement.";
+  }
+  else if(type==="APERAK"){
+    const erc=findSeg("ERC");
+    const errCode=erc?g(erc,1,0):"";
+    headline='<b>'+esc(sender||"The application")+'</b> sent an APERAK to <b>'+esc(receiver||"the sender")+'</b>, acknowledging a message at the application level'+(errCode?' with error code <b>'+esc(errCode)+'</b>':"")+'.';
+    rows=[["Message","Application Error & Acknowledgment (APERAK)"],["Sender",sender||"—"],["Recipient",receiver||"—"]];
+    if(errCode) rows.push(["Error code",errCode]);
+    note="APERAK reports application-level acceptance or business errors — a step beyond CONTRL's syntax check.";
+  }
+  else { // generic fallback
+    headline='This is an EDIFACT <b>'+esc(type||"message")+'</b> ('+esc(typeName)+') sent from <b>'+esc(sender||"a sender")+'</b> to <b>'+esc(receiver||"a recipient")+'</b>. A detailed plain-English summary is not available for this message type yet, but the full segment breakdown is in the Segments tab.';
+    rows=[["Message type",type||"—"],["Sender",sender||"—"],["Recipient",receiver||"—"]];
+    if(docNo) rows.push(["Document number",docNo]);
+  }
+
+  let html='<div class="bizwrap">';
+  html+='<div class="biz-headline">'+headline+'</div>';
+  html+='<div class="biz-section"><div class="lbl">Key details</div>';
+  rows.forEach(r=>{html+='<div class="biz-row"><span class="rk">'+esc(r[0])+'</span><span class="rv">'+esc(r[1])+'</span></div>';});
+  html+='</div>';
+  if(itemsHtml) html+='<div class="biz-section"><div class="lbl">Line items</div>'+itemsHtml+'</div>';
+  if(note) html+='<div class="biz-note">ℹ '+esc(note)+'</div>';
+  html+='</div>';
+  biz.innerHTML=html;
+}
+
+/* extract line items from LIN/QTY/PRI/IMD groups */
+function lineItems(){
+  const items=[];
+  let cur=null;
+  segments.forEach(s=>{
+    if(s.tag==="LIN"){
+      if(cur)items.push(cur);
+      cur={line:g(s,1,0),itemId:g(s,3,0),desc:"",qty:null,price:null};
+    } else if(cur){
+      if(s.tag==="IMD"){const d=g(s,3,3);if(d)cur.desc=d;}
+      if(s.tag==="QTY"){const q=parseFloat(g(s,1,1));if(!isNaN(q)&&cur.qty===null)cur.qty=q;}
+      if(s.tag==="PRI"){const p=parseFloat(g(s,1,1));if(!isNaN(p)&&cur.price===null)cur.price=p;}
+    }
+  });
+  if(cur)items.push(cur);
+  return items;
+}
+
+function lineItemTable(items){
+  if(!items.length) return "";
+  let rows="";
+  items.forEach(it=>{
+    rows+='<tr><td>'+esc(it.line||"—")+'</td><td>'+esc(it.desc||it.itemId||"—")+'</td>'+
+          '<td class="num">'+(it.qty!=null?it.qty.toLocaleString():"—")+'</td>'+
+          '<td class="num">'+(it.price!=null?money(it.price):"—")+'</td></tr>';
+  });
+  return '<table class="biz-items"><thead><tr><th>Line</th><th>Item</th><th class="num">Qty</th><th class="num">Unit price</th></tr></thead><tbody>'+rows+'</tbody></table>';
+}
+
+/* tab switching */
+document.querySelectorAll(".tab").forEach(t=>{
+  t.addEventListener("click",()=>{
+    document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+    document.querySelectorAll(".view").forEach(x=>x.classList.remove("active"));
+    t.classList.add("active");
+    document.getElementById(t.dataset.view).classList.add("active");
+    document.getElementById("segTools").style.display = t.dataset.view==="segView" ? "flex" : "none";
+  });
+});
+
+document.getElementById("parseBtn").onclick=parse;
+document.getElementById("expandBtn").onclick=()=>document.querySelectorAll(".seg").forEach(s=>s.classList.add("open"));
+document.getElementById("collapseBtn").onclick=()=>document.querySelectorAll(".seg").forEach(s=>s.classList.remove("open"));
+document.getElementById("clearBtn").onclick=()=>{document.getElementById("input").value="";document.getElementById("segView").innerHTML='<div class="placeholder"><div class="big">⌖</div>Parsed segments will appear here.</div>';document.getElementById("bizView").innerHTML='<div class="placeholder"><div class="big">💬</div>A plain-English summary will appear here after you parse.</div>';document.getElementById("inStat").textContent="Waiting for input…";document.getElementById("outStat").textContent="—";};
+document.getElementById("copyBtn").onclick=()=>{
+  let txt=segments.map(s=>{const d=SEG[s.tag];let l=s.tag+" ("+(d?d.name:"unknown")+")\n";s.els.forEach((comps,ei)=>{const dd=d&&d.el[ei+1]?d.el[ei+1]:"Element "+(ei+1);l+="   "+s.tag+String(ei+1).padStart(2,"0")+" "+dd+": "+comps.join(" : ")+"\n";});return l;}).join("\n");
+  if(!txt)return;
+  navigator.clipboard.writeText(txt).then(()=>{const b=document.getElementById("copyBtn");b.textContent="✓ Copied";setTimeout(()=>b.textContent="Copy as text",1500);});
+};
+document.getElementById("input").addEventListener("input",function(){const len=this.value.length;document.getElementById("inStat").textContent=len?len+" characters":"Waiting for input…";});
+
+const SAMPLE_ORDERS="UNA:+.? 'UNB+UNOC:3+5790001234567:14+5790007654321:14+240220:0900+REF00001'UNH+1+ORDERS:D:96A:UN'BGM+220+PO-55012+9'DTM+137:20240220:102'NAD+BY+5412345000013::9'NAD+SU+4012345000094::9'LIN+1++5410738377056:EN'IMD+F++:::WIDGET BLUE 12IN'QTY+21:100'PRI+AAA:12.50'LIN+2++5410738377057:EN'IMD+F++:::GADGET RED SMALL'QTY+21:50'PRI+AAA:8.75'UNS+S'CNT+2:2'UNT+16+1'UNZ+1+REF00001'";
+const SAMPLE_INVOIC="UNA:+.? 'UNB+UNOC:3+4012345000094:14+5412345000013:14+240225:1100+INV77001'UNH+1+INVOIC:D:96A:UN'BGM+380+INV-2024-3391+9'DTM+137:20240225:102'RFF+ON:PO-55012'NAD+SU+4012345000094::9'NAD+BY+5412345000013::9'NAD+IV+5412345000013::9'LIN+1++5410738377056:EN'IMD+F++:::WIDGET BLUE 12IN'QTY+47:100'MOA+203:1250.00'PRI+AAA:12.50'LIN+2++5410738377057:EN'QTY+47:50'MOA+203:437.50'PRI+AAA:8.75'UNS+S'MOA+77:1687.50'UNT+19+1'UNZ+1+INV77001'";
+document.getElementById("sampleBtn").onclick=()=>{document.getElementById("input").value=SAMPLE_ORDERS;document.getElementById("inStat").textContent=SAMPLE_ORDERS.length+" characters";parse();};
+document.getElementById("sampleInvBtn").onclick=()=>{document.getElementById("input").value=SAMPLE_INVOIC;document.getElementById("inStat").textContent=SAMPLE_INVOIC.length+" characters";parse();};
+</script>
+</body>
+</html>
