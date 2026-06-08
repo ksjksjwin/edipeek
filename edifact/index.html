@@ -4,9 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>UN/EDIFACT Viewer — Free Online ORDERS, INVOIC, DESADV Parser (No Upload)</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <meta name="description" content="Paste raw UN/EDIFACT and read it instantly. Free online EDIFACT parser and viewer for ORDERS, INVOIC, DESADV, IFTMIN, CUSDEC and more. 100% in your browser — files never leave your computer.">
 <meta name="keywords" content="EDIFACT viewer, EDIFACT parser online, read EDIFACT file, ORDERS message, INVOIC EDIFACT, DESADV parser, UN EDIFACT decoder, UNB UNH segment">
-<link rel="canonical" href="https://example.com/edifact/">
+<link rel="canonical" href="https://edipeek.com/edifact/">
 <meta property="og:title" content="UN/EDIFACT Viewer — Read Any EDIFACT Message in Your Browser">
 <meta property="og:description" content="Paste raw UN/EDIFACT, get a clean human-readable breakdown. Free, no signup, files stay on your device.">
 <meta property="og:type" content="website">
@@ -46,7 +47,11 @@
     background:rgba(13,17,23,.7);backdrop-filter:blur(6px);
     position:sticky;top:0;z-index:10;
   }
-  .logo{font-weight:700;font-size:18px;letter-spacing:-.5px;display:flex;align-items:center;gap:10px}
+  .logo{font-weight:700;font-size:18px;letter-spacing:-.5px;display:flex;align-items:center;gap:9px;color:var(--ink);text-decoration:none}
+  .logo:hover{text-decoration:none}
+  .logo:hover .logo-mark{transform:scale(1.08) rotate(-6deg)}
+  .logo-mark{color:var(--accent);transition:transform .2s ease;flex-shrink:0}
+  .logo-text{display:inline-flex;align-items:center}
   .logo .blink{color:var(--accent);animation:blink 1.2s steps(2,start) infinite}
   @keyframes blink{to{opacity:0}}
   .tag{font-size:11px;color:var(--ink-dim);border:1px solid var(--border);padding:3px 8px;border-radius:99px}
@@ -156,10 +161,21 @@
 <body>
 
 <header>
-  <div class="logo">UN<span style="color:var(--accent)">/EDIFACT</span>.view<span class="blink">_</span></div>
-  <span class="tag"><b>●</b> 100% in-browser · no upload</span>
+  <a class="logo" href="/" title="EdiPeek home" aria-label="EdiPeek home">
+    <svg class="logo-mark" viewBox="0 0 28 28" width="26" height="26" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/>
+      <line x1="17.6" y1="17.6" x2="25" y2="25" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+      <line x1="8" y1="10" x2="16" y2="10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.9"/>
+      <line x1="8" y1="13" x2="14" y2="13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+      <line x1="8" y1="16" x2="15" y2="16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
+    </svg>
+    <span class="logo-text">EDI<span style="color:var(--accent)">PEEK</span><span class="blink">_</span></span>
+  </a>
+  <span class="tag" style="color:var(--accent);border-color:rgba(88,166,255,.35)"><b>EDIFACT</b></span>
+  <span class="tag">● 100% in-browser · no upload</span>
   <div class="spacer"></div>
-  <a class="navlink" href="../x12/">Need X12 instead? →</a>
+  <a class="navlink" href="/">⌂ Home</a>
+  <a class="navlink" href="../x12/">X12 →</a>
 </header>
 
 <main>
@@ -276,6 +292,7 @@
 </main>
 
 <footer>
+  <div style="margin-bottom:10px"><a href="/">Home</a> &middot; <a href="/about/">About</a> &middot; <a href="/contact/">Contact</a> &middot; <a href="/privacy/">Privacy</a> &middot; <a href="/terms/">Terms</a></div>
   UN/EDIFACT.view — a free in-browser EDIFACT parser. Not affiliated with UN/CEFACT.
   Files are processed locally and never uploaded. · <a href="../x12/">X12 viewer</a>
 </footer>
