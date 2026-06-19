@@ -3,15 +3,31 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EDI 850 — Purchase Order | EdiPeek</title>
+<title>EDI 850 - Purchase Order | EdiPeek</title>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2945012312110955"
      crossorigin="anonymous"></script>
-<meta name="description" content="What an EDI 850 purchase order is, how it is structured segment by segment, and what BEG, N1, PO1 and other segments mean.">
+<meta name="description" content="A detailed guide to the EDI 850 purchase order: where it fits in the order cycle, every key segment (BEG, REF, N1, PO1, PID, CTT), a worked example, and common questions.">
 <link rel="canonical" href="https://edipeek.com/guides/edi-850/">
-<meta property="og:title" content="EDI 850 — Purchase Order">
-<meta property="og:description" content="What an EDI 850 purchase order is, how it is structured segment by segment, and what BEG, N1, PO1 and other segments mean.">
+<meta property="og:title" content="EDI 850 - Purchase Order">
+<meta property="og:description" content="A detailed guide to the EDI 850 purchase order: where it fits in the order cycle, every key segment (BEG, REF, N1, PO1, PID, CTT), a worked example, and common questions.">
 <meta property="og:type" content="article">
+<meta property="og:url" content="https://edipeek.com/guides/edi-850/">
+<meta property="og:site_name" content="EdiPeek">
+<meta name="robots" content="index, follow">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "EDI 850 - Purchase Order",
+  "description": "A detailed guide to the EDI 850 purchase order: where it fits in the order cycle, every key segment (BEG, REF, N1, PO1, PID, CTT), a worked example, and common questions.",
+  "url": "https://edipeek.com/guides/edi-850/",
+  "mainEntityOfPage": {"@type": "WebPage", "@id": "https://edipeek.com/guides/edi-850/"},
+  "author": {"@type": "Organization", "name": "EdiPeek"},
+  "publisher": {"@type": "Organization", "name": "EdiPeek", "url": "https://edipeek.com/"},
+  "dateModified": "2026-06-01"
+}
+</script>
 <style>
   :root{--bg:#0d1117;--panel:#161b22;--panel-2:#1c2330;--border:#2a3340;--ink:#e6edf3;--ink-dim:#8b97a7;--accent:#58a6ff;--green:#3fb950;--seg:#f0883e;--mono:"JetBrains Mono","SF Mono",ui-monospace,Menlo,Consolas,monospace}
   *{box-sizing:border-box;margin:0;padding:0}
@@ -39,6 +55,10 @@
   code{background:var(--panel-2);border:1px solid var(--border);padding:1px 6px;border-radius:4px;color:var(--ink);font-size:13px}
   pre{background:#0a0e13;border:1px solid var(--border);border-radius:8px;padding:14px 16px;overflow-x:auto;margin:14px 0;font-size:12.5px;line-height:1.6;color:#c4cdd9}
   pre .seg{color:var(--seg);font-weight:700}
+  table.t{width:100%;border-collapse:collapse;margin:14px 0;font-size:13px}
+  table.t th{text-align:left;color:var(--ink-dim);font-size:11px;text-transform:uppercase;letter-spacing:1px;padding:7px 9px;border-bottom:1px solid var(--border)}
+  table.t td{padding:7px 9px;border-bottom:1px dotted #243042;color:#c4cdd9;vertical-align:top}
+  table.t td code{white-space:nowrap}
   .trybox{background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--green);border-radius:8px;padding:16px 18px;margin:26px 0}
   .trybox .tt{font-size:13px;color:var(--ink);margin-bottom:6px;font-weight:700}
   .trybox p{font-size:13px;margin-bottom:10px}
@@ -75,58 +95,81 @@
   <a class="navlink" href="/guides/">All guides</a>
 </header>
 <main>
-  <div class="crumb"><a href="/">Home</a> / <a href="/guides/">Guides</a> / EDI 850 — Purchase Order</div>
-  <h1>EDI 850: The Purchase Order, Explained</h1>
-  <div class="meta">EdiPeek · Updated June 2026 · 5 min read</div>
+  <div class="crumb"><a href="/">Home</a> / <a href="/guides/">Guides</a> / EDI 850 - Purchase Order</div>
+  <h1>EDI 850: The Purchase Order, Explained in Depth</h1>
+  <div class="meta">EdiPeek · Updated June 2026 · 7 min read</div>
 
-<p>The <strong>EDI 850</strong> is the <strong>Purchase Order</strong> — one of the most common EDI transactions. It is how a buyer formally tells a supplier what they want to buy: which items, how many, at what price, shipped where and when.</p>
+<p>The <strong>EDI 850</strong> is the <strong>Purchase Order</strong>, and it is one of the most common transactions in all of EDI. It is the document a buyer sends to formally tell a supplier what they want to buy: which items, how many, at what price, shipped to where, and by when. If you work in supply chain, retail, or procurement, the 850 is probably the first transaction you will meet.</p>
 
-<h2>Where the 850 fits</h2>
-<p>The 850 usually starts a chain of related documents:</p>
+<h2>Where the 850 fits in the order cycle</h2>
+<p>The 850 usually starts a chain of related documents that together make up a complete order-to-cash or procure-to-pay cycle:</p>
 <ol>
-  <li><strong>850</strong> — buyer sends the purchase order</li>
-  <li><strong>855</strong> — supplier acknowledges it</li>
-  <li><strong>856</strong> — supplier sends the advance ship notice when goods ship</li>
-  <li><strong>810</strong> — supplier sends the invoice</li>
+  <li><strong>850 Purchase Order</strong> - the buyer sends the order.</li>
+  <li><strong>855 Purchase Order Acknowledgment</strong> - the supplier confirms which lines are accepted, backordered, or rejected.</li>
+  <li><strong>856 Advance Ship Notice</strong> - when the goods ship, the supplier sends details of the shipment and how it is packed.</li>
+  <li><strong>810 Invoice</strong> - the supplier bills for the goods.</li>
+  <li><strong>820 Payment / Remittance</strong> - the buyer pays and explains which invoices the payment covers.</li>
 </ol>
+<p>Understanding this flow helps you read any single document, because each one references the others. The 850 is the anchor that the rest point back to.</p>
 
-<h2>Key segments in an 850</h2>
-<h3>BEG — Beginning Segment</h3>
-<p>Marks the start of the order and carries the PO number and date. <code>BEG*00*SA*PO-99831**20240115</code> means a new (<code>00</code>) standalone order (<code>SA</code>), number <code>PO-99831</code>, dated 2024-01-15.</p>
-<h3>N1 — Party Identification</h3>
-<p>Identifies the parties. <code>N1*BY</code> is the buyer, <code>N1*ST</code> is the ship-to location, <code>N1*VN</code> the vendor. Address detail follows in N3/N4 segments.</p>
-<h3>PO1 — Line Item</h3>
-<p>The heart of the order. <code>PO1*1*100*EA*12.50**UP*012345678905</code> means line 1, quantity 100, each, at $12.50, identified by UPC 012345678905.</p>
-<h3>PID — Product Description</h3>
-<p>A human-readable description that usually follows a PO1, e.g. "BLUE WIDGET 12IN".</p>
-<h3>CTT / SE — Totals and trailer</h3>
-<p>CTT gives line-item counts for control; SE closes the transaction.</p>
+<h2>The key segments of an 850</h2>
+<h3>ST - Transaction Set Header</h3>
+<p>Opens the transaction and declares the type. <code>ST*850*0001</code> means this is an 850, with a control number of 0001 that the closing SE will match.</p>
+<h3>BEG - Beginning Segment for Purchase Order</h3>
+<p>This is the heart of the order header. It carries the purpose, the PO type, the PO number, and the date. For example <code>BEG*00*SA*PO-99831**20240115</code> means a new order (<code>00</code>), of type standalone (<code>SA</code>), numbered <code>PO-99831</code>, dated 2024-01-15. The PO number here is the single most important identifier in the whole document - it is what every downstream document will reference.</p>
+<h3>REF - Reference Information</h3>
+<p>Carries additional reference numbers such as a department number, contract number, or vendor number. <code>REF*DP*042</code> might indicate department 042.</p>
+<h3>N1 loop - Party Identification</h3>
+<p>Identifies the parties involved. The qualifier in the first element says who: <code>N1*BY</code> is the buyer, <code>N1*ST</code> is the ship-to location, <code>N1*VN</code> is the vendor, <code>N1*BT</code> is the bill-to. The N1 is often followed by N3 (street address) and N4 (city, state, postal code) segments to give a full address.</p>
+<h3>PO1 - Baseline Item Data</h3>
+<p>The line items - the actual products being ordered. This is where the order's substance lives. A line like <code>PO1*1*100*EA*12.50**UP*012345678905</code> reads: line number 1, quantity 100, unit of measure EA (each), unit price 12.50, product identified by UPC <code>012345678905</code>. An 850 will have one PO1 segment per ordered item.</p>
+<h3>PID - Product/Item Description</h3>
+<p>A human-readable description that usually follows its PO1. <code>PID*F****BLUE WIDGET 12IN</code> provides a free-form (<code>F</code>) description of the item.</p>
+<h3>CTT - Transaction Totals</h3>
+<p>A control total near the end, giving the number of line items so the receiver can verify nothing was lost. <code>CTT*2</code> means two line items.</p>
+<h3>SE - Transaction Set Trailer</h3>
+<p>Closes the transaction and states how many segments it contained, matching the control number from the ST.</p>
 
-<div class="adslot">Ad slot — insert AdSense unit here</div>
+<div class="adslot">Ad slot - insert AdSense unit here</div>
 
-<h2>A complete mini example</h2>
+<h2>A complete worked example</h2>
 <pre><span class="seg">ST</span>*850*0001~
 <span class="seg">BEG</span>*00*SA*PO-99831**20240115~
-<span class="seg">N1</span>*BY*BIG RETAILER INC~
+<span class="seg">REF</span>*DP*042~
+<span class="seg">N1</span>*BY*BIG RETAILER INC*92*0048~
+<span class="seg">N3</span>*123 COMMERCE ST~
+<span class="seg">N4</span>*CHICAGO*IL*60601*US~
+<span class="seg">N1</span>*ST*WAREHOUSE 7~
 <span class="seg">PO1</span>*1*100*EA*12.50**UP*012345678905~
 <span class="seg">PID</span>*F****BLUE WIDGET 12IN~
-<span class="seg">CTT</span>*1~
-<span class="seg">SE</span>*6*0001~</pre>
-<p>Read in plain English: Big Retailer Inc is ordering 100 blue widgets at $12.50 each on purchase order PO-99831.</p>
+<span class="seg">PO1</span>*2*50*EA*8.75**UP*012345678912~
+<span class="seg">PID</span>*F****RED GADGET SMALL~
+<span class="seg">CTT</span>*2~
+<span class="seg">SE</span>*12*0001~</pre>
+<p>Read in plain English: Big Retailer Inc, ordering on behalf of department 042, is placing purchase order PO-99831 dated January 15, 2024. The goods ship to Warehouse 7. They want 100 blue widgets at $12.50 each and 50 small red gadgets at $8.75 each, for two line items in total.</p>
+
+<h2>Common pitfalls when reading an 850</h2>
+<ul>
+  <li><strong>Confusing buyer and ship-to.</strong> The party that placed the order (BY) is not always the place it ships to (ST). A head office may order for many stores.</li>
+  <li><strong>Implied decimals.</strong> Some implementations send prices and quantities without decimal points, with the decimal position defined in the trading-partner spec. Always confirm against the implementation guide.</li>
+  <li><strong>Empty elements.</strong> Consecutive delimiters like <code>**</code> mean an element was intentionally left blank, not that data is missing in error.</li>
+</ul>
 
 <div class="trybox">
   <div class="tt">See your own 850 explained</div>
-  <p>Paste a real 850 into the viewer. It labels every segment and writes a plain-English summary of the order. Nothing leaves your browser.</p>
+  <p>Paste a real 850 into the viewer. It labels every segment and writes a plain-English summary of the order - who is buying what from whom, and for how much. Nothing leaves your browser.</p>
   <a class="trybtn" href="/x12/">Open the X12 viewer</a>
 </div>
 
 <h2>Frequently asked questions</h2>
 <div class="faq">
-  <details><summary>What is the EDIFACT equivalent of an 850?</summary><div class="ans">The ORDERS message. See our <a href="/guides/edifact-orders/">EDIFACT ORDERS guide</a>.</div></details>
-  <details><summary>What does the supplier send back?</summary><div class="ans">Usually an 855 purchase order acknowledgment confirming which lines are accepted, then an 856 ship notice and an 810 invoice.</div></details>
+  <details><summary>What is the EDIFACT equivalent of an 850?</summary><div class="ans">The ORDERS message. See our <a href="/guides/edifact-orders/">EDIFACT ORDERS guide</a> for the same concepts in EDIFACT syntax.</div></details>
+  <details><summary>What does the supplier send back after an 850?</summary><div class="ans">Usually an 855 purchase order acknowledgment confirming which lines are accepted, then an 856 ship notice when goods ship, and finally an 810 invoice.</div></details>
+  <details><summary>What is the difference between a standalone and a blanket PO?</summary><div class="ans">The PO type code in the BEG segment distinguishes them. A standalone order (SA) is a single complete order; other codes indicate blanket orders, releases against a blanket, and so on.</div></details>
+  <details><summary>How do I know which product identifier is used?</summary><div class="ans">The element just before the product ID in PO1 is a qualifier. UP means UPC, VN means vendor part number, BP means buyer part number, and so on.</div></details>
 </div>
 
-<div class="related"><h2>Related guides</h2><a href="/guides/edi-810/">EDI 810 — Invoice &rarr;</a><a href="/guides/edi-856/">EDI 856 — ASN &rarr;</a><a href="/guides/edifact-orders/">EDIFACT ORDERS &rarr;</a></div>
+<div class="related"><h2>Related guides</h2><a href="/guides/edi-810/">EDI 810 - Invoice &rarr;</a><a href="/guides/edi-856/">EDI 856 - ASN &rarr;</a><a href="/guides/edi-855/">EDI 855 - PO Acknowledgment &rarr;</a><a href="/guides/edifact-orders/">EDIFACT ORDERS &rarr;</a></div>
 </main>
 <footer>
   <div style="margin-bottom:10px"><a href="/">Home</a> · <a href="/guides/">Guides</a> · <a href="/about/">About</a> · <a href="/contact/">Contact</a> · <a href="/privacy/">Privacy</a> · <a href="/terms/">Terms</a></div>

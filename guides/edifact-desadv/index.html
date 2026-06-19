@@ -3,26 +3,26 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EDIFACT INVOIC | EdiPeek</title>
+<title>EDIFACT DESADV | EdiPeek</title>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2945012312110955"
      crossorigin="anonymous"></script>
-<meta name="description" content="A detailed guide to the UN/EDIFACT INVOIC message: how it differs from the X12 810, key segments (BGM, RFF, NAD, LIN, QTY, MOA, PRI, TAX), a worked example, and FAQs.">
-<link rel="canonical" href="https://edipeek.com/guides/edifact-invoic/">
-<meta property="og:title" content="EDIFACT INVOIC">
-<meta property="og:description" content="A detailed guide to the UN/EDIFACT INVOIC message: how it differs from the X12 810, key segments (BGM, RFF, NAD, LIN, QTY, MOA, PRI, TAX), a worked example, and FAQs.">
+<meta name="description" content="A guide to the UN/EDIFACT DESADV despatch advice: the EDIFACT equivalent of the X12 856 ASN, its CPS packing hierarchy, key segments (BGM, NAD, CPS, LIN, QTY, PCI), and FAQs.">
+<link rel="canonical" href="https://edipeek.com/guides/edifact-desadv/">
+<meta property="og:title" content="EDIFACT DESADV">
+<meta property="og:description" content="A guide to the UN/EDIFACT DESADV despatch advice: the EDIFACT equivalent of the X12 856 ASN, its CPS packing hierarchy, key segments (BGM, NAD, CPS, LIN, QTY, PCI), and FAQs.">
 <meta property="og:type" content="article">
-<meta property="og:url" content="https://edipeek.com/guides/edifact-invoic/">
+<meta property="og:url" content="https://edipeek.com/guides/edifact-desadv/">
 <meta property="og:site_name" content="EdiPeek">
 <meta name="robots" content="index, follow">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "Article",
-  "headline": "EDIFACT INVOIC",
-  "description": "A detailed guide to the UN/EDIFACT INVOIC message: how it differs from the X12 810, key segments (BGM, RFF, NAD, LIN, QTY, MOA, PRI, TAX), a worked example, and FAQs.",
-  "url": "https://edipeek.com/guides/edifact-invoic/",
-  "mainEntityOfPage": {"@type": "WebPage", "@id": "https://edipeek.com/guides/edifact-invoic/"},
+  "headline": "EDIFACT DESADV",
+  "description": "A guide to the UN/EDIFACT DESADV despatch advice: the EDIFACT equivalent of the X12 856 ASN, its CPS packing hierarchy, key segments (BGM, NAD, CPS, LIN, QTY, PCI), and FAQs.",
+  "url": "https://edipeek.com/guides/edifact-desadv/",
+  "mainEntityOfPage": {"@type": "WebPage", "@id": "https://edipeek.com/guides/edifact-desadv/"},
   "author": {"@type": "Organization", "name": "EdiPeek"},
   "publisher": {"@type": "Organization", "name": "EdiPeek", "url": "https://edipeek.com/"},
   "dateModified": "2026-06-01"
@@ -95,69 +95,69 @@
   <a class="navlink" href="/guides/">All guides</a>
 </header>
 <main>
-  <div class="crumb"><a href="/">Home</a> / <a href="/guides/">Guides</a> / EDIFACT INVOIC</div>
-  <h1>EDIFACT INVOIC: The Invoice, Explained in Depth</h1>
-  <div class="meta">EdiPeek · Updated June 2026 · 7 min read</div>
+  <div class="crumb"><a href="/">Home</a> / <a href="/guides/">Guides</a> / EDIFACT DESADV</div>
+  <h1>EDIFACT DESADV: The Despatch Advice, Explained</h1>
+  <div class="meta">EdiPeek · Updated June 2026 · 6 min read</div>
 
-<p><strong>INVOIC</strong> is the UN/EDIFACT <strong>Invoice</strong> message - the international equivalent of the X12 <a href="/guides/edi-810/">810</a>. The supplier uses it to bill the buyer for goods or services, normally referencing an earlier <a href="/guides/edifact-orders/">ORDERS</a> message. It is one of the most widely exchanged EDIFACT messages in international trade.</p>
+<p><strong>DESADV</strong> is the UN/EDIFACT <strong>Despatch Advice</strong> - the international equivalent of the X12 <a href="/guides/edi-856/">856 advance ship notice</a>. The supplier sends it when goods are despatched, so the buyer knows what is in the shipment and how it is packed before it arrives.</p>
 
-<h2>Where INVOIC fits</h2>
-<p>Like its X12 counterpart, the INVOIC sits near the end of the trading cycle: ORDERS to place the order, ORDRSP to acknowledge it, DESADV to advise the despatch, then INVOIC to bill. The buyer's accounts-payable system reconciles the INVOIC against the original order and the goods received, the EDIFACT equivalent of the three-way match. A clean reference chain between these messages is what allows that reconciliation to happen automatically.</p>
+<h2>What the DESADV does</h2>
+<p>Just like the 856 ASN, the DESADV lets a buyer prepare to receive a shipment efficiently. It describes the goods, the quantities, and the packaging structure, enabling scan-based receiving and cross-docking. In European retail in particular, an accurate DESADV is often a strict requirement, and the packaging detail it carries is used to validate pallet and carton labels (typically SSCC) at the dock.</p>
 
-<h2>The key segments of an INVOIC</h2>
+<h2>The packing hierarchy: CPS</h2>
+<p>Where the X12 856 uses HL loops to express its shipment-order-pack-item tree, the DESADV uses the <strong>CPS (Consignment Packing Sequence)</strong> segment to describe nested packaging. A CPS can contain packaging detail (PAC), package identification (PCI) with the SSCC barcode, and the line items (LIN) inside that package. Nested CPS segments express pallets containing cartons containing items.</p>
+
+<h2>The key segments of a DESADV</h2>
 <h3>BGM - Beginning of Message</h3>
-<p><code>BGM+380+INV-3391+9</code> means a commercial invoice (document code 380), number INV-3391, function 9 (original). Other document codes distinguish credit notes (381) and other invoice types, so the BGM code is worth checking carefully.</p>
-<h3>RFF - Reference</h3>
-<p>This is the link back to the order. <code>RFF+ON:PO-55012</code> references order number PO-55012 (qualifier ON = order number). Without a correct RFF, the invoice cannot be matched to its purchase order.</p>
-<h3>NAD - Name and Address</h3>
-<p>Identifies the parties: <code>NAD+SU</code> supplier, <code>NAD+BY</code> buyer, <code>NAD+IV</code> invoicee (the party to be billed, which is not always the buyer). As in ORDERS, parties are often identified by GLN.</p>
-<h3>LIN, QTY, MOA, PRI - the line-item group</h3>
-<p>Each invoice line is built from several segments. <code>LIN+1++5410738377056:EN</code> identifies the product, <code>QTY+47:100</code> gives the invoiced quantity (qualifier 47 = invoiced quantity), <code>MOA+203:1250.00</code> gives the line amount (qualifier 203 = line item amount), and <code>PRI+AAA:12.50</code> gives the unit price.</p>
-<h3>MOA - Monetary Amount</h3>
-<p>MOA appears at both line and summary level, distinguished by qualifier. <code>MOA+77</code> is commonly the invoice total amount payable, <code>MOA+79</code> the total line-items amount, and <code>MOA+124</code> the tax amount. Reading the qualifier is essential, because the same segment carries very different figures.</p>
-<h3>TAX - Duty/Tax/Fee Details</h3>
-<p>Describes VAT or other taxes applied, including the rate and category. In international and especially European trade, correct VAT handling in the TAX and related MOA segments is critical.</p>
+<p><code>BGM+351+DESP-7781+9</code> means a despatch advice (document code 351), number DESP-7781, function 9 (original).</p>
+<h3>DTM - Date/Time</h3>
+<p>Carries the despatch date and often the estimated delivery date, each by qualifier.</p>
+<h3>NAD - Parties</h3>
+<p><code>NAD+SU</code> supplier, <code>NAD+ST</code> ship-to, <code>NAD+BY</code> buyer. The ship-to is especially important for routing the physical goods.</p>
+<h3>CPS - Consignment Packing Sequence</h3>
+<p>Opens a level of the packing hierarchy. Nested CPS segments build the pallet/carton/item tree.</p>
+<h3>PAC and PCI - Packaging and package identification</h3>
+<p>PAC gives the number and type of packages; PCI carries marks and the SSCC barcode used for scanning.</p>
+<h3>LIN, QTY - Line items</h3>
+<p>Within a packing level, LIN identifies the product and <code>QTY+12:100</code> gives the despatched quantity (qualifier 12 = despatch quantity).</p>
 
 <div class="adslot">Ad slot - insert AdSense unit here</div>
 
-<h2>A complete worked example</h2>
-<pre><span class="seg">UNH</span>+1+INVOIC:D:96A:UN'
-<span class="seg">BGM</span>+380+INV-3391+9'
-<span class="seg">DTM</span>+137:20240225:102'
-<span class="seg">RFF</span>+ON:PO-55012'
+<h2>A simplified worked example</h2>
+<pre><span class="seg">UNH</span>+1+DESADV:D:96A:UN'
+<span class="seg">BGM</span>+351+DESP-7781+9'
+<span class="seg">DTM</span>+11:20240220:102'
 <span class="seg">NAD</span>+SU+4012345000094::9'
-<span class="seg">NAD</span>+BY+5412345000013::9'
+<span class="seg">NAD</span>+ST+5412345000013::9'
+<span class="seg">CPS</span>+1'
+<span class="seg">PAC</span>+1++201'
+<span class="seg">PCI</span>+33E'
 <span class="seg">LIN</span>+1++5410738377056:EN'
-<span class="seg">QTY</span>+47:100'
-<span class="seg">MOA</span>+203:1250.00'
-<span class="seg">PRI</span>+AAA:12.50'
-<span class="seg">UNS</span>+S'
-<span class="seg">MOA</span>+77:1250.00'
-<span class="seg">UNT</span>+12+1'</pre>
-<p>In plain English: the supplier is billing the buyer on invoice INV-3391 dated 2024-02-25, against order PO-55012, for 100 units at 12.50 each, with a total payable of 1,250.00.</p>
+<span class="seg">QTY</span>+12:100'
+<span class="seg">UNT</span>+10+1'</pre>
+<p>In plain English: the supplier despatched shipment DESP-7781 on 2024-02-20 to the ship-to party, containing one package with 100 units of the blue widget.</p>
 
-<h2>Common pitfalls when reading an INVOIC</h2>
+<h2>Common pitfalls when reading a DESADV</h2>
 <ul>
-  <li><strong>Reading MOA without the qualifier.</strong> The same MOA segment carries line amounts, totals, and tax depending on the qualifier. Always read the leading code.</li>
-  <li><strong>Missing the RFF link.</strong> If the RFF order reference is wrong or absent, automated matching fails.</li>
-  <li><strong>Credit note vs invoice.</strong> A BGM document code of 381 is a credit note, not an invoice. Treating one as the other reverses the accounting.</li>
+  <li><strong>Missing the CPS nesting.</strong> As with the 856's HL loops, the meaning of a LIN depends on which CPS packing level it sits under.</li>
+  <li><strong>Despatch vs ordered quantity.</strong> The QTY qualifier 12 means despatched quantity, which can differ from what was ordered.</li>
+  <li><strong>SSCC mismatches.</strong> If the PCI barcode does not match the physical label, scan-based receiving fails.</li>
 </ul>
 
 <div class="trybox">
-  <div class="tt">Decode your own INVOIC</div>
-  <p>Paste an EDIFACT invoice into the viewer to see parties, references, line items, and totals explained, with a plain-English summary. Nothing leaves your browser.</p>
+  <div class="tt">Decode your own DESADV</div>
+  <p>Paste a despatch advice into the viewer to see the parties, packaging, and quantities laid out clearly, with a plain-English summary. Nothing leaves your browser.</p>
   <a class="trybtn edi" href="/edifact/">Open the EDIFACT viewer</a>
 </div>
 
 <h2>Frequently asked questions</h2>
 <div class="faq">
-  <details><summary>How is INVOIC different from the X12 810?</summary><div class="ans">Same purpose, different syntax and segment names. INVOIC uses MOA for amounts and NAD for parties, with EDIFACT delimiters and an explicit version in the UNH. See <a href="/guides/x12-vs-edifact/">X12 vs EDIFACT</a>.</div></details>
-  <details><summary>How does the invoice link to the order?</summary><div class="ans">Through an RFF segment with the ON (order number) qualifier, referencing the original ORDERS message.</div></details>
-  <details><summary>What does MOA+77 mean?</summary><div class="ans">It is commonly the total amount payable on the invoice. MOA qualifiers distinguish line amounts, totals, and tax amounts.</div></details>
-  <details><summary>How is VAT represented?</summary><div class="ans">Through TAX segments describing the rate and category, with corresponding MOA segments carrying the tax amounts. Correct VAT handling is essential in European trade.</div></details>
+  <details><summary>What is the X12 equivalent of a DESADV?</summary><div class="ans">The 856 advance ship notice. They serve the same purpose with different syntax and packing structures (CPS vs HL).</div></details>
+  <details><summary>What is SSCC and where does it appear?</summary><div class="ans">The Serial Shipping Container Code, an 18-digit pallet/carton identifier. In a DESADV it appears in the PCI segment and is scanned during receiving.</div></details>
+  <details><summary>How does CPS differ from HL?</summary><div class="ans">Both express nested packaging, but CPS is the EDIFACT consignment packing sequence while HL is the X12 hierarchical level. The concepts are parallel.</div></details>
 </div>
 
-<div class="related"><h2>Related guides</h2><a href="/guides/edifact-orders/">EDIFACT ORDERS &rarr;</a><a href="/guides/edi-810/">EDI 810 - Invoice &rarr;</a><a href="/guides/x12-vs-edifact/">X12 vs EDIFACT &rarr;</a><a href="/guides/edifact-unb-unh-envelope/">The UNB / UNH Envelope &rarr;</a></div>
+<div class="related"><h2>Related guides</h2><a href="/guides/edi-856/">EDI 856 - ASN &rarr;</a><a href="/guides/edifact-orders/">EDIFACT ORDERS &rarr;</a><a href="/guides/edifact-invoic/">EDIFACT INVOIC &rarr;</a><a href="/guides/x12-vs-edifact/">X12 vs EDIFACT &rarr;</a></div>
 </main>
 <footer>
   <div style="margin-bottom:10px"><a href="/">Home</a> · <a href="/guides/">Guides</a> · <a href="/about/">About</a> · <a href="/contact/">Contact</a> · <a href="/privacy/">Privacy</a> · <a href="/terms/">Terms</a></div>

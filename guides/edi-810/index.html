@@ -3,15 +3,31 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EDI 810 — Invoice | EdiPeek</title>
+<title>EDI 810 - Invoice | EdiPeek</title>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2945012312110955"
      crossorigin="anonymous"></script>
-<meta name="description" content="What an EDI 810 invoice is, how it links back to the purchase order, and what BIG, IT1, TDS and other segments mean.">
+<meta name="description" content="A detailed guide to the EDI 810 invoice: how it links to the purchase order and the three-way match, every key segment (BIG, N1, IT1, TDS, SAC, ITD), a worked example, and FAQs.">
 <link rel="canonical" href="https://edipeek.com/guides/edi-810/">
-<meta property="og:title" content="EDI 810 — Invoice">
-<meta property="og:description" content="What an EDI 810 invoice is, how it links back to the purchase order, and what BIG, IT1, TDS and other segments mean.">
+<meta property="og:title" content="EDI 810 - Invoice">
+<meta property="og:description" content="A detailed guide to the EDI 810 invoice: how it links to the purchase order and the three-way match, every key segment (BIG, N1, IT1, TDS, SAC, ITD), a worked example, and FAQs.">
 <meta property="og:type" content="article">
+<meta property="og:url" content="https://edipeek.com/guides/edi-810/">
+<meta property="og:site_name" content="EdiPeek">
+<meta name="robots" content="index, follow">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "EDI 810 - Invoice",
+  "description": "A detailed guide to the EDI 810 invoice: how it links to the purchase order and the three-way match, every key segment (BIG, N1, IT1, TDS, SAC, ITD), a worked example, and FAQs.",
+  "url": "https://edipeek.com/guides/edi-810/",
+  "mainEntityOfPage": {"@type": "WebPage", "@id": "https://edipeek.com/guides/edi-810/"},
+  "author": {"@type": "Organization", "name": "EdiPeek"},
+  "publisher": {"@type": "Organization", "name": "EdiPeek", "url": "https://edipeek.com/"},
+  "dateModified": "2026-06-01"
+}
+</script>
 <style>
   :root{--bg:#0d1117;--panel:#161b22;--panel-2:#1c2330;--border:#2a3340;--ink:#e6edf3;--ink-dim:#8b97a7;--accent:#58a6ff;--green:#3fb950;--seg:#f0883e;--mono:"JetBrains Mono","SF Mono",ui-monospace,Menlo,Consolas,monospace}
   *{box-sizing:border-box;margin:0;padding:0}
@@ -39,6 +55,10 @@
   code{background:var(--panel-2);border:1px solid var(--border);padding:1px 6px;border-radius:4px;color:var(--ink);font-size:13px}
   pre{background:#0a0e13;border:1px solid var(--border);border-radius:8px;padding:14px 16px;overflow-x:auto;margin:14px 0;font-size:12.5px;line-height:1.6;color:#c4cdd9}
   pre .seg{color:var(--seg);font-weight:700}
+  table.t{width:100%;border-collapse:collapse;margin:14px 0;font-size:13px}
+  table.t th{text-align:left;color:var(--ink-dim);font-size:11px;text-transform:uppercase;letter-spacing:1px;padding:7px 9px;border-bottom:1px solid var(--border)}
+  table.t td{padding:7px 9px;border-bottom:1px dotted #243042;color:#c4cdd9;vertical-align:top}
+  table.t td code{white-space:nowrap}
   .trybox{background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--green);border-radius:8px;padding:16px 18px;margin:26px 0}
   .trybox .tt{font-size:13px;color:var(--ink);margin-bottom:6px;font-weight:700}
   .trybox p{font-size:13px;margin-bottom:10px}
@@ -75,50 +95,73 @@
   <a class="navlink" href="/guides/">All guides</a>
 </header>
 <main>
-  <div class="crumb"><a href="/">Home</a> / <a href="/guides/">Guides</a> / EDI 810 — Invoice</div>
-  <h1>EDI 810: The Invoice, Explained</h1>
-  <div class="meta">EdiPeek · Updated June 2026 · 5 min read</div>
+  <div class="crumb"><a href="/">Home</a> / <a href="/guides/">Guides</a> / EDI 810 - Invoice</div>
+  <h1>EDI 810: The Invoice, Explained in Depth</h1>
+  <div class="meta">EdiPeek · Updated June 2026 · 7 min read</div>
 
-<p>The <strong>EDI 810</strong> is the <strong>Invoice</strong> — the supplier's electronic bill for goods or services. It is the EDI counterpart of a paper invoice, and it usually arrives after the goods have shipped.</p>
+<p>The <strong>EDI 810</strong> is the <strong>Invoice</strong> - the supplier's electronic bill for goods or services delivered. It is the EDI counterpart of a paper invoice, and it normally arrives after the goods have shipped, referencing the original purchase order. For accounts-payable teams, the 810 is the document that triggers payment.</p>
 
-<h2>How the 810 connects to the order</h2>
-<p>An 810 almost always references the original <a href="/guides/edi-850/">850 purchase order</a>. The buyer's accounts-payable system performs a "three-way match": the purchase order (850), the receipt of goods (often from the 856 ship notice), and this invoice (810). If all three agree, the invoice is paid automatically.</p>
+<h2>How the 810 fits the order cycle</h2>
+<p>An 810 almost always references an earlier <a href="/guides/edi-850/">850 purchase order</a> and frequently follows an <a href="/guides/edi-856/">856 advance ship notice</a>. The buyer's accounts-payable system performs what is called a <strong>three-way match</strong>:</p>
+<ol>
+  <li>The <strong>purchase order</strong> (850) - what was ordered.</li>
+  <li>The <strong>goods receipt</strong> - what actually arrived, often derived from the 856 ASN.</li>
+  <li>The <strong>invoice</strong> (810) - what is being billed.</li>
+</ol>
+<p>If all three agree on quantities and prices, the invoice can be approved and paid automatically, with no human intervention. If they disagree - a price mismatch, a short shipment, an extra charge - the invoice is flagged for review. This automation is a major reason EDI invoicing exists: it turns a manual matching chore into an exception-only process.</p>
 
-<h2>Key segments in an 810</h2>
-<h3>BIG — Beginning Segment for Invoice</h3>
-<p>Carries the invoice date and number, and references the PO. <code>BIG*20240225*INV-3391*20240115*PO-99831</code> = invoice INV-3391 dated 2024-02-25, against PO-99831.</p>
-<h3>N1 — Parties</h3>
-<p>Identifies the remit-to (<code>RI</code>), bill-to (<code>BT</code>), and other parties.</p>
-<h3>IT1 — Invoice Line Item</h3>
-<p>One per billed line. <code>IT1*1*100*EA*12.50**UP*012345678905</code> mirrors the PO1 from the original order: 100 each at $12.50.</p>
-<h3>TDS — Total Monetary Summary</h3>
-<p>The invoice total, in cents. <code>TDS*168750</code> means $1,687.50.</p>
-<h3>SAC — Allowances and charges</h3>
-<p>Optional discounts, freight, or other charges applied to the invoice.</p>
+<h2>The key segments of an 810</h2>
+<h3>BIG - Beginning Segment for Invoice</h3>
+<p>Carries the invoice date and number, and references the original PO. <code>BIG*20240225*INV-3391*20240115*PO-99831</code> means invoice INV-3391 dated 2024-02-25, against purchase order PO-99831 dated 2024-01-15. The invoice number and the referenced PO number are the two anchors that tie this document to the rest of the cycle.</p>
+<h3>N1 loop - Parties</h3>
+<p>Identifies the parties, such as remit-to (<code>RI</code>), bill-to (<code>BT</code>), and vendor. The remit-to tells the buyer where to send payment.</p>
+<h3>IT1 - Baseline Item Data (Invoice Line)</h3>
+<p>One per billed line, mirroring the PO1 from the order. <code>IT1*1*100*EA*12.50**UP*012345678905</code> reads: line 1, quantity invoiced 100, unit of measure EA, unit price 12.50, identified by UPC. AP systems compare these lines against the original PO1 lines.</p>
+<h3>TDS - Total Monetary Summary</h3>
+<p>The invoice total, usually expressed in cents with an implied decimal. <code>TDS*168750</code> means $1,687.50. This is the figure the buyer is expected to pay.</p>
+<h3>SAC - Service, Promotion, Allowance, or Charge</h3>
+<p>Optional segments for discounts, freight, handling, or other charges and allowances that adjust the total. A freight charge or an early-payment allowance appears here.</p>
+<h3>ITD - Terms of Sale</h3>
+<p>Payment terms, such as net 30 or 2% discount if paid within 10 days. These terms drive when and how much the buyer pays.</p>
 
-<div class="adslot">Ad slot — insert AdSense unit here</div>
+<div class="adslot">Ad slot - insert AdSense unit here</div>
 
-<h2>A complete mini example</h2>
+<h2>A complete worked example</h2>
 <pre><span class="seg">ST</span>*810*0001~
 <span class="seg">BIG</span>*20240225*INV-3391*20240115*PO-99831~
+<span class="seg">N1</span>*RI*ACME SUPPLY CO~
 <span class="seg">IT1</span>*1*100*EA*12.50**UP*012345678905~
-<span class="seg">TDS</span>*125000~
-<span class="seg">SE</span>*5*0001~</pre>
-<p>In plain English: the supplier is billing $1,250.00 for 100 units on invoice INV-3391, referencing purchase order PO-99831.</p>
+<span class="seg">IT1</span>*2*50*EA*8.75**UP*012345678912~
+<span class="seg">TDS</span>*168750~
+<span class="seg">ITD</span>*01*3*2**10**30~
+<span class="seg">SE</span>*8*0001~</pre>
+<p>In plain English: Acme Supply Co is billing the buyer on invoice INV-3391, referencing purchase order PO-99831. There are two lines: 100 units at $12.50 and 50 units at $8.75. The invoice total is $1,687.50, with terms of 2% discount if paid within 10 days, otherwise net 30.</p>
+
+<h2>Why amounts look strange</h2>
+<p>New readers are often puzzled that the total appears as <code>168750</code> rather than <code>1687.50</code>. Many monetary and quantity fields in X12 are transmitted without an explicit decimal point; the implied decimal position is defined in the trading-partner's implementation guide. So <code>168750</code> with two implied decimals is read as 1,687.50. Always confirm the decimal convention in the spec rather than guessing.</p>
+
+<h2>Common pitfalls when reading an 810</h2>
+<ul>
+  <li><strong>Mismatched PO reference.</strong> If the BIG references the wrong PO number, the three-way match fails and the invoice will be rejected. This is one of the most common EDI invoice errors.</li>
+  <li><strong>Charges not reflected in the total.</strong> SAC charges must be consistent with the TDS total, or the invoice will not reconcile.</li>
+  <li><strong>Unit-of-measure differences.</strong> If the invoice bills in cases but the order was in eaches, quantities will appear to disagree even when they are correct.</li>
+</ul>
 
 <div class="trybox">
   <div class="tt">Decode your own 810</div>
-  <p>Paste an invoice into the viewer to see every line and total explained, plus a one-line business summary. All in your browser.</p>
+  <p>Paste an invoice into the viewer to see every line and total explained, plus a one-line business summary of who is billing whom and for how much. All in your browser, nothing uploaded.</p>
   <a class="trybtn" href="/x12/">Open the X12 viewer</a>
 </div>
 
 <h2>Frequently asked questions</h2>
 <div class="faq">
   <details><summary>What is the EDIFACT equivalent of an 810?</summary><div class="ans">The INVOIC message. See our <a href="/guides/edifact-invoic/">EDIFACT INVOIC guide</a>.</div></details>
-  <details><summary>Why do amounts look like 168750 instead of 1687.50?</summary><div class="ans">Many monetary fields are expressed without a decimal point; the implied decimal is defined by the implementation guide. 168750 is read as 1,687.50.</div></details>
+  <details><summary>Why do amounts look like 168750 instead of 1687.50?</summary><div class="ans">Many monetary fields are sent without a decimal point; the implied decimal is defined by the implementation guide. 168750 is read as 1,687.50.</div></details>
+  <details><summary>What is a three-way match?</summary><div class="ans">The reconciliation of the purchase order, the goods receipt, and the invoice. When all three agree, the invoice is approved automatically.</div></details>
+  <details><summary>Does the 810 always reference a PO?</summary><div class="ans">In most retail and supply-chain flows, yes. Some non-PO invoices exist, but PO-based invoicing is the norm and is what enables automated matching.</div></details>
 </div>
 
-<div class="related"><h2>Related guides</h2><a href="/guides/edi-850/">EDI 850 — Purchase Order &rarr;</a><a href="/guides/edi-856/">EDI 856 — ASN &rarr;</a><a href="/guides/edifact-invoic/">EDIFACT INVOIC &rarr;</a></div>
+<div class="related"><h2>Related guides</h2><a href="/guides/edi-850/">EDI 850 - Purchase Order &rarr;</a><a href="/guides/edi-856/">EDI 856 - ASN &rarr;</a><a href="/guides/edi-820/">EDI 820 - Payment &rarr;</a><a href="/guides/edifact-invoic/">EDIFACT INVOIC &rarr;</a></div>
 </main>
 <footer>
   <div style="margin-bottom:10px"><a href="/">Home</a> · <a href="/guides/">Guides</a> · <a href="/about/">About</a> · <a href="/contact/">Contact</a> · <a href="/privacy/">Privacy</a> · <a href="/terms/">Terms</a></div>

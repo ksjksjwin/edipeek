@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EDI 820 - Payment / Remittance | EdiPeek</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2945012312110955"
+     crossorigin="anonymous"></script>
+<meta name="description" content="A guide to the EDI 820 payment order and remittance advice: how payers tell payees what a payment covers, key segments (BPR, TRN, N1, RMR), and FAQs.">
+<link rel="canonical" href="https://edipeek.com/guides/edi-820/">
+<meta property="og:title" content="EDI 820 - Payment / Remittance">
+<meta property="og:description" content="A guide to the EDI 820 payment order and remittance advice: how payers tell payees what a payment covers, key segments (BPR, TRN, N1, RMR), and FAQs.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://edipeek.com/guides/edi-820/">
+<meta property="og:site_name" content="EdiPeek">
+<meta name="robots" content="index, follow">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "EDI 820 - Payment / Remittance",
+  "description": "A guide to the EDI 820 payment order and remittance advice: how payers tell payees what a payment covers, key segments (BPR, TRN, N1, RMR), and FAQs.",
+  "url": "https://edipeek.com/guides/edi-820/",
+  "mainEntityOfPage": {"@type": "WebPage", "@id": "https://edipeek.com/guides/edi-820/"},
+  "author": {"@type": "Organization", "name": "EdiPeek"},
+  "publisher": {"@type": "Organization", "name": "EdiPeek", "url": "https://edipeek.com/"},
+  "dateModified": "2026-06-01"
+}
+</script>
+<style>
+  :root{--bg:#0d1117;--panel:#161b22;--panel-2:#1c2330;--border:#2a3340;--ink:#e6edf3;--ink-dim:#8b97a7;--accent:#58a6ff;--green:#3fb950;--seg:#f0883e;--mono:"JetBrains Mono","SF Mono",ui-monospace,Menlo,Consolas,monospace}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--ink);font-family:var(--mono);line-height:1.75;font-size:15px}
+  body{background-image:radial-gradient(circle at 15% -10%,rgba(63,185,80,.05),transparent 45%),radial-gradient(circle at 100% 0%,rgba(88,166,255,.05),transparent 40%);min-height:100vh}
+  a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+  header{border-bottom:1px solid var(--border);padding:18px 22px;display:flex;align-items:center;gap:12px}
+  .logo{font-weight:700;font-size:18px;letter-spacing:-.5px;display:flex;align-items:center;gap:9px;color:var(--ink)}
+  .logo .b{color:var(--accent)}
+  .logo-mark{color:var(--green);flex-shrink:0}
+  .spacer{flex:1}
+  .navlink{font-size:12px;color:var(--ink-dim);border:1px solid var(--border);padding:6px 12px;border-radius:6px}
+  .navlink:hover{border-color:var(--accent);color:var(--accent);text-decoration:none}
+  main{max-width:720px;margin:0 auto;padding:30px 22px 70px}
+  .crumb{font-size:12px;color:var(--ink-dim);margin-bottom:22px}
+  .crumb a{color:var(--ink-dim)}
+  h1{font-size:27px;letter-spacing:-.6px;margin-bottom:10px;line-height:1.25}
+  .meta{color:var(--ink-dim);font-size:12px;margin-bottom:28px}
+  h2{font-size:19px;margin:32px 0 10px;letter-spacing:-.3px}
+  h3{font-size:15px;margin:22px 0 6px;color:var(--accent)}
+  p,li{color:#c4cdd9;font-size:14.5px;margin-bottom:12px}
+  ul,ol{padding-left:22px;margin-bottom:12px}
+  li{margin-bottom:6px}
+  strong{color:var(--ink)}
+  code{background:var(--panel-2);border:1px solid var(--border);padding:1px 6px;border-radius:4px;color:var(--ink);font-size:13px}
+  pre{background:#0a0e13;border:1px solid var(--border);border-radius:8px;padding:14px 16px;overflow-x:auto;margin:14px 0;font-size:12.5px;line-height:1.6;color:#c4cdd9}
+  pre .seg{color:var(--seg);font-weight:700}
+  table.t{width:100%;border-collapse:collapse;margin:14px 0;font-size:13px}
+  table.t th{text-align:left;color:var(--ink-dim);font-size:11px;text-transform:uppercase;letter-spacing:1px;padding:7px 9px;border-bottom:1px solid var(--border)}
+  table.t td{padding:7px 9px;border-bottom:1px dotted #243042;color:#c4cdd9;vertical-align:top}
+  table.t td code{white-space:nowrap}
+  .trybox{background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--green);border-radius:8px;padding:16px 18px;margin:26px 0}
+  .trybox .tt{font-size:13px;color:var(--ink);margin-bottom:6px;font-weight:700}
+  .trybox p{font-size:13px;margin-bottom:10px}
+  .trybtn{display:inline-block;background:var(--green);color:#07210e;font-weight:700;font-size:13px;padding:8px 16px;border-radius:7px}
+  .trybtn:hover{filter:brightness(1.1);text-decoration:none}
+  .trybtn.edi{background:var(--accent);color:#06223f}
+  .adslot{margin:28px 0;min-height:90px;border:1px dashed var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--ink-dim);font-size:11px;background:repeating-linear-gradient(45deg,transparent,transparent 10px,rgba(255,255,255,.012) 10px,rgba(255,255,255,.012) 20px)}
+  .related{margin-top:40px;border-top:1px solid var(--border);padding-top:22px}
+  .related h2{font-size:14px;text-transform:uppercase;letter-spacing:1.5px;color:var(--ink-dim);margin-top:0}
+  .related a{display:block;padding:5px 0;font-size:14px}
+  .faq details{border:1px solid var(--border);border-radius:8px;margin-bottom:8px;background:var(--panel);overflow:hidden}
+  .faq summary{padding:13px 15px;cursor:pointer;color:var(--ink);font-size:14px;list-style:none}
+  .faq summary::-webkit-details-marker{display:none}
+  .faq summary:before{content:"\25B8 ";color:var(--accent)}
+  .faq details[open] summary:before{content:"\25BE "}
+  .faq .ans{padding:0 15px 14px;color:var(--ink-dim);font-size:13px}
+  footer{border-top:1px solid var(--border);padding:24px 22px;text-align:center;color:var(--ink-dim);font-size:12px;margin-top:40px}
+  footer a{margin:0 7px}
+</style>
+</head>
+<body>
+<header>
+  <a class="logo" href="/" style="text-decoration:none">
+    <svg class="logo-mark" viewBox="0 0 28 28" width="24" height="24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/>
+      <line x1="17.6" y1="17.6" x2="25" y2="25" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+      <line x1="8" y1="10" x2="16" y2="10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.9"/>
+      <line x1="8" y1="13" x2="14" y2="13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+      <line x1="8" y1="16" x2="15" y2="16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
+    </svg>
+    <span>EDI<span class="b">PEEK</span></span>
+  </a>
+  <div class="spacer"></div>
+  <a class="navlink" href="/guides/">All guides</a>
+</header>
+<main>
+  <div class="crumb"><a href="/">Home</a> / <a href="/guides/">Guides</a> / EDI 820 - Payment / Remittance</div>
+  <h1>EDI 820: Payment Order and Remittance Advice, Explained</h1>
+  <div class="meta">EdiPeek · Updated June 2026 · 6 min read</div>
+
+<p>The <strong>EDI 820</strong> is the <strong>Payment Order / Remittance Advice</strong>. It is how a payer (usually the buyer) tells a payee (usually the supplier) that a payment has been made and, crucially, which invoices that payment covers. It is the document that lets the receiver apply incoming cash correctly in their accounts-receivable system.</p>
+
+<h2>Two jobs in one document</h2>
+<p>The 820 can play two related roles. It can be a <strong>payment order</strong>, instructing a bank to move money, often through the ACH network. And it can be a <strong>remittance advice</strong>, explaining the detail behind a payment so the payee knows exactly what is being settled. Many 820s function primarily as remittance advice, traveling alongside a separate bank payment.</p>
+<p>This matters because a payment without remittance detail creates work: the payee receives a lump sum and has to figure out which of dozens of open invoices it pays. The 820 removes that guesswork by itemizing the payment.</p>
+
+<h2>The key segments of an 820</h2>
+<h3>BPR - Beginning Segment for Payment Order/Remittance Advice</h3>
+<p>The financial header. It carries the total payment amount, whether it is a credit or debit, the payment method, and banking details. <code>BPR*C*1687.50*C*ACH</code> indicates a credit of 1,687.50 paid via ACH.</p>
+<h3>TRN - Trace</h3>
+<p>A trace or reassociation number that links the remittance advice to the actual payment, so the payee can match the money to the explanation. This is essential when payment and remittance travel separately.</p>
+<h3>N1 loop - Parties</h3>
+<p>Identifies the payer and payee, and often their financial institutions.</p>
+<h3>RMR - Remittance Advice Accounts Receivable Open Item Reference</h3>
+<p>The heart of the remittance detail. Each RMR ties part of the payment to a specific invoice. <code>RMR*IV*INV-3391**1687.50</code> means this payment applies 1,687.50 to invoice INV-3391. Adjustments such as deductions or short-pays appear alongside.</p>
+
+<div class="adslot">Ad slot - insert AdSense unit here</div>
+
+<h2>A simplified worked example</h2>
+<pre><span class="seg">ST</span>*820*0001~
+<span class="seg">BPR</span>*C*1687.50*C*ACH~
+<span class="seg">TRN</span>*1*0012345678~
+<span class="seg">N1</span>*PR*BIG RETAILER INC~
+<span class="seg">N1</span>*PE*ACME SUPPLY CO~
+<span class="seg">RMR</span>*IV*INV-3391**1687.50~
+<span class="seg">SE</span>*6*0001~</pre>
+<p>In plain English: Big Retailer Inc paid Acme Supply Co 1,687.50 by ACH, and the payment fully settles invoice INV-3391, traceable by reference 0012345678.</p>
+
+<h2>Common pitfalls when reading an 820</h2>
+<ul>
+  <li><strong>Confusing payer and payee.</strong> The N1 qualifiers PR (payer) and PE (payee) tell you the direction of the money.</li>
+  <li><strong>Ignoring adjustments.</strong> An RMR may show a payment less than the invoice amount, with adjustment reason codes explaining the deduction. Missing these leads to misapplied cash.</li>
+  <li><strong>Assuming the 820 moves money.</strong> Sometimes it only advises; the actual funds move through a separate banking channel matched by the TRN.</li>
+</ul>
+
+<div class="trybox">
+  <div class="tt">Decode your own 820</div>
+  <p>Paste a remittance into the viewer to see the payment amount, parties, and which invoices it covers, all in plain English. Nothing leaves your browser.</p>
+  <a class="trybtn" href="/x12/">Open the X12 viewer</a>
+</div>
+
+<h2>Frequently asked questions</h2>
+<div class="faq">
+  <details><summary>What is the EDIFACT equivalent of an 820?</summary><div class="ans">The REMADV (remittance advice) message, and for bank payment orders, PAYMUL.</div></details>
+  <details><summary>Does the 820 actually transfer funds?</summary><div class="ans">It can carry payment instructions, but in many flows it is a remittance advice that accompanies a separate ACH or wire transfer, linked by the TRN trace number.</div></details>
+  <details><summary>How are short-pays shown?</summary><div class="ans">Through adjustment information in the remittance detail, with reason codes explaining why the paid amount differs from the invoiced amount.</div></details>
+</div>
+
+<div class="related"><h2>Related guides</h2><a href="/guides/edi-810/">EDI 810 - Invoice &rarr;</a><a href="/guides/edi-850/">EDI 850 - Purchase Order &rarr;</a><a href="/guides/what-is-edi/">What is EDI? &rarr;</a><a href="/guides/x12-vs-edifact/">X12 vs EDIFACT &rarr;</a></div>
+</main>
+<footer>
+  <div style="margin-bottom:10px"><a href="/">Home</a> · <a href="/guides/">Guides</a> · <a href="/about/">About</a> · <a href="/contact/">Contact</a> · <a href="/privacy/">Privacy</a> · <a href="/terms/">Terms</a></div>
+  EdiPeek — free in-browser EDI viewers. Files are processed locally and never uploaded.
+</footer>
+</body>
+</html>

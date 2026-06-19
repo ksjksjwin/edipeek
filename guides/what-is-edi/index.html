@@ -7,11 +7,27 @@
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2945012312110955"
      crossorigin="anonymous"></script>
-<meta name="description" content="What EDI (Electronic Data Interchange) is, why businesses use it, and how an EDI document is structured, explained in plain English.">
+<meta name="description" content="A complete introduction to EDI (Electronic Data Interchange): what it is, why businesses use it, how an EDI document is structured, the main standards, and how data moves between trading partners.">
 <link rel="canonical" href="https://edipeek.com/guides/what-is-edi/">
 <meta property="og:title" content="What is EDI?">
-<meta property="og:description" content="What EDI (Electronic Data Interchange) is, why businesses use it, and how an EDI document is structured, explained in plain English.">
+<meta property="og:description" content="A complete introduction to EDI (Electronic Data Interchange): what it is, why businesses use it, how an EDI document is structured, the main standards, and how data moves between trading partners.">
 <meta property="og:type" content="article">
+<meta property="og:url" content="https://edipeek.com/guides/what-is-edi/">
+<meta property="og:site_name" content="EdiPeek">
+<meta name="robots" content="index, follow">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "What is EDI?",
+  "description": "A complete introduction to EDI (Electronic Data Interchange): what it is, why businesses use it, how an EDI document is structured, the main standards, and how data moves between trading partners.",
+  "url": "https://edipeek.com/guides/what-is-edi/",
+  "mainEntityOfPage": {"@type": "WebPage", "@id": "https://edipeek.com/guides/what-is-edi/"},
+  "author": {"@type": "Organization", "name": "EdiPeek"},
+  "publisher": {"@type": "Organization", "name": "EdiPeek", "url": "https://edipeek.com/"},
+  "dateModified": "2026-06-01"
+}
+</script>
 <style>
   :root{--bg:#0d1117;--panel:#161b22;--panel-2:#1c2330;--border:#2a3340;--ink:#e6edf3;--ink-dim:#8b97a7;--accent:#58a6ff;--green:#3fb950;--seg:#f0883e;--mono:"JetBrains Mono","SF Mono",ui-monospace,Menlo,Consolas,monospace}
   *{box-sizing:border-box;margin:0;padding:0}
@@ -39,6 +55,10 @@
   code{background:var(--panel-2);border:1px solid var(--border);padding:1px 6px;border-radius:4px;color:var(--ink);font-size:13px}
   pre{background:#0a0e13;border:1px solid var(--border);border-radius:8px;padding:14px 16px;overflow-x:auto;margin:14px 0;font-size:12.5px;line-height:1.6;color:#c4cdd9}
   pre .seg{color:var(--seg);font-weight:700}
+  table.t{width:100%;border-collapse:collapse;margin:14px 0;font-size:13px}
+  table.t th{text-align:left;color:var(--ink-dim);font-size:11px;text-transform:uppercase;letter-spacing:1px;padding:7px 9px;border-bottom:1px solid var(--border)}
+  table.t td{padding:7px 9px;border-bottom:1px dotted #243042;color:#c4cdd9;vertical-align:top}
+  table.t td code{white-space:nowrap}
   .trybox{background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--green);border-radius:8px;padding:16px 18px;margin:26px 0}
   .trybox .tt{font-size:13px;color:var(--ink);margin-bottom:6px;font-weight:700}
   .trybox p{font-size:13px;margin-bottom:10px}
@@ -76,61 +96,96 @@
 </header>
 <main>
   <div class="crumb"><a href="/">Home</a> / <a href="/guides/">Guides</a> / What is EDI?</div>
-  <h1>What is EDI? A Plain-English Introduction</h1>
-  <div class="meta">EdiPeek · Updated June 2026 · 6 min read</div>
+  <h1>What is EDI? A Complete Plain-English Introduction</h1>
+  <div class="meta">EdiPeek · Updated June 2026 · 8 min read</div>
 
-<p><strong>EDI</strong> stands for <strong>Electronic Data Interchange</strong>. It is the standardized electronic format that businesses use to exchange common documents — purchase orders, invoices, shipping notices, payments — directly between their computer systems, without paper, email, or someone re-typing the data by hand.</p>
+<p><strong>EDI</strong> stands for <strong>Electronic Data Interchange</strong>. It is the standardized electronic format that businesses use to exchange routine documents - purchase orders, invoices, shipping notices, payments, and more - directly between their computer systems, without paper, email attachments, or anyone re-typing the data by hand.</p>
 
-<p>If a retailer wants to order 10,000 units from a supplier, it does not send a PDF that a human reads and re-keys. It sends an EDI document that the supplier's system reads automatically. That is the whole point: machines talking to machines in a format both sides agreed on in advance.</p>
+<p>That last point is the whole reason EDI exists. When a retailer wants to order 10,000 units from a supplier, it does not send a PDF that a human on the other side opens, reads, and re-keys into an order-entry screen. Instead it transmits a structured EDI document that the supplier's system ingests automatically. Machines talk to machines, in a format both sides agreed on in advance.</p>
+
+<h2>A short history, and why it still matters</h2>
+<p>EDI is not new. Its roots go back to the 1960s and 1970s, when industries like transportation and retail began standardizing electronic documents to replace telexes and paper forms. The standards that dominate today - ANSI X12 in North America and UN/EDIFACT internationally - were formalized in the 1980s and have been refined ever since.</p>
+<p>Despite being decades old, EDI is very much alive in 2026. Newer technologies like REST APIs and webhooks handle a growing share of real-time integrations, but EDI remains the backbone of business-to-business document exchange in retail, manufacturing, automotive, logistics, and healthcare. The reason is simple: enormous amounts of existing infrastructure, trading-partner agreements, and compliance requirements are built on it. A large retailer cannot simply tell its thousands of suppliers to abandon EDI overnight.</p>
 
 <h2>Why businesses use EDI</h2>
+<p>The benefits cluster around four themes:</p>
 <ul>
-  <li><strong>Speed.</strong> An order that took days by mail or fax is transmitted in seconds.</li>
-  <li><strong>Accuracy.</strong> No manual re-keying means far fewer errors. A single mistyped quantity can be expensive.</li>
-  <li><strong>Cost.</strong> Less paper, less labor, fewer disputes.</li>
-  <li><strong>Scale.</strong> A large retailer trading with thousands of suppliers cannot do it by hand. EDI makes high volume possible.</li>
+  <li><strong>Speed.</strong> A purchase order that once took days by mail or fax is transmitted and acknowledged in seconds. Order-to-cash and procure-to-pay cycles shrink dramatically.</li>
+  <li><strong>Accuracy.</strong> Eliminating manual re-keying removes a whole class of errors. A single mistyped quantity or price can trigger an incorrect shipment, a disputed invoice, or a chargeback. EDI removes the human keyboard from the loop.</li>
+  <li><strong>Cost.</strong> Less paper, less postage, less manual labor, and fewer costly disputes. At scale, the savings are substantial.</li>
+  <li><strong>Scalability.</strong> A retailer trading with thousands of suppliers, or a manufacturer with hundreds of parts vendors, simply cannot operate by hand. EDI makes high transaction volume possible.</li>
 </ul>
-<p>For these reasons, big buyers like major retailers, automakers, and healthcare payers often <em>require</em> their partners to use EDI as a condition of doing business.</p>
+<p>Because of these advantages, large buyers - major retailers, automakers, government agencies, and healthcare payers - frequently <em>require</em> their partners to support EDI as a condition of doing business. For many small and mid-sized suppliers, "being EDI capable" is not optional; it is the price of entry.</p>
 
-<div class="adslot">Ad slot — insert AdSense unit here</div>
+<div class="adslot">Ad slot - insert AdSense unit here</div>
 
 <h2>What an EDI document actually looks like</h2>
-<p>A raw EDI file is dense and machine-oriented. Here is a tiny fragment of an X12 purchase order:</p>
+<p>A raw EDI file is dense and unfriendly to human eyes. Here is a small fragment of an ANSI X12 purchase order:</p>
 <pre><span class="seg">ST</span>*850*0001~
 <span class="seg">BEG</span>*00*SA*PO-99831**20240115~
 <span class="seg">PO1</span>*1*100*EA*12.50**UP*012345678905~</pre>
-<p>It looks cryptic, but the structure is simple once you know the pattern:</p>
+<p>It looks like noise, but the structure is consistent and learnable. Three concepts unlock almost everything:</p>
 <ul>
-  <li>The file is made of <strong>segments</strong>, each starting with a 2–3 letter tag (<code>ST</code>, <code>BEG</code>, <code>PO1</code>) and ending with a terminator (here <code>~</code>).</li>
-  <li>Within a segment, individual values are <strong>elements</strong>, separated here by <code>*</code>.</li>
-  <li>So <code>PO1*1*100*EA*12.50</code> means: line 1, quantity 100, unit of measure EA (each), price 12.50.</li>
+  <li><strong>Segments.</strong> Each line is a segment, beginning with a two- or three-letter tag (<code>ST</code>, <code>BEG</code>, <code>PO1</code>) and ending with a segment terminator (here the tilde <code>~</code>). A segment is roughly like a row of related data.</li>
+  <li><strong>Elements.</strong> Within a segment, individual values are elements, separated by a delimiter (here the asterisk <code>*</code>). So in <code>PO1*1*100*EA*12.50</code>, the elements are 1, 100, EA, and 12.50.</li>
+  <li><strong>Meaning by position.</strong> Each element's meaning is defined by its position. In a PO1 segment, the first element is the line number, the second is the quantity, the third is the unit of measure, and the fourth is the unit price. So that line reads: line 1, quantity 100, unit of measure EA (each), price 12.50.</li>
 </ul>
+<p>Once you internalize "segments contain positional elements separated by delimiters," reading EDI becomes a matter of knowing what each segment tag means - which is exactly what a viewer like EdiPeek does for you.</p>
+
+<h2>Envelopes: how documents are wrapped</h2>
+<p>EDI documents do not float around loose. They are wrapped in envelopes that handle routing and control. In X12, the structure nests like this:</p>
+<ul>
+  <li><strong>ISA / IEA</strong> - the interchange envelope (the outermost wrapper, identifying sender and receiver)</li>
+  <li><strong>GS / GE</strong> - the functional group (groups related documents of the same type)</li>
+  <li><strong>ST / SE</strong> - the transaction set (one actual business document, such as one purchase order)</li>
+</ul>
+<p>The <code>ST</code> segment is the one that tells you which document type you are looking at. <code>ST*850</code> means a purchase order; <code>ST*810</code> means an invoice. We cover this envelope structure in depth in our guide on <a href="/guides/edi-envelope-isa-gs-st/">the ISA, GS, and ST envelope</a>.</p>
 
 <h2>The two big standards</h2>
-<p>There is no single worldwide EDI format. Two dominate:</p>
+<p>There is no single worldwide EDI format. Two dominate, and which you encounter depends largely on geography:</p>
 <ul>
-  <li><strong>ANSI X12</strong> — used mainly in North America. Documents are numbered (850 = purchase order, 810 = invoice, 856 = ship notice).</li>
-  <li><strong>UN/EDIFACT</strong> — the international standard used across Europe and most of the world. Documents have names (ORDERS, INVOIC, DESADV).</li>
+  <li><strong>ANSI X12</strong> - used mainly in North America. Document types are numbered: 850 (purchase order), 810 (invoice), 856 (advance ship notice), 837 (healthcare claim), and hundreds more.</li>
+  <li><strong>UN/EDIFACT</strong> - the international standard used across Europe, Asia, and most global trade. Document types have names: ORDERS, INVOIC, DESADV, IFTMIN.</li>
 </ul>
-<p>They carry the same business meaning in different syntax. We compare them in detail in <a href="/guides/x12-vs-edifact/">X12 vs EDIFACT</a>.</p>
+<p>They express the same business documents in different syntax. An X12 850 and an EDIFACT ORDERS are both purchase orders. We compare them side by side in <a href="/guides/x12-vs-edifact/">X12 vs EDIFACT</a>.</p>
 
 <h2>How EDI documents travel</h2>
-<p>The document itself is separate from how it is sent. Historically EDI moved over private value-added networks (VANs); today it also travels over AS2, SFTP, and APIs. As a reader of EDI, you mostly care about the document content, not the transport.</p>
+<p>The document content is separate from how it is transmitted. Over the years, EDI has moved across several transport methods:</p>
+<ul>
+  <li><strong>VANs (Value-Added Networks)</strong> - private third-party networks that act like a managed post office for EDI, historically the dominant method.</li>
+  <li><strong>AS2</strong> - a secure internet-based protocol that sends EDI directly between partners with encryption and signed receipts (MDNs).</li>
+  <li><strong>SFTP</strong> - secure file transfer, common for batch exchanges.</li>
+  <li><strong>APIs</strong> - increasingly used to wrap or replace traditional EDI flows.</li>
+</ul>
+<p>As someone reading or troubleshooting EDI, you usually care about the document content rather than the transport. The file you receive is the same regardless of how it arrived.</p>
+
+<h2>Common transaction types you will meet</h2>
+<p>A handful of document types account for most day-to-day EDI traffic:</p>
+<table class="t"><thead><tr><th>X12</th><th>EDIFACT</th><th>Purpose</th></tr></thead><tbody>
+<tr><td><code>850</code></td><td>ORDERS</td><td>Purchase order</td></tr>
+<tr><td><code>855</code></td><td>ORDRSP</td><td>Order acknowledgment</td></tr>
+<tr><td><code>856</code></td><td>DESADV</td><td>Advance ship notice</td></tr>
+<tr><td><code>810</code></td><td>INVOIC</td><td>Invoice</td></tr>
+<tr><td><code>820</code></td><td>REMADV</td><td>Payment / remittance</td></tr>
+<tr><td><code>997</code></td><td>CONTRL</td><td>Acknowledgment of receipt</td></tr>
+</tbody></table>
 
 <div class="trybox">
   <div class="tt">Try it yourself</div>
-  <p>Paste a real EDI file into our free viewer and see every segment explained in plain English. Nothing is uploaded — it all runs in your browser.</p>
-  <a class="trybtn" href="/x12/">Open the X12 viewer</a>
+  <p>Paste a real EDI file into our free viewer and see every segment explained in plain English, with a business summary of what the document means. Nothing is uploaded - it all runs in your browser.</p>
+  <a class="trybtn" href="/x12/">Open the X12 viewer</a> &nbsp; <a class="trybtn edi" href="/edifact/">Open the EDIFACT viewer</a>
 </div>
 
 <h2>Frequently asked questions</h2>
 <div class="faq">
-  <details><summary>Is EDI still used in 2026?</summary><div class="ans">Yes, heavily. Despite newer API-based integrations, EDI remains the backbone of retail, manufacturing, logistics, and healthcare data exchange because so much existing infrastructure depends on it.</div></details>
-  <details><summary>Do I need special software to read EDI?</summary><div class="ans">To read and understand a file, no — a viewer like EdiPeek parses it in your browser. To send and receive EDI in production, businesses use EDI software or a service provider.</div></details>
-  <details><summary>What is the difference between a segment and an element?</summary><div class="ans">A segment is one line of the document (like a row), identified by a tag such as PO1. An element is a single value inside that segment, separated by a delimiter.</div></details>
+  <details><summary>Is EDI still used in 2026?</summary><div class="ans">Yes, heavily. Despite the growth of API-based integration, EDI remains the backbone of retail, manufacturing, logistics, and healthcare data exchange. Too much infrastructure and too many trading-partner agreements depend on it for it to disappear.</div></details>
+  <details><summary>Do I need special software to read EDI?</summary><div class="ans">To simply read and understand a file, no. A browser-based viewer like EdiPeek parses it instantly. To send and receive EDI in production, businesses use dedicated EDI software or a managed service provider.</div></details>
+  <details><summary>What is the difference between a segment and an element?</summary><div class="ans">A segment is one line of the document, identified by a tag such as PO1. An element is a single value inside that segment, separated from its neighbors by a delimiter. Elements get their meaning from their position within the segment.</div></details>
+  <details><summary>Is EDI the same as an API?</summary><div class="ans">No, though they solve overlapping problems. EDI is a document standard with decades of established formats and trading-partner conventions, often batch-oriented. APIs are typically real-time, request-response interfaces. Many modern integrations use both, sometimes translating between them.</div></details>
+  <details><summary>What does "EDI capable" mean for a supplier?</summary><div class="ans">It means the supplier can receive and send the EDI documents its trading partner requires, in the correct format, over an agreed transport, meeting that partner's specific implementation guidelines.</div></details>
 </div>
 
-<div class="related"><h2>Related guides</h2><a href="/guides/x12-vs-edifact/">X12 vs EDIFACT &rarr;</a><a href="/guides/edi-850/">EDI 850 — Purchase Order &rarr;</a><a href="/guides/edi-810/">EDI 810 — Invoice &rarr;</a></div>
+<div class="related"><h2>Related guides</h2><a href="/guides/x12-vs-edifact/">X12 vs EDIFACT &rarr;</a><a href="/guides/edi-850/">EDI 850 - Purchase Order &rarr;</a><a href="/guides/edi-envelope-isa-gs-st/">The ISA / GS / ST Envelope &rarr;</a><a href="/guides/edi-delimiters/">Understanding EDI Delimiters &rarr;</a></div>
 </main>
 <footer>
   <div style="margin-bottom:10px"><a href="/">Home</a> · <a href="/guides/">Guides</a> · <a href="/about/">About</a> · <a href="/contact/">Contact</a> · <a href="/privacy/">Privacy</a> · <a href="/terms/">Terms</a></div>

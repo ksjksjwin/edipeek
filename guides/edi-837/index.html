@@ -3,15 +3,31 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EDI 837 — Health Care Claim | EdiPeek</title>
+<title>EDI 837 - Health Care Claim | EdiPeek</title>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2945012312110955"
      crossorigin="anonymous"></script>
-<meta name="description" content="What an EDI 837 health care claim is, how providers bill insurers, and how the 837 connects to the 835 remittance. Key NM1, CLM, and SV1 segments.">
+<meta name="description" content="A detailed guide to the EDI 837 health care claim: the 837/835 cycle, professional vs institutional vs dental variants, key segments (BHT, NM1, CLM, SV1, DTP), PHI privacy, and FAQs.">
 <link rel="canonical" href="https://edipeek.com/guides/edi-837/">
-<meta property="og:title" content="EDI 837 — Health Care Claim">
-<meta property="og:description" content="What an EDI 837 health care claim is, how providers bill insurers, and how the 837 connects to the 835 remittance. Key NM1, CLM, and SV1 segments.">
+<meta property="og:title" content="EDI 837 - Health Care Claim">
+<meta property="og:description" content="A detailed guide to the EDI 837 health care claim: the 837/835 cycle, professional vs institutional vs dental variants, key segments (BHT, NM1, CLM, SV1, DTP), PHI privacy, and FAQs.">
 <meta property="og:type" content="article">
+<meta property="og:url" content="https://edipeek.com/guides/edi-837/">
+<meta property="og:site_name" content="EdiPeek">
+<meta name="robots" content="index, follow">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "EDI 837 - Health Care Claim",
+  "description": "A detailed guide to the EDI 837 health care claim: the 837/835 cycle, professional vs institutional vs dental variants, key segments (BHT, NM1, CLM, SV1, DTP), PHI privacy, and FAQs.",
+  "url": "https://edipeek.com/guides/edi-837/",
+  "mainEntityOfPage": {"@type": "WebPage", "@id": "https://edipeek.com/guides/edi-837/"},
+  "author": {"@type": "Organization", "name": "EdiPeek"},
+  "publisher": {"@type": "Organization", "name": "EdiPeek", "url": "https://edipeek.com/"},
+  "dateModified": "2026-06-01"
+}
+</script>
 <style>
   :root{--bg:#0d1117;--panel:#161b22;--panel-2:#1c2330;--border:#2a3340;--ink:#e6edf3;--ink-dim:#8b97a7;--accent:#58a6ff;--green:#3fb950;--seg:#f0883e;--mono:"JetBrains Mono","SF Mono",ui-monospace,Menlo,Consolas,monospace}
   *{box-sizing:border-box;margin:0;padding:0}
@@ -39,6 +55,10 @@
   code{background:var(--panel-2);border:1px solid var(--border);padding:1px 6px;border-radius:4px;color:var(--ink);font-size:13px}
   pre{background:#0a0e13;border:1px solid var(--border);border-radius:8px;padding:14px 16px;overflow-x:auto;margin:14px 0;font-size:12.5px;line-height:1.6;color:#c4cdd9}
   pre .seg{color:var(--seg);font-weight:700}
+  table.t{width:100%;border-collapse:collapse;margin:14px 0;font-size:13px}
+  table.t th{text-align:left;color:var(--ink-dim);font-size:11px;text-transform:uppercase;letter-spacing:1px;padding:7px 9px;border-bottom:1px solid var(--border)}
+  table.t td{padding:7px 9px;border-bottom:1px dotted #243042;color:#c4cdd9;vertical-align:top}
+  table.t td code{white-space:nowrap}
   .trybox{background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--green);border-radius:8px;padding:16px 18px;margin:26px 0}
   .trybox .tt{font-size:13px;color:var(--ink);margin-bottom:6px;font-weight:700}
   .trybox p{font-size:13px;margin-bottom:10px}
@@ -75,50 +95,79 @@
   <a class="navlink" href="/guides/">All guides</a>
 </header>
 <main>
-  <div class="crumb"><a href="/">Home</a> / <a href="/guides/">Guides</a> / EDI 837 — Health Care Claim</div>
-  <h1>EDI 837: The Health Care Claim, Explained</h1>
-  <div class="meta">EdiPeek · Updated June 2026 · 6 min read</div>
+  <div class="crumb"><a href="/">Home</a> / <a href="/guides/">Guides</a> / EDI 837 - Health Care Claim</div>
+  <h1>EDI 837: The Health Care Claim, Explained in Depth</h1>
+  <div class="meta">EdiPeek · Updated June 2026 · 8 min read</div>
 
-<p>The <strong>EDI 837</strong> is the <strong>Health Care Claim</strong>. It is how a medical provider — a clinic, hospital, or physician — bills an insurance payer for services delivered to a patient. It is one of the core HIPAA-mandated EDI transactions in U.S. healthcare.</p>
+<p>The <strong>EDI 837</strong> is the <strong>Health Care Claim</strong>. It is how a medical provider - a clinic, hospital, physician, or dentist - bills an insurance payer for services delivered to a patient. In the United States, the 837 is one of the core transactions mandated by HIPAA for electronic healthcare administration, which means almost all electronic medical claims flow through it.</p>
 
-<h2>The 837 / 835 cycle</h2>
-<p>The 837 does not travel alone. The payer responds with an <strong>835</strong> (Health Care Claim Payment/Remittance Advice), which explains how each claim was adjudicated — paid, denied, or applied to patient responsibility. Provider billing systems match the 835 back to the original 837.</p>
+<h2>The 837 and 835 cycle</h2>
+<p>The 837 does not travel alone. After a provider submits an 837 claim, the payer responds with an <strong>835</strong> (Health Care Claim Payment / Remittance Advice), which explains how each claim was adjudicated: paid in full, paid in part, denied, or applied to patient responsibility such as a deductible or copay. The provider's billing system then matches the 835 back to the original 837 to reconcile what was billed against what was paid. This 837-out, 835-back loop is the heartbeat of medical revenue-cycle management.</p>
 
-<h2>Three flavors of 837</h2>
+<h2>Three variants of the 837</h2>
+<p>The 837 comes in three flavors, distinguished by the type of provider and care:</p>
 <ul>
-  <li><strong>837P</strong> — Professional (physician/clinic claims)</li>
-  <li><strong>837I</strong> — Institutional (hospital claims)</li>
-  <li><strong>837D</strong> — Dental</li>
+  <li><strong>837P - Professional.</strong> Claims from physicians, clinics, and individual practitioners. The most common variant.</li>
+  <li><strong>837I - Institutional.</strong> Claims from hospitals and facilities, with additional detail about admissions, revenue codes, and facility charges.</li>
+  <li><strong>837D - Dental.</strong> Dental claims, with tooth and oral-cavity detail.</li>
 </ul>
+<p>All three share the same overall structure but differ in some segments and code sets. A given file is one of these variants, identified by the implementation guide version in the message.</p>
 
-<h2>Key segments</h2>
-<h3>BHT — Beginning of Hierarchical Transaction</h3>
-<p>Opens the claim transaction with a reference number, date, and purpose.</p>
-<h3>NM1 — Names</h3>
-<p>Unlike retail EDI (which uses N1), healthcare uses <strong>NM1</strong>. The entity code says who: <code>41</code> submitter, <code>85</code> billing provider, <code>PR</code> payer, <code>IL</code> insured/subscriber, <code>QC</code> patient. A person's name is split into last/first; an organization's name sits in one field.</p>
-<h3>CLM — Claim Information</h3>
-<p>The claim itself: the claim ID and total charge amount. <code>CLM*PATIENT-A*450.00</code>.</p>
-<h3>SV1 — Professional Service Line</h3>
-<p>Each billed service, with a procedure code and charge. <code>SV1*HC:99213*125.00*UN*1</code> = CPT 99213, $125.00, 1 unit.</p>
+<h2>The key segments of an 837</h2>
+<h3>BHT - Beginning of Hierarchical Transaction</h3>
+<p>Opens the claim transaction with a structure code, a reference identifier, a date and time, and a purpose. It signals that what follows is organized into hierarchical loops, much like the 856 ASN.</p>
+<h3>NM1 - Individual or Organizational Name</h3>
+<p>This is the segment that surprises people coming from retail EDI. Healthcare does not use N1; it uses <strong>NM1</strong>. The entity identifier code in the first element says who the party is: <code>41</code> submitter, <code>40</code> receiver, <code>85</code> billing provider, <code>87</code> pay-to provider, <code>82</code> rendering provider, <code>IL</code> insured or subscriber, <code>QC</code> patient, <code>PR</code> payer. A second element distinguishes a person (1) from an organization (2). For a person, the name is split into last name, first name, and middle name; for an organization, the name sits in a single field. NM1 segments also carry standardized identifiers like the NPI (National Provider Identifier) and member ID.</p>
+<h3>CLM - Claim Information</h3>
+<p>The claim itself: a claim submitter identifier and the total claim charge amount, plus facility and signature indicators. <code>CLM*PATIENT-A*450.00</code> indicates a claim identified as PATIENT-A with total charges of $450.00.</p>
+<h3>SV1 - Professional Service</h3>
+<p>Each billed service line, with a procedure code and charge. <code>SV1*HC:99213*125.00*UN*1</code> means CPT/HCPCS procedure 99213, charged at $125.00, one unit. The 837I institutional variant uses SV2 with revenue codes instead.</p>
+<h3>DTP - Date or Time Period</h3>
+<p>Carries clinically important dates such as the date of service, admission, or discharge.</p>
+<h3>HI - Health Care Diagnosis Codes</h3>
+<p>The diagnosis codes (ICD-10) that justify the services billed. Payers use these to determine medical necessity.</p>
 
-<div class="adslot">Ad slot — insert AdSense unit here</div>
+<div class="adslot">Ad slot - insert AdSense unit here</div>
 
-<h2>A note on privacy</h2>
-<p>An 837 contains protected health information (PHI) — patient names, member IDs, diagnoses. That makes confidentiality essential. EdiPeek parses entirely in your browser and <strong>never uploads your file</strong>, which is why it is safe to use for inspecting real claims. Even so, avoid sharing unredacted PHI elsewhere.</p>
+<h2>A simplified worked example</h2>
+<pre><span class="seg">ST</span>*837*0001~
+<span class="seg">BHT</span>*0019*00*REF12345*20240220*0900*CH~
+<span class="seg">NM1</span>*41*2*RIVERSIDE MEDICAL GROUP*****46*9988776~
+<span class="seg">NM1</span>*40*2*BLUE CROSS*****46*BCBS001~
+<span class="seg">NM1</span>*85*2*RIVERSIDE MEDICAL GROUP*****XX*1234567890~
+<span class="seg">NM1</span>*IL*1*DOE*JOHN****MI*ZGP9876543~
+<span class="seg">CLM</span>*PATIENT-A*450.00***11:B:1*Y*A*Y*Y~
+<span class="seg">SV1</span>*HC:99213*125.00*UN*1~
+<span class="seg">SV1</span>*HC:85025*325.00*UN*1~
+<span class="seg">SE</span>*9*0001~</pre>
+<p>In plain English: Riverside Medical Group is submitting a claim to Blue Cross for patient John Doe. The claim totals $450.00 and includes two services: an office visit (CPT 99213) at $125.00 and a blood count (CPT 85025) at $325.00.</p>
+
+<h2>A serious note on privacy</h2>
+<p>An 837 contains <strong>protected health information (PHI)</strong>: patient names, member IDs, diagnosis codes, and service details. Under HIPAA, this data is legally sensitive and its handling is tightly regulated. That makes confidentiality essential when inspecting claims.</p>
+<p>This is exactly why EdiPeek parses everything <strong>locally in your browser and never uploads your file</strong>. The claim data never travels to a server, which makes it safe to inspect real 837 files without sending PHI anywhere. Even so, treat any unredacted claim with care and avoid pasting real PHI into tools that do upload data.</p>
+
+<h2>Common pitfalls when reading an 837</h2>
+<ul>
+  <li><strong>Looking for N1.</strong> Healthcare uses NM1, not N1. If you cannot find the parties, look for NM1 loops.</li>
+  <li><strong>Person vs organization names.</strong> The second NM1 element (1 or 2) tells you whether to read the name as last/first or as a single organization name.</li>
+  <li><strong>Confusing billing and rendering providers.</strong> The billing provider (85) and the rendering provider (82) can differ, especially in group practices.</li>
+</ul>
 
 <div class="trybox">
   <div class="tt">Read a claim in plain English</div>
-  <p>Paste an 837 into the viewer to see who is billing whom, for what, and how much — with every claim and service line summarized. Nothing leaves your browser.</p>
+  <p>Paste an 837 into the viewer to see who is billing whom, for what, and how much, with every claim and service line summarized. Nothing leaves your browser, so it is safe for real claims.</p>
   <a class="trybtn" href="/x12/">Open the X12 viewer</a>
 </div>
 
 <h2>Frequently asked questions</h2>
 <div class="faq">
-  <details><summary>What is the 835?</summary><div class="ans">The payer's electronic remittance advice — the response to an 837, explaining what was paid or denied for each claim.</div></details>
-  <details><summary>Why does healthcare use NM1 instead of N1?</summary><div class="ans">HIPAA healthcare implementation guides standardized on the NM1 name segment, which separates person names into structured fields and supports identifiers like NPI and member ID.</div></details>
+  <details><summary>What is the 835?</summary><div class="ans">The payer's electronic remittance advice, sent in response to an 837. It explains what was paid, denied, or applied to patient responsibility for each claim.</div></details>
+  <details><summary>Why does healthcare use NM1 instead of N1?</summary><div class="ans">HIPAA implementation guides standardized on the NM1 name segment, which separates person names into structured fields and carries identifiers like NPI and member ID.</div></details>
+  <details><summary>What is the difference between 837P, 837I, and 837D?</summary><div class="ans">P is professional (physician) claims, I is institutional (hospital) claims, and D is dental claims. They share a structure but differ in some segments and code sets.</div></details>
+  <details><summary>Is it safe to inspect a real 837 in EdiPeek?</summary><div class="ans">EdiPeek parses entirely in your browser and never uploads the file, so the PHI never leaves your device. As always, handle unredacted PHI responsibly and follow your organization's policies.</div></details>
 </div>
 
-<div class="related"><h2>Related guides</h2><a href="/guides/what-is-edi/">What is EDI? &rarr;</a><a href="/guides/edi-810/">EDI 810 — Invoice &rarr;</a><a href="/guides/x12-vs-edifact/">X12 vs EDIFACT &rarr;</a></div>
+<div class="related"><h2>Related guides</h2><a href="/guides/what-is-edi/">What is EDI? &rarr;</a><a href="/guides/edi-810/">EDI 810 - Invoice &rarr;</a><a href="/guides/edi-820/">EDI 820 - Payment &rarr;</a><a href="/guides/x12-vs-edifact/">X12 vs EDIFACT &rarr;</a></div>
 </main>
 <footer>
   <div style="margin-bottom:10px"><a href="/">Home</a> · <a href="/guides/">Guides</a> · <a href="/about/">About</a> · <a href="/contact/">Contact</a> · <a href="/privacy/">Privacy</a> · <a href="/terms/">Terms</a></div>

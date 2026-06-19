@@ -7,11 +7,27 @@
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2945012312110955"
      crossorigin="anonymous"></script>
-<meta name="description" content="ANSI X12 and UN/EDIFACT are the two major EDI standards. Learn how they differ in syntax, structure, and naming, and which transaction maps to which.">
+<meta name="description" content="A detailed comparison of ANSI X12 and UN/EDIFACT, the two major EDI standards: their syntax, structure, envelopes, naming, governance, and how each transaction type maps between them.">
 <link rel="canonical" href="https://edipeek.com/guides/x12-vs-edifact/">
 <meta property="og:title" content="X12 vs EDIFACT">
-<meta property="og:description" content="ANSI X12 and UN/EDIFACT are the two major EDI standards. Learn how they differ in syntax, structure, and naming, and which transaction maps to which.">
+<meta property="og:description" content="A detailed comparison of ANSI X12 and UN/EDIFACT, the two major EDI standards: their syntax, structure, envelopes, naming, governance, and how each transaction type maps between them.">
 <meta property="og:type" content="article">
+<meta property="og:url" content="https://edipeek.com/guides/x12-vs-edifact/">
+<meta property="og:site_name" content="EdiPeek">
+<meta name="robots" content="index, follow">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "X12 vs EDIFACT",
+  "description": "A detailed comparison of ANSI X12 and UN/EDIFACT, the two major EDI standards: their syntax, structure, envelopes, naming, governance, and how each transaction type maps between them.",
+  "url": "https://edipeek.com/guides/x12-vs-edifact/",
+  "mainEntityOfPage": {"@type": "WebPage", "@id": "https://edipeek.com/guides/x12-vs-edifact/"},
+  "author": {"@type": "Organization", "name": "EdiPeek"},
+  "publisher": {"@type": "Organization", "name": "EdiPeek", "url": "https://edipeek.com/"},
+  "dateModified": "2026-06-01"
+}
+</script>
 <style>
   :root{--bg:#0d1117;--panel:#161b22;--panel-2:#1c2330;--border:#2a3340;--ink:#e6edf3;--ink-dim:#8b97a7;--accent:#58a6ff;--green:#3fb950;--seg:#f0883e;--mono:"JetBrains Mono","SF Mono",ui-monospace,Menlo,Consolas,monospace}
   *{box-sizing:border-box;margin:0;padding:0}
@@ -39,6 +55,10 @@
   code{background:var(--panel-2);border:1px solid var(--border);padding:1px 6px;border-radius:4px;color:var(--ink);font-size:13px}
   pre{background:#0a0e13;border:1px solid var(--border);border-radius:8px;padding:14px 16px;overflow-x:auto;margin:14px 0;font-size:12.5px;line-height:1.6;color:#c4cdd9}
   pre .seg{color:var(--seg);font-weight:700}
+  table.t{width:100%;border-collapse:collapse;margin:14px 0;font-size:13px}
+  table.t th{text-align:left;color:var(--ink-dim);font-size:11px;text-transform:uppercase;letter-spacing:1px;padding:7px 9px;border-bottom:1px solid var(--border)}
+  table.t td{padding:7px 9px;border-bottom:1px dotted #243042;color:#c4cdd9;vertical-align:top}
+  table.t td code{white-space:nowrap}
   .trybox{background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--green);border-radius:8px;padding:16px 18px;margin:26px 0}
   .trybox .tt{font-size:13px;color:var(--ink);margin-bottom:6px;font-weight:700}
   .trybox p{font-size:13px;margin-bottom:10px}
@@ -76,60 +96,83 @@
 </header>
 <main>
   <div class="crumb"><a href="/">Home</a> / <a href="/guides/">Guides</a> / X12 vs EDIFACT</div>
-  <h1>X12 vs EDIFACT: What's the Difference?</h1>
-  <div class="meta">EdiPeek · Updated June 2026 · 6 min read</div>
+  <h1>X12 vs EDIFACT: A Detailed Comparison</h1>
+  <div class="meta">EdiPeek · Updated June 2026 · 8 min read</div>
 
-<p>There is no single global EDI standard. Two dominate the world, and which one you encounter depends mostly on geography. <strong>ANSI X12</strong> rules North America; <strong>UN/EDIFACT</strong> rules most of the rest of the world. They do the same job — moving orders, invoices, and shipping notices between companies — but they look different on the wire.</p>
+<p>There is no single global EDI standard. Two dominate the world, and which one you encounter depends mostly on geography. <strong>ANSI X12</strong> rules North America. <strong>UN/EDIFACT</strong> rules Europe and most of the rest of the world. They do the same job - moving orders, invoices, shipping notices, and payments between companies - but they look quite different on the wire, and understanding both is valuable for anyone working in global trade.</p>
 
 <h2>The quick comparison</h2>
-<ul>
-  <li><strong>Region:</strong> X12 is North America; EDIFACT is international (Europe, Asia, and global trade).</li>
-  <li><strong>Naming:</strong> X12 uses numbers (850, 810, 856). EDIFACT uses names (ORDERS, INVOIC, DESADV).</li>
-  <li><strong>Governing body:</strong> X12 is maintained by ASC X12; EDIFACT by the United Nations (UN/CEFACT).</li>
-</ul>
+<table class="t"><thead><tr><th></th><th>ANSI X12</th><th>UN/EDIFACT</th></tr></thead><tbody>
+<tr><td>Region</td><td>North America</td><td>International (Europe, Asia, global)</td></tr>
+<tr><td>Naming</td><td>Numbers (850, 810, 856)</td><td>Names (ORDERS, INVOIC, DESADV)</td></tr>
+<tr><td>Governing body</td><td>ASC X12</td><td>UN/CEFACT</td></tr>
+<tr><td>Element separator</td><td><code>*</code></td><td><code>+</code></td></tr>
+<tr><td>Segment terminator</td><td><code>~</code></td><td><code>'</code></td></tr>
+<tr><td>Component separator</td><td><code>:</code></td><td><code>:</code></td></tr>
+<tr><td>Envelope</td><td>ISA / GS / ST</td><td>UNB / UNG / UNH</td></tr>
+</tbody></table>
 
 <h2>Syntax differences</h2>
-<p>The biggest visible difference is the delimiters — the characters that separate the pieces.</p>
-<h3>X12</h3>
+<p>The most immediately visible difference is the delimiters - the characters that separate the pieces of the file.</p>
+<h3>X12 syntax</h3>
 <pre><span class="seg">ST</span>*850*0001~
 <span class="seg">BEG</span>*00*SA*PO-99831**20240115~</pre>
-<p>Segments end with a tilde <code>~</code>, elements are separated by an asterisk <code>*</code>, and the envelope is defined by the <code>ISA</code> header.</p>
-<h3>EDIFACT</h3>
+<p>Segments end with a tilde <code>~</code>, elements are separated by an asterisk <code>*</code>, and sub-elements (components) by a colon <code>:</code>. The delimiters are declared implicitly by their position in the opening <code>ISA</code> segment, which is fixed-width.</p>
+<h3>EDIFACT syntax</h3>
 <pre><span class="seg">UNH</span>+1+ORDERS:D:96A:UN'
 <span class="seg">BGM</span>+220+PO-55012+9'</pre>
-<p>Segments end with an apostrophe <code>'</code>, elements with a plus <code>+</code>, components with a colon <code>:</code>, and an optional <code>UNA</code> string can declare those delimiters explicitly.</p>
+<p>Segments end with an apostrophe <code>'</code>, elements with a plus <code>+</code>, and components with a colon <code>:</code>. EDIFACT can also use an optional <code>UNA</code> service string at the very start of the interchange to explicitly declare its delimiters, and it supports a release (escape) character - by default <code>?</code> - so that a delimiter character can appear literally inside a data value.</p>
+<p>That release character is a subtle but important difference. In EDIFACT, <code>?+</code> means a literal plus sign rather than an element separator. X12 has no equivalent escape mechanism, which is one reason X12 data tends to avoid the delimiter characters entirely.</p>
 
-<div class="adslot">Ad slot — insert AdSense unit here</div>
+<div class="adslot">Ad slot - insert AdSense unit here</div>
 
-<h2>Structure differences</h2>
-<p>Both wrap their content in envelopes, but the envelope segments are named differently:</p>
-<ul>
-  <li><strong>X12:</strong> <code>ISA</code> / <code>GS</code> / <code>ST</code> … <code>SE</code> / <code>GE</code> / <code>IEA</code></li>
-  <li><strong>EDIFACT:</strong> <code>UNB</code> / <code>UNG</code> / <code>UNH</code> … <code>UNT</code> / <code>UNE</code> / <code>UNZ</code></li>
-</ul>
-<p>In both, the innermost header (<code>ST</code> for X12, <code>UNH</code> for EDIFACT) is what tells you which document type you are looking at.</p>
+<h2>Structure and envelope differences</h2>
+<p>Both standards wrap their content in nested envelopes, but the envelope segments are named and built differently.</p>
+<p><strong>X12</strong> uses a three-level envelope: <code>ISA</code>/<code>IEA</code> for the interchange, <code>GS</code>/<code>GE</code> for the functional group, and <code>ST</code>/<code>SE</code> for each transaction set. The ISA is a fixed-length, 106-character segment, which makes it unusually rigid compared to the rest of X12.</p>
+<p><strong>EDIFACT</strong> uses <code>UNB</code>/<code>UNZ</code> for the interchange, an optional <code>UNG</code>/<code>UNE</code> for the functional group, and <code>UNH</code>/<code>UNT</code> for each message. EDIFACT envelopes are variable length and rely on delimiters rather than fixed positions.</p>
+<p>In both standards, the innermost header - <code>ST</code> in X12, <code>UNH</code> in EDIFACT - is what tells you which document type you are looking at. In EDIFACT the <code>UNH</code> also carries the message version, like <code>D:96A:UN</code>, which identifies the directory, release, and controlling agency so the receiver knows which dictionary of segments to apply.</p>
 
-<h2>Which transaction maps to which</h2>
-<p>The same business document exists in both standards under different labels:</p>
-<ul>
-  <li>Purchase order: <strong>850</strong> (X12) = <strong>ORDERS</strong> (EDIFACT)</li>
-  <li>Invoice: <strong>810</strong> = <strong>INVOIC</strong></li>
-  <li>Advance ship notice: <strong>856</strong> = <strong>DESADV</strong></li>
-  <li>Order response: <strong>855</strong> = <strong>ORDRSP</strong></li>
-  <li>Payment/remittance: <strong>820</strong> = <strong>REMADV</strong></li>
-  <li>Functional acknowledgment: <strong>997</strong> = <strong>CONTRL</strong></li>
-</ul>
+<h2>How transactions map between the two</h2>
+<p>The same business document exists in both standards under different labels. If you know one, you can usually find its counterpart:</p>
+<table class="t"><thead><tr><th>X12</th><th>EDIFACT</th><th>Document</th></tr></thead><tbody>
+<tr><td>850</td><td>ORDERS</td><td>Purchase order</td></tr>
+<tr><td>855</td><td>ORDRSP</td><td>Order response / acknowledgment</td></tr>
+<tr><td>860</td><td>ORDCHG</td><td>Purchase order change</td></tr>
+<tr><td>856</td><td>DESADV</td><td>Advance ship notice / despatch advice</td></tr>
+<tr><td>810</td><td>INVOIC</td><td>Invoice</td></tr>
+<tr><td>820</td><td>REMADV</td><td>Payment / remittance advice</td></tr>
+<tr><td>846</td><td>INVRPT</td><td>Inventory report</td></tr>
+<tr><td>832</td><td>PRICAT</td><td>Price / sales catalogue</td></tr>
+<tr><td>997</td><td>CONTRL</td><td>Functional acknowledgment</td></tr>
+</tbody></table>
+<p>The mapping is rarely perfect - the standards model some details differently - but at the document level the correspondence is reliable.</p>
 
 <h2>Which one will you deal with?</h2>
-<p>If you trade primarily with U.S. partners, you will see X12. If you trade with European or global partners, expect EDIFACT. Many companies that operate internationally have to handle both.</p>
+<p>If you trade primarily with United States or Canadian partners, you will mostly see X12. If you trade with European, Middle Eastern, or Asian partners, expect EDIFACT. Many companies that operate internationally have to support both, and EDI translation software often converts between them so internal systems only deal with one format.</p>
+<p>There are also industry-specific subsets. Automotive uses EDIFACT subsets like ODETTE and VDA in Europe. Retail uses both. Healthcare in the United States is almost entirely X12, mandated by HIPAA. Knowing the industry usually tells you the standard.</p>
+
+<h2>Practical tips for reading either one</h2>
+<ul>
+  <li><strong>Find the header first.</strong> Look for <code>ST</code> (X12) or <code>UNH</code> (EDIFACT) to identify the document type before anything else.</li>
+  <li><strong>Identify the delimiters.</strong> In X12, read them from the ISA. In EDIFACT, check for a UNA string, or assume the defaults (<code>+</code>, <code>:</code>, <code>'</code>).</li>
+  <li><strong>Watch the parties.</strong> X12 uses N1 loops; EDIFACT uses NAD segments. Both tell you who is buying, selling, and shipping.</li>
+</ul>
 
 <div class="trybox">
   <div class="tt">Try both</div>
-  <p>EdiPeek reads both standards. Paste an X12 or an EDIFACT message and get a plain-English breakdown — in your browser, nothing uploaded.</p>
+  <p>EdiPeek reads both standards. Paste an X12 or an EDIFACT message and get a plain-English breakdown, in your browser, with nothing uploaded.</p>
   <a class="trybtn" href="/x12/">X12 viewer</a> &nbsp; <a class="trybtn edi" href="/edifact/">EDIFACT viewer</a>
 </div>
 
-<div class="related"><h2>Related guides</h2><a href="/guides/what-is-edi/">What is EDI? &rarr;</a><a href="/guides/edi-850/">EDI 850 — Purchase Order &rarr;</a><a href="/guides/edifact-orders/">EDIFACT ORDERS &rarr;</a></div>
+<h2>Frequently asked questions</h2>
+<div class="faq">
+  <details><summary>Is one standard better than the other?</summary><div class="ans">Neither is objectively better; they are regional conventions. X12 is more rigid in its envelope, EDIFACT is more flexible with delimiters and escaping. The right one is whichever your trading partner uses.</div></details>
+  <details><summary>Can I convert X12 to EDIFACT?</summary><div class="ans">Yes. EDI translation software maps one to the other. Because the underlying business documents are the same, an 850 can be converted to an ORDERS, though implementation-specific details require careful mapping.</div></details>
+  <details><summary>Why does EDIFACT put a version in the UNH?</summary><div class="ans">Because EDIFACT messages evolve through directory releases (like D96A or D01B). The version tells the receiver which dictionary of segments and codes to use when interpreting the message.</div></details>
+  <details><summary>What is the UNA segment?</summary><div class="ans">An optional service string at the start of an EDIFACT interchange that declares the delimiter characters explicitly, in case they differ from the defaults.</div></details>
+</div>
+
+<div class="related"><h2>Related guides</h2><a href="/guides/what-is-edi/">What is EDI? &rarr;</a><a href="/guides/edi-850/">EDI 850 - Purchase Order &rarr;</a><a href="/guides/edifact-orders/">EDIFACT ORDERS &rarr;</a><a href="/guides/edi-delimiters/">Understanding EDI Delimiters &rarr;</a></div>
 </main>
 <footer>
   <div style="margin-bottom:10px"><a href="/">Home</a> · <a href="/guides/">Guides</a> · <a href="/about/">About</a> · <a href="/contact/">Contact</a> · <a href="/privacy/">Privacy</a> · <a href="/terms/">Terms</a></div>

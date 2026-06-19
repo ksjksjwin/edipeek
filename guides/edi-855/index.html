@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EDI 855 - PO Acknowledgment | EdiPeek</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2945012312110955"
+     crossorigin="anonymous"></script>
+<meta name="description" content="A guide to the EDI 855 purchase order acknowledgment: how a supplier confirms, changes, or rejects an order, key segments (BAK, PO1, ACK), line-level status codes, and FAQs.">
+<link rel="canonical" href="https://edipeek.com/guides/edi-855/">
+<meta property="og:title" content="EDI 855 - PO Acknowledgment">
+<meta property="og:description" content="A guide to the EDI 855 purchase order acknowledgment: how a supplier confirms, changes, or rejects an order, key segments (BAK, PO1, ACK), line-level status codes, and FAQs.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://edipeek.com/guides/edi-855/">
+<meta property="og:site_name" content="EdiPeek">
+<meta name="robots" content="index, follow">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "EDI 855 - PO Acknowledgment",
+  "description": "A guide to the EDI 855 purchase order acknowledgment: how a supplier confirms, changes, or rejects an order, key segments (BAK, PO1, ACK), line-level status codes, and FAQs.",
+  "url": "https://edipeek.com/guides/edi-855/",
+  "mainEntityOfPage": {"@type": "WebPage", "@id": "https://edipeek.com/guides/edi-855/"},
+  "author": {"@type": "Organization", "name": "EdiPeek"},
+  "publisher": {"@type": "Organization", "name": "EdiPeek", "url": "https://edipeek.com/"},
+  "dateModified": "2026-06-01"
+}
+</script>
+<style>
+  :root{--bg:#0d1117;--panel:#161b22;--panel-2:#1c2330;--border:#2a3340;--ink:#e6edf3;--ink-dim:#8b97a7;--accent:#58a6ff;--green:#3fb950;--seg:#f0883e;--mono:"JetBrains Mono","SF Mono",ui-monospace,Menlo,Consolas,monospace}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--ink);font-family:var(--mono);line-height:1.75;font-size:15px}
+  body{background-image:radial-gradient(circle at 15% -10%,rgba(63,185,80,.05),transparent 45%),radial-gradient(circle at 100% 0%,rgba(88,166,255,.05),transparent 40%);min-height:100vh}
+  a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+  header{border-bottom:1px solid var(--border);padding:18px 22px;display:flex;align-items:center;gap:12px}
+  .logo{font-weight:700;font-size:18px;letter-spacing:-.5px;display:flex;align-items:center;gap:9px;color:var(--ink)}
+  .logo .b{color:var(--accent)}
+  .logo-mark{color:var(--green);flex-shrink:0}
+  .spacer{flex:1}
+  .navlink{font-size:12px;color:var(--ink-dim);border:1px solid var(--border);padding:6px 12px;border-radius:6px}
+  .navlink:hover{border-color:var(--accent);color:var(--accent);text-decoration:none}
+  main{max-width:720px;margin:0 auto;padding:30px 22px 70px}
+  .crumb{font-size:12px;color:var(--ink-dim);margin-bottom:22px}
+  .crumb a{color:var(--ink-dim)}
+  h1{font-size:27px;letter-spacing:-.6px;margin-bottom:10px;line-height:1.25}
+  .meta{color:var(--ink-dim);font-size:12px;margin-bottom:28px}
+  h2{font-size:19px;margin:32px 0 10px;letter-spacing:-.3px}
+  h3{font-size:15px;margin:22px 0 6px;color:var(--accent)}
+  p,li{color:#c4cdd9;font-size:14.5px;margin-bottom:12px}
+  ul,ol{padding-left:22px;margin-bottom:12px}
+  li{margin-bottom:6px}
+  strong{color:var(--ink)}
+  code{background:var(--panel-2);border:1px solid var(--border);padding:1px 6px;border-radius:4px;color:var(--ink);font-size:13px}
+  pre{background:#0a0e13;border:1px solid var(--border);border-radius:8px;padding:14px 16px;overflow-x:auto;margin:14px 0;font-size:12.5px;line-height:1.6;color:#c4cdd9}
+  pre .seg{color:var(--seg);font-weight:700}
+  table.t{width:100%;border-collapse:collapse;margin:14px 0;font-size:13px}
+  table.t th{text-align:left;color:var(--ink-dim);font-size:11px;text-transform:uppercase;letter-spacing:1px;padding:7px 9px;border-bottom:1px solid var(--border)}
+  table.t td{padding:7px 9px;border-bottom:1px dotted #243042;color:#c4cdd9;vertical-align:top}
+  table.t td code{white-space:nowrap}
+  .trybox{background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--green);border-radius:8px;padding:16px 18px;margin:26px 0}
+  .trybox .tt{font-size:13px;color:var(--ink);margin-bottom:6px;font-weight:700}
+  .trybox p{font-size:13px;margin-bottom:10px}
+  .trybtn{display:inline-block;background:var(--green);color:#07210e;font-weight:700;font-size:13px;padding:8px 16px;border-radius:7px}
+  .trybtn:hover{filter:brightness(1.1);text-decoration:none}
+  .trybtn.edi{background:var(--accent);color:#06223f}
+  .adslot{margin:28px 0;min-height:90px;border:1px dashed var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--ink-dim);font-size:11px;background:repeating-linear-gradient(45deg,transparent,transparent 10px,rgba(255,255,255,.012) 10px,rgba(255,255,255,.012) 20px)}
+  .related{margin-top:40px;border-top:1px solid var(--border);padding-top:22px}
+  .related h2{font-size:14px;text-transform:uppercase;letter-spacing:1.5px;color:var(--ink-dim);margin-top:0}
+  .related a{display:block;padding:5px 0;font-size:14px}
+  .faq details{border:1px solid var(--border);border-radius:8px;margin-bottom:8px;background:var(--panel);overflow:hidden}
+  .faq summary{padding:13px 15px;cursor:pointer;color:var(--ink);font-size:14px;list-style:none}
+  .faq summary::-webkit-details-marker{display:none}
+  .faq summary:before{content:"\25B8 ";color:var(--accent)}
+  .faq details[open] summary:before{content:"\25BE "}
+  .faq .ans{padding:0 15px 14px;color:var(--ink-dim);font-size:13px}
+  footer{border-top:1px solid var(--border);padding:24px 22px;text-align:center;color:var(--ink-dim);font-size:12px;margin-top:40px}
+  footer a{margin:0 7px}
+</style>
+</head>
+<body>
+<header>
+  <a class="logo" href="/" style="text-decoration:none">
+    <svg class="logo-mark" viewBox="0 0 28 28" width="24" height="24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/>
+      <line x1="17.6" y1="17.6" x2="25" y2="25" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+      <line x1="8" y1="10" x2="16" y2="10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.9"/>
+      <line x1="8" y1="13" x2="14" y2="13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+      <line x1="8" y1="16" x2="15" y2="16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
+    </svg>
+    <span>EDI<span class="b">PEEK</span></span>
+  </a>
+  <div class="spacer"></div>
+  <a class="navlink" href="/guides/">All guides</a>
+</header>
+<main>
+  <div class="crumb"><a href="/">Home</a> / <a href="/guides/">Guides</a> / EDI 855 - PO Acknowledgment</div>
+  <h1>EDI 855: The Purchase Order Acknowledgment, Explained</h1>
+  <div class="meta">EdiPeek · Updated June 2026 · 6 min read</div>
+
+<p>The <strong>EDI 855</strong> is the <strong>Purchase Order Acknowledgment</strong>. It is the supplier's reply to a buyer's <a href="/guides/edi-850/">850 purchase order</a>, telling the buyer which lines are accepted, which are backordered, which have changed in price or quantity, and which are rejected. It closes the loop on whether an order will actually be fulfilled as requested.</p>
+
+<h2>Why the 855 matters</h2>
+<p>Without an acknowledgment, a buyer who sends a PO is left guessing. Did the supplier receive it? Can they fill it? Is the price still valid? The 855 answers these questions before goods ship, so the buyer can react early - find an alternate source for rejected lines, adjust expectations on backorders, or approve price changes. In tightly run supply chains, a fast and accurate 855 prevents expensive surprises at the dock.</p>
+
+<h2>The order acknowledgment cycle</h2>
+<ol>
+  <li>Buyer sends an <strong>850</strong> purchase order.</li>
+  <li>Supplier replies with an <strong>855</strong> acknowledgment, line by line.</li>
+  <li>If changes are significant, the buyer may send an <strong>860</strong> purchase order change, and the supplier responds with an <strong>865</strong>.</li>
+  <li>When goods ship, the supplier sends an <strong>856</strong> and then an <strong>810</strong> invoice.</li>
+</ol>
+
+<h2>The key segments of an 855</h2>
+<h3>BAK - Beginning Segment for Purchase Order Acknowledgment</h3>
+<p>The header. It carries the acknowledgment type and references the original PO. <code>BAK*00*AC*PO-99831*20240116</code> means an original acknowledgment, status AC (acknowledge with detail), for purchase order PO-99831, dated 2024-01-16.</p>
+<h3>PO1 - Baseline Item Data</h3>
+<p>Restates the line items being acknowledged, mirroring the PO1 lines from the original 850 so the buyer can match them.</p>
+<h3>ACK - Line Item Acknowledgment</h3>
+<p>The segment that carries the actual status of each line. A code says what is happening: <code>IA</code> item accepted, <code>IB</code> item backordered, <code>IR</code> item rejected, <code>IC</code> item accepted with changes. <code>ACK*IA*100*EA</code> means the line is accepted for 100 each.</p>
+<h3>CTT and SE</h3>
+<p>Control totals and the transaction trailer, as in other X12 documents.</p>
+
+<div class="adslot">Ad slot - insert AdSense unit here</div>
+
+<h2>A simplified worked example</h2>
+<pre><span class="seg">ST</span>*855*0001~
+<span class="seg">BAK</span>*00*AC*PO-99831*20240116~
+<span class="seg">PO1</span>*1*100*EA*12.50**UP*012345678905~
+<span class="seg">ACK</span>*IA*100*EA~
+<span class="seg">PO1</span>*2*50*EA*8.75**UP*012345678912~
+<span class="seg">ACK</span>*IB*30*EA~
+<span class="seg">CTT</span>*2~
+<span class="seg">SE</span>*8*0001~</pre>
+<p>In plain English: the supplier acknowledges purchase order PO-99831. Line 1 is fully accepted for 100 units. Line 2 is partly backordered - only 30 of the 50 requested units are available now.</p>
+
+<h2>Common pitfalls when reading an 855</h2>
+<ul>
+  <li><strong>Missing the ACK status.</strong> The PO1 restates what was ordered, but the ACK is what tells you the supplier's answer. Read the ACK, not just the PO1.</li>
+  <li><strong>Assuming silence means acceptance.</strong> A line with no acknowledgment status should be investigated, not assumed accepted.</li>
+  <li><strong>Overlooking accepted-with-changes.</strong> An IC status means the supplier changed something - often price or date - which the buyer needs to approve.</li>
+</ul>
+
+<div class="trybox">
+  <div class="tt">Decode your own 855</div>
+  <p>Paste an acknowledgment into the viewer to see each line's status explained in plain English. Nothing leaves your browser.</p>
+  <a class="trybtn" href="/x12/">Open the X12 viewer</a>
+</div>
+
+<h2>Frequently asked questions</h2>
+<div class="faq">
+  <details><summary>What is the EDIFACT equivalent of an 855?</summary><div class="ans">The ORDRSP (order response) message.</div></details>
+  <details><summary>What is the difference between an 855 and an 865?</summary><div class="ans">An 855 acknowledges the original order. An 865 acknowledges a buyer's change request (an 860). Both report line-level status.</div></details>
+  <details><summary>Does every 850 get an 855?</summary><div class="ans">It depends on the trading-partner agreement. Many partners require an 855 for every order; others use it only when there are exceptions.</div></details>
+</div>
+
+<div class="related"><h2>Related guides</h2><a href="/guides/edi-850/">EDI 850 - Purchase Order &rarr;</a><a href="/guides/edi-856/">EDI 856 - ASN &rarr;</a><a href="/guides/edi-810/">EDI 810 - Invoice &rarr;</a><a href="/guides/x12-vs-edifact/">X12 vs EDIFACT &rarr;</a></div>
+</main>
+<footer>
+  <div style="margin-bottom:10px"><a href="/">Home</a> · <a href="/guides/">Guides</a> · <a href="/about/">About</a> · <a href="/contact/">Contact</a> · <a href="/privacy/">Privacy</a> · <a href="/terms/">Terms</a></div>
+  EdiPeek — free in-browser EDI viewers. Files are processed locally and never uploaded.
+</footer>
+</body>
+</html>

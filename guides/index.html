@@ -7,8 +7,11 @@
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2945012312110955"
      crossorigin="anonymous"></script>
-<meta name="description" content="Plain-English guides to EDI. Learn what EDI 850, 810, 856, 837 and EDIFACT ORDERS mean, how to read them, and how X12 differs from EDIFACT.">
+<meta name="description" content="Plain-English guides to EDI. Learn what EDI 850, 810, 856, 837, 855, 820 and EDIFACT ORDERS, INVOIC, DESADV mean, how to read them, delimiters, envelopes, and how X12 differs from EDIFACT.">
 <link rel="canonical" href="https://edipeek.com/guides/">
+<meta property="og:url" content="https://edipeek.com/guides/">
+<meta property="og:site_name" content="EdiPeek">
+<meta name="robots" content="index, follow">
 <style>
   :root{--bg:#0d1117;--panel:#161b22;--panel-2:#1c2330;--border:#2a3340;--ink:#e6edf3;--ink-dim:#8b97a7;--accent:#58a6ff;--green:#3fb950;--mono:"JetBrains Mono","SF Mono",ui-monospace,Menlo,Consolas,monospace}
   *{box-sizing:border-box;margin:0;padding:0}
@@ -17,14 +20,14 @@
   a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
   header{border-bottom:1px solid var(--border);padding:18px 22px;display:flex;align-items:center;gap:12px}
   .logo{font-weight:700;font-size:18px;letter-spacing:-.5px;display:flex;align-items:center;gap:9px;color:var(--ink)}
-  .logo .g{color:var(--green)}.logo .b{color:var(--accent)}
+  .logo .b{color:var(--accent)}
   .logo-mark{color:var(--green);flex-shrink:0}
   .spacer{flex:1}
   .navlink{font-size:12px;color:var(--ink-dim);border:1px solid var(--border);padding:6px 12px;border-radius:6px}
   .navlink:hover{border-color:var(--accent);color:var(--accent);text-decoration:none}
   main{max-width:820px;margin:0 auto;padding:46px 22px 70px}
   h1{font-size:28px;letter-spacing:-.6px;margin-bottom:8px}
-  .lead{color:var(--ink-dim);font-size:15px;margin-bottom:36px;max-width:640px}
+  .lead{color:var(--ink-dim);font-size:15px;margin-bottom:36px;max-width:660px}
   .group{margin-bottom:34px}
   .group h2{font-size:14px;text-transform:uppercase;letter-spacing:1.5px;color:var(--accent);margin-bottom:14px}
   .cards{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -57,13 +60,22 @@
 </header>
 <main>
   <h1>EDI Guides</h1>
-  <p class="lead">Plain-English explanations of EDI transactions — what they are, how to read them, and how the two big standards compare. No jargon walls. Each guide links to a free viewer so you can try it on a real file.</p>
+  <p class="lead">Plain-English explanations of EDI - what each transaction means, how to read it, the syntax that holds it together, and how the two big standards compare. Every guide links to a free viewer so you can try it on a real file.</p>
 
   <div class="group">
     <h2>Getting started</h2>
     <div class="cards">
-      <a class="gcard" href="/guides/what-is-edi/"><span class="tag">Basics</span><div class="t">What is EDI?</div><div class="d">The format businesses use to exchange orders, invoices, and shipments — explained from scratch.</div></a>
+      <a class="gcard" href="/guides/what-is-edi/"><span class="tag">Basics</span><div class="t">What is EDI?</div><div class="d">The format businesses use to exchange orders, invoices, and shipments, explained from scratch.</div></a>
       <a class="gcard edi" href="/guides/x12-vs-edifact/"><span class="tag">Basics</span><div class="t">X12 vs EDIFACT</div><div class="d">The two major EDI standards, how they differ, and which transaction maps to which.</div></a>
+      <a class="gcard" href="/guides/edi-delimiters/"><span class="tag">Basics</span><div class="t">Understanding EDI Delimiters</div><div class="d">Segments, elements, components, and the separators that structure every EDI file.</div></a>
+    </div>
+  </div>
+
+  <div class="group">
+    <h2>EDI structure &amp; envelopes</h2>
+    <div class="cards">
+      <a class="gcard" href="/guides/edi-envelope-isa-gs-st/"><span class="tag">Structure</span><div class="t">The ISA / GS / ST Envelope</div><div class="d">How X12 wraps documents in interchange, group, and transaction-set envelopes.</div></a>
+      <a class="gcard edi" href="/guides/edifact-unb-unh-envelope/"><span class="tag">Structure</span><div class="t">The UNB / UNH Envelope</div><div class="d">How EDIFACT wraps messages with UNA, UNB, UNG, and UNH, plus the version string.</div></a>
     </div>
   </div>
 
@@ -71,8 +83,10 @@
     <h2>ANSI X12 transactions</h2>
     <div class="cards">
       <a class="gcard" href="/guides/edi-850/"><span class="tag">X12</span><div class="t">EDI 850 — Purchase Order</div><div class="d">How a buyer sends an order, segment by segment, and what each part means.</div></a>
-      <a class="gcard" href="/guides/edi-810/"><span class="tag">X12</span><div class="t">EDI 810 — Invoice</div><div class="d">The supplier's bill, how it ties back to the PO, and what AP teams check.</div></a>
-      <a class="gcard" href="/guides/edi-856/"><span class="tag">X12</span><div class="t">EDI 856 — ASN</div><div class="d">The advance ship notice and its hierarchical shipment / order / item structure.</div></a>
+      <a class="gcard" href="/guides/edi-855/"><span class="tag">X12</span><div class="t">EDI 855 — PO Acknowledgment</div><div class="d">How a supplier confirms, changes, or rejects an order line by line.</div></a>
+      <a class="gcard" href="/guides/edi-810/"><span class="tag">X12</span><div class="t">EDI 810 — Invoice</div><div class="d">The supplier's bill, how it ties back to the PO, and the three-way match.</div></a>
+      <a class="gcard" href="/guides/edi-856/"><span class="tag">X12</span><div class="t">EDI 856 — ASN</div><div class="d">The advance ship notice and its hierarchical shipment / order / pack / item structure.</div></a>
+      <a class="gcard" href="/guides/edi-820/"><span class="tag">X12</span><div class="t">EDI 820 — Payment</div><div class="d">How a payer tells a payee what a payment covers, invoice by invoice.</div></a>
       <a class="gcard" href="/guides/edi-837/"><span class="tag">X12</span><div class="t">EDI 837 — Health Care Claim</div><div class="d">How providers bill insurers, and how the 837 connects to the 835 remittance.</div></a>
     </div>
   </div>
@@ -82,6 +96,8 @@
     <div class="cards">
       <a class="gcard edi" href="/guides/edifact-orders/"><span class="tag">EDIFACT</span><div class="t">EDIFACT ORDERS</div><div class="d">The international purchase order, its UNB/UNH envelope, and key segments.</div></a>
       <a class="gcard edi" href="/guides/edifact-invoic/"><span class="tag">EDIFACT</span><div class="t">EDIFACT INVOIC</div><div class="d">The EDIFACT invoice and how it differs from the X12 810.</div></a>
+      <a class="gcard edi" href="/guides/edifact-desadv/"><span class="tag">EDIFACT</span><div class="t">EDIFACT DESADV</div><div class="d">The despatch advice, EDIFACT's answer to the 856, and its CPS packing tree.</div></a>
+      <a class="gcard edi" href="/guides/edifact-iftmin/"><span class="tag">EDIFACT</span><div class="t">EDIFACT IFTMIN</div><div class="d">The transport instruction and the IFTM family of logistics messages.</div></a>
     </div>
   </div>
 </main>

@@ -3,15 +3,31 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EDI 856 — ASN | EdiPeek</title>
+<title>EDI 856 - ASN | EdiPeek</title>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2945012312110955"
      crossorigin="anonymous"></script>
-<meta name="description" content="What an EDI 856 ASN is, how its hierarchical shipment-order-pack-item structure works, and what BSN, HL, and related segments mean.">
+<meta name="description" content="A detailed guide to the EDI 856 advance ship notice: why it matters, the hierarchical shipment-order-pack-item structure, key segments (BSN, HL, TD1, TD5, MAN, SN1), and FAQs.">
 <link rel="canonical" href="https://edipeek.com/guides/edi-856/">
-<meta property="og:title" content="EDI 856 — ASN">
-<meta property="og:description" content="What an EDI 856 ASN is, how its hierarchical shipment-order-pack-item structure works, and what BSN, HL, and related segments mean.">
+<meta property="og:title" content="EDI 856 - ASN">
+<meta property="og:description" content="A detailed guide to the EDI 856 advance ship notice: why it matters, the hierarchical shipment-order-pack-item structure, key segments (BSN, HL, TD1, TD5, MAN, SN1), and FAQs.">
 <meta property="og:type" content="article">
+<meta property="og:url" content="https://edipeek.com/guides/edi-856/">
+<meta property="og:site_name" content="EdiPeek">
+<meta name="robots" content="index, follow">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "EDI 856 - ASN",
+  "description": "A detailed guide to the EDI 856 advance ship notice: why it matters, the hierarchical shipment-order-pack-item structure, key segments (BSN, HL, TD1, TD5, MAN, SN1), and FAQs.",
+  "url": "https://edipeek.com/guides/edi-856/",
+  "mainEntityOfPage": {"@type": "WebPage", "@id": "https://edipeek.com/guides/edi-856/"},
+  "author": {"@type": "Organization", "name": "EdiPeek"},
+  "publisher": {"@type": "Organization", "name": "EdiPeek", "url": "https://edipeek.com/"},
+  "dateModified": "2026-06-01"
+}
+</script>
 <style>
   :root{--bg:#0d1117;--panel:#161b22;--panel-2:#1c2330;--border:#2a3340;--ink:#e6edf3;--ink-dim:#8b97a7;--accent:#58a6ff;--green:#3fb950;--seg:#f0883e;--mono:"JetBrains Mono","SF Mono",ui-monospace,Menlo,Consolas,monospace}
   *{box-sizing:border-box;margin:0;padding:0}
@@ -39,6 +55,10 @@
   code{background:var(--panel-2);border:1px solid var(--border);padding:1px 6px;border-radius:4px;color:var(--ink);font-size:13px}
   pre{background:#0a0e13;border:1px solid var(--border);border-radius:8px;padding:14px 16px;overflow-x:auto;margin:14px 0;font-size:12.5px;line-height:1.6;color:#c4cdd9}
   pre .seg{color:var(--seg);font-weight:700}
+  table.t{width:100%;border-collapse:collapse;margin:14px 0;font-size:13px}
+  table.t th{text-align:left;color:var(--ink-dim);font-size:11px;text-transform:uppercase;letter-spacing:1px;padding:7px 9px;border-bottom:1px solid var(--border)}
+  table.t td{padding:7px 9px;border-bottom:1px dotted #243042;color:#c4cdd9;vertical-align:top}
+  table.t td code{white-space:nowrap}
   .trybox{background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--green);border-radius:8px;padding:16px 18px;margin:26px 0}
   .trybox .tt{font-size:13px;color:var(--ink);margin-bottom:6px;font-weight:700}
   .trybox p{font-size:13px;margin-bottom:10px}
@@ -75,50 +95,84 @@
   <a class="navlink" href="/guides/">All guides</a>
 </header>
 <main>
-  <div class="crumb"><a href="/">Home</a> / <a href="/guides/">Guides</a> / EDI 856 — ASN</div>
-  <h1>EDI 856: The Advance Ship Notice (ASN), Explained</h1>
-  <div class="meta">EdiPeek · Updated June 2026 · 5 min read</div>
+  <div class="crumb"><a href="/">Home</a> / <a href="/guides/">Guides</a> / EDI 856 - ASN</div>
+  <h1>EDI 856: The Advance Ship Notice (ASN), Explained in Depth</h1>
+  <div class="meta">EdiPeek · Updated June 2026 · 7 min read</div>
 
-<p>The <strong>EDI 856</strong> is the <strong>Advance Ship Notice</strong>, usually called the <strong>ASN</strong>. The supplier sends it when goods ship, so the buyer knows exactly what is coming, how it is packed, and when it will arrive — before the truck shows up at the dock.</p>
+<p>The <strong>EDI 856</strong> is the <strong>Advance Ship Notice</strong>, almost always called the <strong>ASN</strong>. The supplier sends it when goods ship, so the buyer knows exactly what is coming, how it is packed, and when it will arrive - before the truck reaches the dock. Of all the common EDI documents, the 856 has the most distinctive structure, and it is the one that trips up newcomers most often.</p>
 
 <h2>Why the ASN matters</h2>
-<p>A good ASN lets a warehouse receive a shipment quickly: staff can pre-stage, scan packages against the notice, and flag discrepancies immediately. Many large retailers fine suppliers for late or inaccurate ASNs because they disrupt receiving.</p>
+<p>A good ASN turns receiving from a slow, manual count into a fast, scan-based process. When a shipment arrives, warehouse staff can scan a pallet or carton label and instantly see what should be inside, compare it against the ASN, and flag discrepancies on the spot. Many large retailers depend on the ASN for cross-docking, where goods move straight from inbound to outbound without being stored, which only works if the retailer knows the contents in advance.</p>
+<p>Because the ASN is so operationally important, large buyers often enforce it strictly. Late, missing, or inaccurate ASNs commonly trigger compliance chargebacks - financial penalties deducted from what the buyer pays the supplier. An accurate 856 is not just good practice; it directly affects the supplier's bottom line.</p>
 
-<h2>The hierarchical structure</h2>
-<p>What makes the 856 different from most transactions is its <strong>HL (hierarchical level)</strong> loops. The ASN describes a nested structure, typically:</p>
+<h2>The hierarchical structure: the heart of the 856</h2>
+<p>What makes the 856 different from almost every other transaction is its use of <strong>HL (Hierarchical Level)</strong> loops. Rather than a flat list, the ASN describes a nested tree that mirrors how the shipment is physically organized. A very common pattern is:</p>
 <ul>
-  <li><strong>Shipment</strong> — the whole load</li>
-  <li><strong>Order</strong> — each PO within the shipment</li>
-  <li><strong>Pack</strong> — cartons or pallets</li>
-  <li><strong>Item</strong> — the products inside</li>
+  <li><strong>Shipment</strong> - the entire load (HL level code <code>S</code>)</li>
+  <li><strong>Order</strong> - each purchase order within the shipment (<code>O</code>)</li>
+  <li><strong>Pack</strong> - cartons or pallets (<code>P</code>)</li>
+  <li><strong>Item</strong> - the products inside each pack (<code>I</code>)</li>
 </ul>
-<p>Each level is an <code>HL</code> segment that points back to its parent, building a tree.</p>
+<p>This is often abbreviated as the "SOPI" structure. Each HL segment carries its own ID and a pointer to its parent, which is how the tree is assembled. The pattern is flexible: some ASNs use Shipment-Order-Item without packs, others add tare (pallet) levels. The HL design lets the same transaction model many physical packing arrangements.</p>
 
-<h2>Key segments</h2>
-<h3>BSN — Beginning Segment for Ship Notice</h3>
-<p>Carries the shipment identifier and date/time. <code>BSN*00*SHIP12345*20240220*1430</code>.</p>
-<h3>HL — Hierarchical Level</h3>
-<p><code>HL*1**S</code> starts a shipment level; <code>HL*2*1*O</code> is an order whose parent is level 1; and so on for pack (<code>P</code>) and item (<code>I</code>).</p>
-<h3>TD1 / TD5 — Carrier and packaging</h3>
-<p>Carrier details, routing, and how many packages.</p>
-<h3>SN1 — Item Detail</h3>
-<p>Quantity shipped for each item. <code>SN1**100*EA</code> = 100 each shipped.</p>
+<h3>How HL linking works</h3>
+<p>Consider these HL segments:</p>
+<pre><span class="seg">HL</span>*1**S~
+<span class="seg">HL</span>*2*1*O~
+<span class="seg">HL</span>*3*2*P~
+<span class="seg">HL</span>*4*3*I~</pre>
+<p>The first element is the HL's own number; the second is its parent's number; the third is the level code. So HL 1 is the shipment (no parent). HL 2 is an order whose parent is HL 1. HL 3 is a pack whose parent is the order. HL 4 is an item inside that pack. Read together, they build the shipment-order-pack-item tree.</p>
 
-<div class="adslot">Ad slot — insert AdSense unit here</div>
+<div class="adslot">Ad slot - insert AdSense unit here</div>
+
+<h2>Other key segments</h2>
+<h3>BSN - Beginning Segment for Ship Notice</h3>
+<p>Opens the ASN with a shipment identifier, date, and time. <code>BSN*00*SHIP12345*20240220*1430</code> means an original ship notice, shipment SHIP12345, dated 2024-02-20 at 14:30.</p>
+<h3>TD1, TD5, TD3 - Carrier and transport details</h3>
+<p>TD1 gives packaging and weight, TD5 gives the carrier and routing, and TD3 gives equipment (trailer or container) details.</p>
+<h3>MAN - Marks and Numbers</h3>
+<p>Carries the shipping label barcode values, such as the SSCC-18 on a pallet or carton. This is what warehouse scanners read to match a physical package to the ASN.</p>
+<h3>SN1 - Item Detail (Shipment)</h3>
+<p>At the item level, SN1 states the quantity shipped. <code>SN1**100*EA</code> means 100 each shipped for that item.</p>
+<h3>CTT and SE</h3>
+<p>CTT provides hierarchical-level totals for control, and SE closes the transaction.</p>
+
+<h2>A simplified worked example</h2>
+<pre><span class="seg">ST</span>*856*0001~
+<span class="seg">BSN</span>*00*SHIP12345*20240220*1430~
+<span class="seg">HL</span>*1**S~
+<span class="seg">TD5</span>*B*2*UPSN~
+<span class="seg">HL</span>*2*1*O~
+<span class="seg">PRF</span>*PO-99831~
+<span class="seg">HL</span>*3*2*I~
+<span class="seg">LIN</span>**UP*012345678905~
+<span class="seg">SN1</span>**100*EA~
+<span class="seg">CTT</span>*3~
+<span class="seg">SE</span>*10*0001~</pre>
+<p>In plain English: shipment SHIP12345 went out on 2024-02-20 at 14:30 via UPS. It contains one order, PO-99831, which includes 100 units of the item with UPC 012345678905.</p>
+
+<h2>Common pitfalls when reading an 856</h2>
+<ul>
+  <li><strong>Losing track of the hierarchy.</strong> Because the meaning of an SN1 or LIN depends on which HL it sits under, reading the ASN out of context is easy to get wrong. A viewer that shows the structure helps a lot.</li>
+  <li><strong>Mismatched ASN and physical shipment.</strong> If the ASN says 100 but 96 arrive, the receiving scan flags a shortage. ASN accuracy is everything.</li>
+  <li><strong>Label values not matching MAN.</strong> If the SSCC on the carton does not match the MAN segment, scan-based receiving breaks down.</li>
+</ul>
 
 <div class="trybox">
   <div class="tt">Untangle your own ASN</div>
-  <p>The 856's nesting is hard to read by eye. Paste it into the viewer and see the structure and quantities laid out clearly. Nothing is uploaded.</p>
+  <p>The 856's nesting is hard to follow by eye. Paste it into the viewer and see the hierarchy, carrier, and quantities laid out clearly, with a plain-English summary. Nothing is uploaded.</p>
   <a class="trybtn" href="/x12/">Open the X12 viewer</a>
 </div>
 
 <h2>Frequently asked questions</h2>
 <div class="faq">
-  <details><summary>What is the EDIFACT equivalent of an 856?</summary><div class="ans">The DESADV (Despatch Advice) message.</div></details>
-  <details><summary>Does the ASN come before or after the invoice?</summary><div class="ans">Before. The typical order is 850 (order), 855 (ack), 856 (ship notice), then 810 (invoice).</div></details>
+  <details><summary>What is the EDIFACT equivalent of an 856?</summary><div class="ans">The DESADV (despatch advice) message.</div></details>
+  <details><summary>Does the ASN come before or after the invoice?</summary><div class="ans">Before. The typical sequence is 850 order, 855 acknowledgment, 856 ship notice, then 810 invoice.</div></details>
+  <details><summary>What is SSCC?</summary><div class="ans">The Serial Shipping Container Code, an 18-digit identifier on pallet and carton labels. It appears in the MAN segment and is scanned during receiving to match packages to the ASN.</div></details>
+  <details><summary>Why is the 856 structure called SOPI?</summary><div class="ans">It stands for Shipment, Order, Pack, Item - the most common hierarchical arrangement of HL loops in an ASN.</div></details>
 </div>
 
-<div class="related"><h2>Related guides</h2><a href="/guides/edi-850/">EDI 850 — Purchase Order &rarr;</a><a href="/guides/edi-810/">EDI 810 — Invoice &rarr;</a><a href="/guides/x12-vs-edifact/">X12 vs EDIFACT &rarr;</a></div>
+<div class="related"><h2>Related guides</h2><a href="/guides/edi-850/">EDI 850 - Purchase Order &rarr;</a><a href="/guides/edi-810/">EDI 810 - Invoice &rarr;</a><a href="/guides/edi-855/">EDI 855 - PO Acknowledgment &rarr;</a><a href="/guides/x12-vs-edifact/">X12 vs EDIFACT &rarr;</a></div>
 </main>
 <footer>
   <div style="margin-bottom:10px"><a href="/">Home</a> · <a href="/guides/">Guides</a> · <a href="/about/">About</a> · <a href="/contact/">Contact</a> · <a href="/privacy/">Privacy</a> · <a href="/terms/">Terms</a></div>

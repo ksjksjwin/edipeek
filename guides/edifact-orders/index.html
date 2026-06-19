@@ -7,11 +7,27 @@
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2945012312110955"
      crossorigin="anonymous"></script>
-<meta name="description" content="What an EDIFACT ORDERS message is, how the UNB/UNH envelope works, and what BGM, NAD, LIN, QTY and PRI segments mean.">
+<meta name="description" content="A detailed guide to the UN/EDIFACT ORDERS message: the UNB/UNG/UNH envelope, key segments (BGM, DTM, NAD, LIN, QTY, PRI), the message version string, a worked example, and FAQs.">
 <link rel="canonical" href="https://edipeek.com/guides/edifact-orders/">
 <meta property="og:title" content="EDIFACT ORDERS">
-<meta property="og:description" content="What an EDIFACT ORDERS message is, how the UNB/UNH envelope works, and what BGM, NAD, LIN, QTY and PRI segments mean.">
+<meta property="og:description" content="A detailed guide to the UN/EDIFACT ORDERS message: the UNB/UNG/UNH envelope, key segments (BGM, DTM, NAD, LIN, QTY, PRI), the message version string, a worked example, and FAQs.">
 <meta property="og:type" content="article">
+<meta property="og:url" content="https://edipeek.com/guides/edifact-orders/">
+<meta property="og:site_name" content="EdiPeek">
+<meta name="robots" content="index, follow">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "EDIFACT ORDERS",
+  "description": "A detailed guide to the UN/EDIFACT ORDERS message: the UNB/UNG/UNH envelope, key segments (BGM, DTM, NAD, LIN, QTY, PRI), the message version string, a worked example, and FAQs.",
+  "url": "https://edipeek.com/guides/edifact-orders/",
+  "mainEntityOfPage": {"@type": "WebPage", "@id": "https://edipeek.com/guides/edifact-orders/"},
+  "author": {"@type": "Organization", "name": "EdiPeek"},
+  "publisher": {"@type": "Organization", "name": "EdiPeek", "url": "https://edipeek.com/"},
+  "dateModified": "2026-06-01"
+}
+</script>
 <style>
   :root{--bg:#0d1117;--panel:#161b22;--panel-2:#1c2330;--border:#2a3340;--ink:#e6edf3;--ink-dim:#8b97a7;--accent:#58a6ff;--green:#3fb950;--seg:#f0883e;--mono:"JetBrains Mono","SF Mono",ui-monospace,Menlo,Consolas,monospace}
   *{box-sizing:border-box;margin:0;padding:0}
@@ -39,6 +55,10 @@
   code{background:var(--panel-2);border:1px solid var(--border);padding:1px 6px;border-radius:4px;color:var(--ink);font-size:13px}
   pre{background:#0a0e13;border:1px solid var(--border);border-radius:8px;padding:14px 16px;overflow-x:auto;margin:14px 0;font-size:12.5px;line-height:1.6;color:#c4cdd9}
   pre .seg{color:var(--seg);font-weight:700}
+  table.t{width:100%;border-collapse:collapse;margin:14px 0;font-size:13px}
+  table.t th{text-align:left;color:var(--ink-dim);font-size:11px;text-transform:uppercase;letter-spacing:1px;padding:7px 9px;border-bottom:1px solid var(--border)}
+  table.t td{padding:7px 9px;border-bottom:1px dotted #243042;color:#c4cdd9;vertical-align:top}
+  table.t td code{white-space:nowrap}
   .trybox{background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--green);border-radius:8px;padding:16px 18px;margin:26px 0}
   .trybox .tt{font-size:13px;color:var(--ink);margin-bottom:6px;font-weight:700}
   .trybox p{font-size:13px;margin-bottom:10px}
@@ -76,58 +96,81 @@
 </header>
 <main>
   <div class="crumb"><a href="/">Home</a> / <a href="/guides/">Guides</a> / EDIFACT ORDERS</div>
-  <h1>EDIFACT ORDERS: The Purchase Order, Explained</h1>
-  <div class="meta">EdiPeek · Updated June 2026 · 5 min read</div>
+  <h1>EDIFACT ORDERS: The Purchase Order, Explained in Depth</h1>
+  <div class="meta">EdiPeek · Updated June 2026 · 7 min read</div>
 
-<p><strong>ORDERS</strong> is the UN/EDIFACT <strong>Purchase Order</strong> message — the international equivalent of the X12 <a href="/guides/edi-850/">850</a>. A buyer uses it to tell a supplier what to deliver: items, quantities, prices, and dates.</p>
+<p><strong>ORDERS</strong> is the UN/EDIFACT <strong>Purchase Order</strong> message - the international equivalent of the X12 <a href="/guides/edi-850/">850</a>. A buyer uses it to tell a supplier what to deliver: which items, in what quantities, at what prices, and by when. If you trade with European, Asian, or other international partners, ORDERS is one of the first EDIFACT messages you will encounter.</p>
 
 <h2>The EDIFACT envelope</h2>
-<p>Every EDIFACT interchange is wrapped in envelopes. An ORDERS message sits inside them:</p>
+<p>Every EDIFACT interchange is wrapped in envelopes, and an ORDERS message sits inside them. From the outside in:</p>
 <ul>
-  <li><strong>UNA</strong> — optional service string that declares the delimiters</li>
-  <li><strong>UNB</strong> — interchange header (sender, recipient, date, reference)</li>
-  <li><strong>UNH</strong> — message header; this is where <code>ORDERS</code> is named</li>
-  <li>… message body …</li>
-  <li><strong>UNT / UNZ</strong> — message and interchange trailers</li>
+  <li><strong>UNA</strong> - an optional service string advice that declares the delimiter characters, in case they differ from the defaults.</li>
+  <li><strong>UNB</strong> - the interchange header, identifying sender, recipient, date, time, and a control reference.</li>
+  <li><strong>UNG</strong> - an optional functional group header, grouping related messages.</li>
+  <li><strong>UNH</strong> - the message header. This is where the message type <code>ORDERS</code> and its version are named.</li>
+  <li>... the message body ...</li>
+  <li><strong>UNT</strong> - the message trailer, with a segment count.</li>
+  <li><strong>UNE / UNZ</strong> - the group and interchange trailers.</li>
 </ul>
+<p>If you want a deeper treatment of these wrappers, see our guide to <a href="/guides/edifact-unb-unh-envelope/">the UNB and UNH envelope</a>.</p>
 
-<h2>Key segments</h2>
-<h3>BGM — Beginning of Message</h3>
-<p>States the document type and number. <code>BGM+220+PO-55012+9</code> = order (code 220), number PO-55012, function 9 (original).</p>
-<h3>DTM — Date/Time</h3>
-<p><code>DTM+137:20240220:102</code> = document date 2024-02-20 (format 102 = CCYYMMDD).</p>
-<h3>NAD — Name and Address</h3>
-<p>Identifies parties by qualifier: <code>NAD+BY</code> buyer, <code>NAD+SU</code> supplier. The party is often a GLN (global location number).</p>
-<h3>LIN / QTY / PRI — Line items</h3>
-<p>A line is built from several segments: <code>LIN</code> identifies the product, <code>QTY+21:100</code> gives the quantity (100), and <code>PRI+AAA:12.50</code> the price (12.50).</p>
+<h2>Reading the UNH version string</h2>
+<p>The UNH segment carries something X12 handles differently: an explicit version. A header like <code>UNH+1+ORDERS:D:96A:UN</code> reads as message reference 1, message type ORDERS, directory <code>D</code>, release <code>96A</code>, controlling agency <code>UN</code>. That <code>D:96A:UN</code> tells the receiver exactly which dictionary of segments and codes to apply when interpreting the message. Two partners must agree on the version, because segment usage changes between releases like D96A and D01B.</p>
 
-<div class="adslot">Ad slot — insert AdSense unit here</div>
+<h2>The key segments of an ORDERS message</h2>
+<h3>BGM - Beginning of Message</h3>
+<p>States the document type and number. <code>BGM+220+PO-55012+9</code> means a purchase order (document code 220), number PO-55012, message function 9 (original). The function code matters: 9 is an original, while other codes indicate a change or cancellation.</p>
+<h3>DTM - Date/Time/Period</h3>
+<p>Dates are coded by qualifier. <code>DTM+137:20240220:102</code> means document date (qualifier 137), value 2024-02-20, in format 102 (CCYYMMDD). A delivery date would use a different qualifier such as 2.</p>
+<h3>NAD - Name and Address</h3>
+<p>Identifies parties by a qualifier in the first element: <code>NAD+BY</code> is the buyer, <code>NAD+SU</code> is the supplier, <code>NAD+DP</code> is the delivery party. The party is frequently identified by a GLN (Global Location Number), a globally unique code for a company or location, as in <code>NAD+BY+5412345000013::9</code> where <code>9</code> indicates the GS1 code list.</p>
+<h3>LIN, QTY, PRI - the line-item group</h3>
+<p>An EDIFACT line item is assembled from several segments working together. <code>LIN+1++5410738377056:EN</code> opens line 1 and identifies the product by EAN/GTIN. <code>QTY+21:100</code> gives the quantity (qualifier 21 = ordered quantity, value 100). <code>PRI+AAA:12.50</code> gives the price (qualifier AAA = calculation net, value 12.50). Reading them together yields: line 1, 100 units of this product at 12.50 each.</p>
+<h3>IMD - Item Description</h3>
+<p>A free-form or coded description that accompanies a line, such as a product name.</p>
+<h3>UNS, CNT - section control and totals</h3>
+<p>UNS separates the header and detail sections; CNT provides control totals.</p>
 
-<h2>A complete mini example</h2>
-<pre><span class="seg">UNH</span>+1+ORDERS:D:96A:UN'
+<div class="adslot">Ad slot - insert AdSense unit here</div>
+
+<h2>A complete worked example</h2>
+<pre><span class="seg">UNB</span>+UNOC:3+5790001234567:14+5790007654321:14+240220:0900+REF00001'
+<span class="seg">UNH</span>+1+ORDERS:D:96A:UN'
 <span class="seg">BGM</span>+220+PO-55012+9'
 <span class="seg">DTM</span>+137:20240220:102'
 <span class="seg">NAD</span>+BY+5412345000013::9'
 <span class="seg">NAD</span>+SU+4012345000094::9'
 <span class="seg">LIN</span>+1++5410738377056:EN'
+<span class="seg">IMD</span>+F++:::WIDGET BLUE 12IN'
 <span class="seg">QTY</span>+21:100'
 <span class="seg">PRI</span>+AAA:12.50'
-<span class="seg">UNT</span>+8+1'</pre>
-<p>In plain English: the buyer ordered 100 units of one product at 12.50 each on order PO-55012.</p>
+<span class="seg">UNS</span>+S'
+<span class="seg">CNT</span>+2:1'
+<span class="seg">UNT</span>+11+1'</pre>
+<p>In plain English: the buyer (GLN 5412345000013) placed order PO-55012 on 2024-02-20 with the supplier (GLN 4012345000094), for 100 blue 12-inch widgets at 12.50 each.</p>
+
+<h2>Common pitfalls when reading ORDERS</h2>
+<ul>
+  <li><strong>Forgetting the release character.</strong> EDIFACT uses <code>?</code> to escape delimiters. <code>?+</code> is a literal plus, not a separator. Misreading this corrupts the parse.</li>
+  <li><strong>Treating components as elements.</strong> The colon separates components within an element. <code>5410738377056:EN</code> is one element with two components, not two elements.</li>
+  <li><strong>Ignoring qualifiers.</strong> In QTY and DTM, the leading qualifier changes the meaning entirely. <code>QTY+21</code> (ordered) and <code>QTY+12</code> (despatch) are very different.</li>
+</ul>
 
 <div class="trybox">
   <div class="tt">Decode your own ORDERS</div>
-  <p>Paste an EDIFACT message into the viewer to see the envelope, parties, and line items explained — in your browser, nothing uploaded.</p>
+  <p>Paste an EDIFACT message into the viewer to see the envelope, parties, and line items explained, with a plain-English summary. In your browser, nothing uploaded.</p>
   <a class="trybtn edi" href="/edifact/">Open the EDIFACT viewer</a>
 </div>
 
 <h2>Frequently asked questions</h2>
 <div class="faq">
-  <details><summary>How is ORDERS different from the X12 850?</summary><div class="ans">Same business purpose, different syntax. EDIFACT uses + and : delimiters and segments end with an apostrophe. See <a href="/guides/x12-vs-edifact/">X12 vs EDIFACT</a>.</div></details>
-  <details><summary>What does D:96A:UN mean in the UNH?</summary><div class="ans">It is the message version: directory D, release 96A, controlling agency UN. It tells the receiver which dictionary of segments to use.</div></details>
+  <details><summary>How is ORDERS different from the X12 850?</summary><div class="ans">Same business purpose, different syntax. EDIFACT uses + and : delimiters, segments end with an apostrophe, and parties are in NAD segments rather than N1 loops. See <a href="/guides/x12-vs-edifact/">X12 vs EDIFACT</a>.</div></details>
+  <details><summary>What does D:96A:UN mean in the UNH?</summary><div class="ans">It is the message version: directory D, release 96A, controlling agency UN. It tells the receiver which dictionary of segments and codes to use.</div></details>
+  <details><summary>What is a GLN?</summary><div class="ans">A Global Location Number, a GS1 standard identifier for a company or location, commonly used in NAD segments to identify trading partners unambiguously.</div></details>
+  <details><summary>What does the message function code in BGM mean?</summary><div class="ans">It indicates whether the message is an original (9), a change, a cancellation, and so on. It is essential for knowing how to process the message.</div></details>
 </div>
 
-<div class="related"><h2>Related guides</h2><a href="/guides/edifact-invoic/">EDIFACT INVOIC &rarr;</a><a href="/guides/x12-vs-edifact/">X12 vs EDIFACT &rarr;</a><a href="/guides/edi-850/">EDI 850 — Purchase Order &rarr;</a></div>
+<div class="related"><h2>Related guides</h2><a href="/guides/edifact-invoic/">EDIFACT INVOIC &rarr;</a><a href="/guides/x12-vs-edifact/">X12 vs EDIFACT &rarr;</a><a href="/guides/edi-850/">EDI 850 - Purchase Order &rarr;</a><a href="/guides/edifact-unb-unh-envelope/">The UNB / UNH Envelope &rarr;</a></div>
 </main>
 <footer>
   <div style="margin-bottom:10px"><a href="/">Home</a> · <a href="/guides/">Guides</a> · <a href="/about/">About</a> · <a href="/contact/">Contact</a> · <a href="/privacy/">Privacy</a> · <a href="/terms/">Terms</a></div>
