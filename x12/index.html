@@ -114,6 +114,14 @@
   .out::-webkit-scrollbar-thumb{background:var(--border);border-radius:6px}
 
   .toolbar{display:flex;gap:8px;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid var(--border);background:var(--panel-2)}
+  .filetabs{display:flex;gap:6px;flex-wrap:wrap;padding:9px 14px;border-bottom:1px solid var(--border);background:#0a0e13}
+  .filetab{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:11px;background:var(--panel);color:var(--ink-dim);border:1px solid var(--border);padding:5px 10px;border-radius:6px;cursor:pointer;transition:.12s;max-width:220px}
+  .filetab:hover{border-color:var(--accent)}
+  .filetab.active{color:var(--ink);border-color:var(--accent);background:rgba(63,185,80,.08)}
+  .filetab .fn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .filetab .ft{font-size:9px;font-weight:700;color:var(--accent);background:rgba(88,166,255,.12);padding:1px 5px;border-radius:4px;flex-shrink:0}
+  .filetab .fx{color:var(--ink-dim);flex-shrink:0;padding-left:2px;opacity:.6}
+  .filetab .fx:hover{opacity:1;color:var(--red)}
   button{
     font-family:var(--mono);font-size:12px;cursor:pointer;
     background:var(--panel);color:var(--ink);border:1px solid var(--border);
@@ -257,11 +265,14 @@
       </div>
       <div class="toolbar">
         <button class="primary" id="parseBtn">▶ Parse</button>
+        <button id="uploadBtn">📁 Upload files</button>
         <button id="sampleBtn">Sample: 850 PO</button>
         <button id="sample837Btn">Sample: 837 Claim</button>
         <button id="clearBtn">Clear</button>
+        <input type="file" id="fileInput" multiple accept=".edi,.txt,.x12,.dat,text/plain" style="display:none">
       </div>
-      <textarea id="input" spellcheck="false" placeholder="ISA*00*          *00*          *ZZ*SENDERID       *ZZ*RECEIVERID     *...&#10;&#10;Paste your EDI here, then hit Parse.&#10;&#10;Segment terminators (~ or newline) and element separators (*) are auto-detected."></textarea>
+      <div class="filetabs" id="fileTabs" style="display:none"></div>
+      <textarea id="input" spellcheck="false" placeholder="ISA*00*          *00*          *ZZ*SENDERID       *ZZ*RECEIVERID     *...&#10;&#10;Paste your EDI here, then hit Parse.&#10;&#10;Or upload one or more files. Segment terminators (~ or newline) and element separators (*) are auto-detected."></textarea>
       <div class="stat" id="inStat">Waiting for input…</div>
     </div>
 
@@ -1081,9 +1092,83 @@ document.querySelectorAll(".tab").forEach(t=>{
 });
 
 document.getElementById("parseBtn").onclick=parse;
+
+/* ---------- multi-file upload with tabs (view one at a time) ---------- */
+let UPLOADED=[]; // {name, raw, type}
+let activeFile=-1;
+
+function detectType(raw){
+  try{
+    const {elem,segT}=detectDelims(raw);
+    const segs=raw.replace(/\r/g,"").split(segT);
+    for(const s of segs){
+      const f=s.replace(/\n/g,"").trim().split(elem);
+      if((f[0]||"").trim().toUpperCase()==="ST") return (f[1]||"").trim();
+    }
+  }catch(e){}
+  return "";
+}
+
+function renderFileTabs(){
+  const bar=document.getElementById("fileTabs");
+  if(!UPLOADED.length){ bar.style.display="none"; bar.innerHTML=""; return; }
+  bar.style.display="flex";
+  bar.innerHTML=UPLOADED.map((f,i)=>{
+    const t=f.type?("X12 "+esc(f.type)):"?";
+    return '<span class="filetab'+(i===activeFile?" active":"")+'" data-i="'+i+'">'+
+      '<span class="ft">'+t+'</span>'+
+      '<span class="fn" title="'+esc(f.name)+'">'+esc(f.name)+'</span>'+
+      '<span class="fx" data-x="'+i+'" title="Remove">✕</span>'+
+    '</span>';
+  }).join("");
+  bar.querySelectorAll(".filetab").forEach(el=>{
+    el.onclick=e=>{
+      if(e.target.classList.contains("fx")) return;
+      selectFile(parseInt(el.getAttribute("data-i"),10));
+    };
+  });
+  bar.querySelectorAll(".fx").forEach(x=>{
+    x.onclick=e=>{ e.stopPropagation(); removeFile(parseInt(x.getAttribute("data-x"),10)); };
+  });
+}
+
+function selectFile(i){
+  if(i<0||i>=UPLOADED.length) return;
+  activeFile=i;
+  document.getElementById("input").value=UPLOADED[i].raw;
+  document.getElementById("inStat").textContent=UPLOADED[i].raw.length+" characters · "+UPLOADED[i].name;
+  renderFileTabs();
+  parse();
+}
+
+function removeFile(i){
+  UPLOADED.splice(i,1);
+  if(activeFile>=UPLOADED.length) activeFile=UPLOADED.length-1;
+  if(UPLOADED.length){ selectFile(Math.max(0,activeFile)); }
+  else { activeFile=-1; renderFileTabs(); }
+}
+
+function ingestFiles(fileList){
+  const arr=[...fileList];
+  let pending=arr.length;
+  if(!pending) return;
+  arr.forEach(file=>{
+    const reader=new FileReader();
+    reader.onload=e=>{
+      const raw=String(e.target.result||"");
+      UPLOADED.push({name:file.name,raw,type:detectType(raw)});
+      if(--pending===0){ selectFile(UPLOADED.length-1); }
+    };
+    reader.onerror=()=>{ if(--pending===0&&UPLOADED.length) selectFile(UPLOADED.length-1); };
+    reader.readAsText(file);
+  });
+}
+
+document.getElementById("uploadBtn").onclick=()=>document.getElementById("fileInput").click();
+document.getElementById("fileInput").onchange=e=>{ ingestFiles(e.target.files); e.target.value=""; };
 document.getElementById("expandBtn").onclick=()=>document.querySelectorAll(".seg").forEach(s=>s.classList.add("open"));
 document.getElementById("collapseBtn").onclick=()=>document.querySelectorAll(".seg").forEach(s=>s.classList.remove("open"));
-document.getElementById("clearBtn").onclick=()=>{document.getElementById("input").value="";document.getElementById("segView").innerHTML='<div class="placeholder"><div class="big">⌖</div>Parsed segments will appear here.</div>';document.getElementById("bizView").innerHTML='<div class="placeholder"><div class="big">💬</div>A plain-English summary will appear here after you parse.</div>';document.getElementById("inStat").textContent="Waiting for input…";document.getElementById("outStat").textContent="—";};
+document.getElementById("clearBtn").onclick=()=>{UPLOADED=[];activeFile=-1;renderFileTabs();document.getElementById("input").value="";document.getElementById("segView").innerHTML='<div class="placeholder"><div class="big">⌖</div>Parsed segments will appear here.</div>';document.getElementById("bizView").innerHTML='<div class="placeholder"><div class="big">💬</div>A plain-English summary will appear here after you parse.</div>';document.getElementById("inStat").textContent="Waiting for input…";document.getElementById("outStat").textContent="—";};
 document.getElementById("copyBtn").onclick=()=>{
   let txt=segments.map(s=>{const d=SEG[s.id];let l=s.id+" ("+(d?d.name:"unknown")+")\n";for(let i=1;i<s.fields.length;i++){const dd=d&&d.el[i]?d.el[i]:"Element "+i;l+="   "+s.id+String(i).padStart(2,"0")+" "+dd+": "+s.fields[i]+"\n";}return l;}).join("\n");
   if(!txt){return;}
