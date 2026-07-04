@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Free Online EDI Viewer — X12 &amp; UN/EDIFACT Parser (No Upload)</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2945012312110955"
+     crossorigin="anonymous"></script>
+<meta name="description" content="Free in-browser EDI viewers. Parse and read X12 (850, 810, 856, 837, 835) and UN/EDIFACT (ORDERS, INVOIC, DESADV) messages instantly. Files never leave your computer.">
+<link rel="canonical" href="https://edipeek.com/">
+<meta property="og:title" content="Free Online EDI Viewer — X12 & UN/EDIFACT">
+<meta property="og:description" content="Read raw EDI in your browser. X12 and EDIFACT, with plain-English business summaries. No upload, no signup.">
+<meta property="og:url" content="https://edipeek.com/">
+<meta property="og:site_name" content="EdiPeek">
+<meta property="og:type" content="website">
+<meta name="robots" content="index, follow">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "EdiPeek",
+  "url": "https://edipeek.com/",
+  "description": "Free in-browser EDI viewers for ANSI X12 and UN/EDIFACT, with plain-English business summaries. Files are processed locally and never uploaded.",
+  "publisher": {
+    "@type": "Organization",
+    "name": "EdiPeek",
+    "url": "https://edipeek.com/"
+  }
+}
+</script>
+<style>
+  :root{
+    --bg:#0d1117;--panel:#161b22;--panel-2:#1c2330;--border:#2a3340;
+    --ink:#e6edf3;--ink-dim:#8b97a7;--green:#3fb950;--blue:#58a6ff;
+    --mono:"JetBrains Mono","SF Mono",ui-monospace,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--ink);font-family:var(--mono);line-height:1.5;font-size:15px}
+  body{background-image:radial-gradient(circle at 20% -10%,rgba(63,185,80,.07),transparent 45%),radial-gradient(circle at 90% 0%,rgba(88,166,255,.07),transparent 40%);min-height:100vh}
+  a{text-decoration:none;color:inherit}
+  header{border-bottom:1px solid var(--border);padding:18px 22px;display:flex;align-items:center;gap:12px}
+  .logo{font-weight:700;font-size:18px;letter-spacing:-.5px}
+  .logo .b{color:var(--blue)}.logo .g{color:var(--green)}
+  .blink{color:var(--green);animation:blink 1.2s steps(2,start) infinite}
+  @keyframes blink{to{opacity:0}}
+  main{max-width:960px;margin:0 auto;padding:60px 22px 80px}
+  h1{font-size:32px;letter-spacing:-1px;line-height:1.15;margin-bottom:14px}
+  h1 .g{color:var(--green)}h1 .b{color:var(--blue)}
+  .sub{color:var(--ink-dim);max-width:620px;margin-bottom:14px;font-size:16px}
+  .privacy{color:var(--green);font-size:13px;display:inline-flex;gap:8px;align-items:center;border:1px solid rgba(63,185,80,.3);background:rgba(63,185,80,.06);padding:7px 12px;border-radius:8px;margin-bottom:44px}
+  .cards{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px}
+  @media(max-width:900px){.cards{grid-template-columns:1fr 1fr}}
+  @media(max-width:760px){.cards{grid-template-columns:1fr}}
+  .card{display:block;background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:26px;transition:.18s}
+  .card:hover{transform:translateY(-3px)}
+  .card.x12:hover{border-color:var(--green);box-shadow:0 10px 40px -18px rgba(63,185,80,.5)}
+  .card.edi:hover{border-color:var(--blue);box-shadow:0 10px 40px -18px rgba(88,166,255,.5)}
+  .card .badge{display:inline-block;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;padding:4px 10px;border-radius:99px;margin-bottom:16px}
+  .card.x12 .badge{color:var(--green);border:1px solid rgba(63,185,80,.4);background:rgba(63,185,80,.07)}
+  .card.edi .badge{color:var(--blue);border:1px solid rgba(88,166,255,.4);background:rgba(88,166,255,.07)}
+  .card h2{font-size:21px;margin-bottom:8px;letter-spacing:-.4px}
+  .card p{color:var(--ink-dim);font-size:14px;margin-bottom:16px;min-height:60px}
+  .card .types{color:var(--ink-dim);font-size:12px;line-height:1.9}
+  .card .types b{color:var(--ink)}
+  .card .go{margin-top:18px;font-size:13px;font-weight:700}
+  .card.x12 .go{color:var(--green)}.card.edi .go{color:var(--blue)}
+  .card.analyzer:hover{border-color:#bc8cff;box-shadow:0 10px 40px -18px rgba(188,140,255,.5)}
+  .card.analyzer .badge{color:#bc8cff;border:1px solid rgba(188,140,255,.4);background:rgba(188,140,255,.07)}
+  .card.analyzer .go{color:#bc8cff}
+  .why{margin-top:54px;border-top:1px solid var(--border);padding-top:32px}
+  .why h3{font-size:16px;margin-bottom:14px}
+  .why ul{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:760px){.why ul{grid-template-columns:1fr}}
+  .why li{color:var(--ink-dim);font-size:14px;padding-left:22px;position:relative}
+  .why li:before{content:"\25B8";position:absolute;left:0;color:var(--green)}
+  footer{border-top:1px solid var(--border);padding:24px 22px;text-align:center;color:var(--ink-dim);font-size:12px;margin-top:40px}
+  footer a{color:var(--blue)}
+</style>
+</head>
+<body>
+<header>
+  <a href="/" style="text-decoration:none;display:flex;align-items:center;gap:9px">
+    <svg viewBox="0 0 28 28" width="26" height="26" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="color:var(--green);flex-shrink:0">
+      <circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/>
+      <line x1="17.6" y1="17.6" x2="25" y2="25" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+      <line x1="8" y1="10" x2="16" y2="10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.9"/>
+      <line x1="8" y1="13" x2="14" y2="13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+      <line x1="8" y1="16" x2="15" y2="16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
+    </svg>
+    <span class="logo">EDI<span class="b">PEEK</span><span class="blink">_</span></span>
+  </a>
+</header>
+<main>
+  <h1>Read raw <span class="g">EDI</span> in your <span class="b">browser</span>.</h1>
+  <p class="sub">Paste an EDI message and get a clean, human-readable breakdown of every segment, plus a plain-English summary of what the transaction actually means. Two standards, one place.</p>
+  <div class="privacy">&#128274; Your file never leaves your computer. All parsing happens locally in your browser.</div>
+
+  <div class="cards">
+    <a class="card x12" href="x12/">
+      <span class="badge">North America</span>
+      <h2>ANSI X12 Viewer</h2>
+      <p>The North American EDI standard. Purchase orders, invoices, shipping notices, healthcare claims and more.</p>
+      <div class="types">
+        <b>Supply chain:</b> 850, 855, 856, 810, 846, 940/945<br>
+        <b>Healthcare:</b> 837, 835, 270/271, 276/277, 834<br>
+        <b>Finance &amp; transport:</b> 820, 204, 210, 214, 990
+      </div>
+      <div class="go">Open X12 viewer &#8594;</div>
+    </a>
+
+    <a class="card edi" href="edifact/">
+      <span class="badge">International / EU</span>
+      <h2>UN/EDIFACT Viewer</h2>
+      <p>The international EDI standard used across Europe and worldwide. Orders, invoices, despatch, transport and customs.</p>
+      <div class="types">
+        <b>Supply chain:</b> ORDERS, ORDRSP, INVOIC, PRICAT, DELFOR<br>
+        <b>Logistics:</b> DESADV, IFTMIN, IFTSTA, COPARN<br>
+        <b>Finance &amp; customs:</b> REMADV, PAYMUL, CUSDEC, CUSRES
+      </div>
+      <div class="go">Open EDIFACT viewer &#8594;</div>
+    </a>
+
+    <a class="card analyzer" href="analyze/">
+      <span class="badge">New · Batch</span>
+      <h2>EDI Analyzer</h2>
+      <p>Upload many files at once. Validates each against business rules, then links your 850, 856, and 810 into a lifecycle and flags quantity and amount discrepancies.</p>
+      <div class="types">
+        <b>Batch validation:</b> envelope controls, counts, totals<br>
+        <b>Lifecycle:</b> order &#8594; ship &#8594; invoice by PO number<br>
+        <b>Discrepancies:</b> ordered vs shipped vs billed
+      </div>
+      <div class="go">Open EDI Analyzer &#8594;</div>
+    </a>
+  </div>
+
+  <div class="why">
+    <h3>Why this tool</h3>
+    <ul>
+      <li>100% in-browser, sensitive trading-partner data never gets uploaded</li>
+      <li>Auto-detects delimiters from the ISA / UNA service string</li>
+      <li>Plain-English business summary, not just a segment dump</li>
+      <li>Free, no sign-up, works on mobile and desktop</li>
+    </ul>
+  </div>
+</main>
+<footer>
+  <div style="margin-bottom:12px"><a href="https://ko-fi.com/edipeek" target="_blank" rel="noopener" style="display:inline-block;color:#13c3ff;border:1px solid rgba(19,195,255,.4);background:rgba(19,195,255,.08);padding:8px 16px;border-radius:8px;font-size:13px">☕ Support EdiPeek — keep it free</a></div>
+  <div style="margin-bottom:10px"><a href="/guides/">Guides</a> &middot; <a href="/about/">About</a> &middot; <a href="/contact/">Contact</a> &middot; <a href="/privacy/">Privacy</a> &middot; <a href="/terms/">Terms</a></div>
+  EdiPeek, free in-browser EDI parsers. Not affiliated with any standards body. Files are processed locally and never uploaded.
+</footer>
+</body>
+</html>

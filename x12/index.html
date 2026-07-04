@@ -205,6 +205,16 @@
   .faq .ans{padding:0 15px 14px;color:var(--ink-dim);font-size:13px}
 
   footer{border-top:1px solid var(--border);padding:24px 22px;text-align:center;color:var(--ink-dim);font-size:12px}
+  .val{border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:13px}
+  .val.ok{border-color:rgba(63,185,80,.45);background:rgba(63,185,80,.06)}
+  .val.ok .vh{color:var(--green)}
+  .val .vh{font-weight:700;margin-bottom:6px;color:var(--ink)}
+  .val .vn{color:var(--ink-dim);font-size:11px;margin-top:6px}
+  .vitem{display:flex;gap:8px;padding:3px 0;color:#c4cdd9;align-items:baseline}
+  .vtag{flex-shrink:0;font-size:10px;border-radius:99px;padding:1px 8px;font-weight:700}
+  .vtag.err{color:#f85149;border:1px solid rgba(248,81,73,.45)}
+  .vtag.warn{color:#f0883e;border:1px solid rgba(240,136,62,.45)}
+  .vtag.info{color:var(--accent);border:1px solid rgba(88,166,255,.45)}
 </style>
 </head>
 <body>
@@ -225,6 +235,7 @@
   <div class="spacer"></div>
   <a class="ghbtn" href="/" style="text-decoration:none">⌂ Home</a>
   <a class="ghbtn" href="../edifact/" style="text-decoration:none">EDIFACT →</a>
+  <a class="ghbtn" href="../analyze/" style="text-decoration:none">Analyzer →</a>
   <a class="kofi-btn" href="https://ko-fi.com/edipeek" target="_blank" rel="noopener">☕ Support</a>
 </header>
 
@@ -345,82 +356,220 @@
 </footer>
 
 <script>
-/* ---------- Minimal X12 segment + element dictionary ----------
-   Enough to be genuinely useful; expand over time for SEO depth. */
+/* ---------- X12 segment + element dictionary ----------
+   100+ common segments across supply chain, transportation, warehouse,
+   finance, and healthcare (HIPAA) transaction sets, plus code-list
+   translations for the most frequent qualifier elements.
+   Note: this is a practical working subset drawn from public knowledge,
+   not the licensed X12 standard, and is not release-specific. */
 const SEG = {
+  // --- Envelope ---
   ISA:{name:"Interchange Control Header",el:{1:"Auth Info Qualifier",2:"Auth Info",3:"Security Qualifier",4:"Security Info",5:"Sender ID Qualifier",6:"Interchange Sender ID",7:"Receiver ID Qualifier",8:"Interchange Receiver ID",9:"Interchange Date (YYMMDD)",10:"Interchange Time (HHMM)",11:"Repetition Sep",12:"Version Number",13:"Interchange Control Number",14:"Ack Requested",15:"Usage Indicator",16:"Component Element Sep"}},
   GS:{name:"Functional Group Header",el:{1:"Functional ID Code",2:"App Sender Code",3:"App Receiver Code",4:"Date (CCYYMMDD)",5:"Time",6:"Group Control Number",7:"Responsible Agency",8:"Version/Release"}},
   ST:{name:"Transaction Set Header",el:{1:"Transaction Set ID",2:"Transaction Set Control Number"}},
+  SE:{name:"Transaction Set Trailer",el:{1:"Number of Segments",2:"Transaction Set Control Number"}},
+  GE:{name:"Functional Group Trailer",el:{1:"Number of Transaction Sets",2:"Group Control Number"}},
+  IEA:{name:"Interchange Control Trailer",el:{1:"Number of Functional Groups",2:"Interchange Control Number"}},
+  // --- Order / invoice headers ---
   BEG:{name:"Beginning Segment for PO",el:{1:"Transaction Set Purpose",2:"PO Type",3:"PO Number",4:"Release Number",5:"Date"}},
+  BAK:{name:"Beginning Segment for PO Acknowledgment",el:{1:"Transaction Set Purpose",2:"Acknowledgment Type",3:"PO Number",4:"PO Date",8:"Acknowledgment Date"}},
+  BCH:{name:"Beginning Segment for PO Change",el:{1:"Transaction Set Purpose",2:"PO Type",3:"PO Number",4:"Release Number",5:"Change Order Sequence",6:"PO Date"}},
+  BCA:{name:"Beginning Segment for PO Change Ack",el:{1:"Transaction Set Purpose",2:"Acknowledgment Type",3:"PO Number",6:"PO Date"}},
   BIG:{name:"Beginning Segment for Invoice",el:{1:"Invoice Date",2:"Invoice Number",3:"PO Date",4:"PO Number"}},
   BSN:{name:"Beginning Segment for Ship Notice",el:{1:"Transaction Set Purpose",2:"Shipment ID",3:"Date",4:"Time",5:"Hierarchical Structure Code"}},
+  BGN:{name:"Beginning Segment",el:{1:"Transaction Set Purpose",2:"Reference ID",3:"Date",4:"Time"}},
+  BIA:{name:"Beginning Segment for Inventory Advice",el:{1:"Transaction Set Purpose",2:"Report Type",3:"Reference ID",4:"Date"}},
+  BFR:{name:"Beginning Segment for Planning Schedule",el:{1:"Transaction Set Purpose",2:"Reference ID",4:"Schedule Type Qualifier",6:"Horizon Start Date",8:"Generation Date"}},
   BPR:{name:"Beginning Segment for Payment Order",el:{1:"Transaction Handling",2:"Monetary Amount",3:"Credit/Debit Flag",4:"Payment Method"}},
-  REF:{name:"Reference Information",el:{1:"Reference ID Qualifier",2:"Reference ID"}},
+  // --- Common header/detail segments ---
+  CUR:{name:"Currency",el:{1:"Entity ID Code",2:"Currency Code",3:"Exchange Rate"}},
+  REF:{name:"Reference Information",el:{1:"Reference ID Qualifier",2:"Reference ID",3:"Description"}},
+  N9:{name:"Extended Reference Information",el:{1:"Reference ID Qualifier",2:"Reference ID",3:"Free-form Description"}},
+  PER:{name:"Administrative Contact",el:{1:"Contact Function",2:"Name",3:"Comm Number Qualifier",4:"Comm Number"}},
+  G61:{name:"Contact",el:{1:"Contact Function Code",2:"Name",3:"Comm Number Qualifier",4:"Comm Number"}},
   DTM:{name:"Date/Time Reference",el:{1:"Date/Time Qualifier",2:"Date",3:"Time"}},
+  G62:{name:"Date/Time",el:{1:"Date Qualifier",2:"Date",3:"Time Qualifier",4:"Time"}},
+  DTP:{name:"Date or Time Period",el:{1:"Date/Time Qualifier",2:"Date Format",3:"Date Value"}},
+  ITD:{name:"Terms of Sale",el:{1:"Terms Type Code",2:"Terms Basis Date Code",3:"Discount Percent",4:"Discount Due Date",5:"Discount Days Due",6:"Net Due Date",7:"Net Days",8:"Discount Amount"}},
+  FOB:{name:"F.O.B. Related Instructions",el:{1:"Shipment Method of Payment",2:"Location Qualifier",3:"Location Description"}},
+  NTE:{name:"Note / Special Instruction",el:{1:"Note Reference Code",2:"Description"}},
+  MSG:{name:"Message Text",el:{1:"Free-Form Message Text"}},
+  K1:{name:"Remarks",el:{1:"Free-Form Message",2:"Free-Form Message (2)"}},
   N1:{name:"Party Identification",el:{1:"Entity ID Code",2:"Name",3:"ID Code Qualifier",4:"ID Code"}},
   N2:{name:"Additional Name",el:{1:"Name"}},
   N3:{name:"Address Information",el:{1:"Address Line 1",2:"Address Line 2"}},
   N4:{name:"Geographic Location",el:{1:"City",2:"State/Province",3:"Postal Code",4:"Country"}},
-  PER:{name:"Administrative Contact",el:{1:"Contact Function",2:"Name",3:"Comm Number Qualifier",4:"Comm Number"}},
-  PO1:{name:"Purchase Order Baseline Item",el:{1:"Line Number",2:"Quantity",3:"Unit of Measure",4:"Unit Price",5:"Basis of Unit Price",6:"Product ID Qualifier",7:"Product ID"}},
+  // --- Line items & product ---
+  PO1:{name:"Purchase Order Baseline Item",el:{1:"Line Number",2:"Quantity",3:"Unit of Measure",4:"Unit Price",5:"Basis of Unit Price",6:"Product ID Qualifier",7:"Product ID",8:"Product ID Qualifier (2)",9:"Product ID (2)"}},
   IT1:{name:"Invoice Baseline Item",el:{1:"Line Number",2:"Quantity Invoiced",3:"Unit of Measure",4:"Unit Price",5:"Basis of Unit Price",6:"Product ID Qualifier",7:"Product ID"}},
+  IT3:{name:"Additional Item Data",el:{1:"Number of Units Shipped",2:"Unit of Measure"}},
+  SLN:{name:"Subline Item Detail",el:{1:"Assigned ID",3:"Relationship Code",4:"Quantity",5:"Unit of Measure",6:"Unit Price"}},
   PID:{name:"Product/Item Description",el:{1:"Item Description Type",2:"Product Characteristic",3:"Agency Code",4:"Product Description Code",5:"Description"}},
-  HL:{name:"Hierarchical Level",el:{1:"Hierarchical ID",2:"Parent ID",3:"Level Code",4:"Child Code"}},
-  TD1:{name:"Carrier Details (Quantity)",el:{1:"Packaging Code",2:"Lading Quantity"}},
-  TD5:{name:"Carrier Details (Routing)",el:{1:"Routing Sequence",2:"ID Qualifier",3:"Carrier ID",4:"Transport Method"}},
-  LIN:{name:"Item Identification",el:{1:"Line Number",2:"Product ID Qualifier",3:"Product ID"}},
-  SN1:{name:"Item Detail (Shipment)",el:{1:"Assigned ID",2:"Quantity Shipped",3:"Unit of Measure"}},
+  G69:{name:"Line Item Detail - Description",el:{1:"Free-form Description"}},
+  LIN:{name:"Item Identification",el:{1:"Line Number",2:"Product ID Qualifier",3:"Product ID",4:"Product ID Qualifier (2)",5:"Product ID (2)"}},
+  PO4:{name:"Item Physical Details",el:{1:"Pack",2:"Size",3:"Unit of Measure",4:"Packaging Code"}},
+  CTP:{name:"Pricing Information",el:{1:"Class of Trade",2:"Price ID Qualifier",3:"Unit Price",4:"Quantity"}},
+  SDQ:{name:"Destination Quantity",el:{1:"Unit of Measure",2:"ID Code Qualifier",3:"Location ID",4:"Quantity",5:"Location ID (2)",6:"Quantity (2)"}},
+  SCH:{name:"Line Item Schedule",el:{1:"Quantity",2:"Unit of Measure",3:"Entity ID Code",4:"Name",5:"Date Qualifier",6:"Date"}},
+  ACK:{name:"Line Item Acknowledgment",el:{1:"Line Item Status Code",2:"Quantity",3:"Unit of Measure",4:"Date Qualifier",5:"Date",7:"Product ID Qualifier",8:"Product ID"}},
+  QTY:{name:"Quantity Information",el:{1:"Quantity Qualifier",2:"Quantity",3:"Unit of Measure"}},
+  MEA:{name:"Measurements",el:{1:"Measurement Reference Code",2:"Measurement Qualifier",3:"Measurement Value",4:"Unit of Measure"}},
+  PKG:{name:"Marking / Packaging / Loading",el:{1:"Item Description Type",2:"Packaging Characteristic",3:"Agency Code",4:"Packaging Description Code",5:"Description"}},
+  FST:{name:"Forecast Schedule",el:{1:"Quantity",2:"Forecast Qualifier",3:"Forecast Timing Qualifier",4:"Date"}},
+  // --- Totals, charges, tax ---
+  TDS:{name:"Total Monetary Value Summary",el:{1:"Total Invoice Amount (2 implied decimals)",2:"Amount Subject to Discount",3:"Discounted Amount",4:"Terms Discount Amount"}},
+  SAC:{name:"Service / Allowance / Charge",el:{1:"Allowance or Charge Indicator",2:"SAC Code",3:"Agency Code",4:"Agency SAC Code",5:"Amount (2 implied decimals)",15:"Description"}},
+  TXI:{name:"Tax Information",el:{1:"Tax Type Code",2:"Monetary Amount",3:"Percent"}},
   CTT:{name:"Transaction Totals",el:{1:"Number of Line Items",2:"Hash Total"}},
   AMT:{name:"Monetary Amount",el:{1:"Amount Qualifier",2:"Monetary Amount"}},
-  // --- Healthcare (HIPAA) segments ---
+  // --- Shipping / ASN ---
+  HL:{name:"Hierarchical Level",el:{1:"Hierarchical ID",2:"Parent ID",3:"Level Code",4:"Child Code"}},
+  PRF:{name:"Purchase Order Reference",el:{1:"PO Number",2:"Release Number",3:"Change Order Sequence",4:"PO Date"}},
+  TD1:{name:"Carrier Details (Quantity & Weight)",el:{1:"Packaging Code",2:"Lading Quantity",6:"Weight Qualifier",7:"Weight",8:"Unit of Measure"}},
+  TD3:{name:"Carrier Details (Equipment)",el:{1:"Equipment Description Code",2:"Equipment Initial",3:"Equipment Number"}},
+  TD4:{name:"Carrier Details (Special Handling)",el:{1:"Special Handling Code",2:"Hazmat Code Qualifier",3:"Hazmat Class Code"}},
+  TD5:{name:"Carrier Details (Routing)",el:{1:"Routing Sequence",2:"ID Qualifier",3:"Carrier ID (SCAC)",4:"Transport Method",5:"Routing"}},
+  MAN:{name:"Marks and Numbers",el:{1:"Marks Qualifier",2:"Marks and Numbers (e.g., SSCC)",3:"Marks and Numbers (2)"}},
+  SN1:{name:"Item Detail (Shipment)",el:{1:"Assigned ID",2:"Quantity Shipped",3:"Unit of Measure",4:"Quantity Shipped to Date"}},
+  ISS:{name:"Invoice Shipment Summary",el:{1:"Number of Units",2:"Unit of Measure",3:"Weight",4:"Weight Unit"}},
+  CAD:{name:"Carrier Details",el:{1:"Transport Method",4:"Carrier ID (SCAC)",5:"Routing",7:"Reference Qualifier",8:"Reference ID"}},
+  // --- Transportation (204 / 210 / 214) ---
+  B2:{name:"Beginning Segment (Load Tender)",el:{2:"Carrier ID (SCAC)",4:"Shipment ID",6:"Payment Method"}},
+  B2A:{name:"Set Purpose",el:{1:"Purpose Code"}},
+  B3:{name:"Beginning Segment (Freight Invoice)",el:{2:"Invoice Number",3:"Shipment ID",4:"Payment Method",6:"Invoice Date",7:"Net Amount Due (2 implied decimals)",9:"Delivery Date",11:"Carrier ID (SCAC)"}},
+  B10:{name:"Beginning Segment (Shipment Status)",el:{1:"Reference ID (PRO Number)",2:"Shipment ID",3:"Carrier ID (SCAC)"}},
+  LX:{name:"Transaction Set Line Number",el:{1:"Assigned Number"}},
+  L11:{name:"Business Instructions / Reference",el:{1:"Reference ID",2:"Reference ID Qualifier",3:"Description"}},
+  MS1:{name:"Equipment/Shipment Location",el:{1:"City",2:"State/Province",3:"Country"}},
+  MS2:{name:"Equipment Owner and Type",el:{1:"Carrier ID (SCAC)",2:"Equipment Number",3:"Equipment Description Code"}},
+  AT5:{name:"Bill of Lading Handling Requirements",el:{1:"Special Handling Code",2:"Special Services Code",3:"Special Handling Description"}},
+  AT7:{name:"Shipment Status Details",el:{1:"Status Code",2:"Status Reason Code",5:"Date",6:"Time",7:"Time Code"}},
+  AT8:{name:"Shipment Weight & Quantity",el:{1:"Weight Qualifier",2:"Weight Unit Code",3:"Weight",4:"Lading Quantity",5:"Lading Quantity (2)"}},
+  MS3:{name:"Interline Information",el:{1:"Carrier ID (SCAC)",2:"Routing Sequence",3:"City",4:"Transport Method"}},
+  N7:{name:"Equipment Details",el:{1:"Equipment Initial",2:"Equipment Number",3:"Weight",4:"Weight Qualifier",5:"Tare Weight"}},
+  R3:{name:"Route Information (Motor)",el:{1:"Carrier ID (SCAC)",2:"Routing Sequence Code",3:"City",4:"Transport Method"}},
+  L5:{name:"Description, Marks and Numbers",el:{1:"Lading Line Item Number",2:"Lading Description",3:"Commodity Code",4:"Commodity Code Qualifier"}},
+  L0:{name:"Line Item - Quantity and Weight",el:{1:"Lading Line Item Number",2:"Billed/Rated-as Quantity",3:"Billed/Rated-as Qualifier",4:"Weight",5:"Weight Qualifier",8:"Lading Quantity",9:"Packaging Form Code"}},
+  L1:{name:"Rate and Charges",el:{1:"Lading Line Item Number",2:"Freight Rate",3:"Rate/Value Qualifier",4:"Charge (2 implied decimals)",8:"Rate Class Code"}},
+  L3:{name:"Total Weight and Charges",el:{1:"Weight",2:"Weight Qualifier",3:"Freight Rate",4:"Rate/Value Qualifier",5:"Charge (2 implied decimals)",11:"Lading Quantity"}},
+  C3:{name:"Currency",el:{1:"Currency Code",2:"Exchange Rate",3:"Currency Code (2)"}},
+  SPO:{name:"Shipment Purchase Order Detail",el:{1:"PO Number",2:"Reference ID (Department)",3:"Unit of Measure",4:"Quantity",5:"Weight Unit",6:"Weight"}},
+  CD3:{name:"Carton (Package) Detail",el:{1:"Weight Qualifier",2:"Weight",4:"Service Level Code",7:"Payment Method"}},
+  Q7:{name:"Lading Exception Status",el:{1:"Lading Exception Code",2:"Packaging Form Code",3:"Lading Quantity"}},
+  POD:{name:"Proof of Delivery",el:{1:"Date",2:"Time",3:"Name (Signed By)"}},
+  // --- Warehouse (940 / 943 / 944 / 945) ---
+  W05:{name:"Shipping Order Identification",el:{1:"Order Status Code",2:"Depositor Order Number",3:"PO Number"}},
+  W06:{name:"Warehouse Shipment Identification",el:{1:"Reporting Code",2:"Depositor Order Number",3:"Shipment Date",4:"Shipment ID"}},
+  W12:{name:"Warehouse Item Detail",el:{1:"Shipment/Order Status Code",2:"Quantity Ordered",3:"Quantity Shipped",4:"Quantity Difference",5:"Unit of Measure",7:"UPC Case Code"}},
+  W27:{name:"Carrier Details (Warehouse)",el:{1:"Transport Method",2:"Carrier ID (SCAC)",3:"Routing"}},
+  // --- Finance (820) ---
+  TRN:{name:"Trace / Reassociation",el:{1:"Trace Type Code",2:"Reference ID",3:"Originating Company ID"}},
+  ENT:{name:"Entity",el:{1:"Assigned Number"}},
+  RMR:{name:"Remittance Advice Reference",el:{1:"Reference ID Qualifier",2:"Reference ID (Invoice Number)",3:"Payment Action Code",4:"Amount Paid",5:"Total Invoice Amount",6:"Discount Amount"}},
+  ADX:{name:"Adjustment",el:{1:"Adjustment Amount",2:"Adjustment Reason Code"}},
+  // --- Healthcare (HIPAA) ---
   BHT:{name:"Beginning of Hierarchical Transaction",el:{1:"Hierarchical Structure Code",2:"Transaction Set Purpose",3:"Reference ID",4:"Date",5:"Time",6:"Transaction Type"}},
   NM1:{name:"Individual or Organizational Name",el:{1:"Entity ID Code",2:"Entity Type (1=Person,2=Org)",3:"Last Name / Org Name",4:"First Name",5:"Middle Name",8:"ID Code Qualifier",9:"ID Code (NPI/Member ID)"}},
+  SBR:{name:"Subscriber Information",el:{1:"Payer Responsibility",2:"Individual Relationship",3:"Group Number",4:"Group Name",9:"Claim Filing Indicator"}},
+  PAT:{name:"Patient Information",el:{1:"Individual Relationship Code"}},
   CLM:{name:"Health Claim",el:{1:"Claim Submitter ID",2:"Total Claim Charge Amount",5:"Facility Code",6:"Provider Signature",7:"Assignment of Benefits",8:"Benefits Assignment",9:"Release of Information"}},
   CLP:{name:"Claim Payment Information",el:{1:"Claim Submitter ID",2:"Claim Status Code",3:"Total Charge Amount",4:"Amount Paid",5:"Patient Responsibility",6:"Claim Filing Indicator",7:"Payer Claim Control Number"}},
+  CAS:{name:"Claims Adjustment",el:{1:"Adjustment Group Code",2:"Adjustment Reason Code",3:"Adjustment Amount",4:"Adjustment Quantity"}},
   SVC:{name:"Service Payment Information",el:{1:"Procedure Code",2:"Line Charge Amount",3:"Line Paid Amount",4:"Revenue Code",5:"Units Paid"}},
   SV1:{name:"Professional Service",el:{1:"Procedure Code",2:"Line Charge Amount",3:"Unit of Measure",4:"Service Unit Count"}},
-  DTP:{name:"Date or Time Period",el:{1:"Date/Time Qualifier",2:"Date Format",3:"Date Value"}},
+  SV2:{name:"Institutional Service",el:{1:"Revenue Code",2:"Procedure Code",3:"Line Charge Amount",4:"Unit of Measure",5:"Service Unit Count"}},
+  HI:{name:"Health Care Code Information",el:{1:"Code (1) - composite",2:"Code (2)",3:"Code (3)",4:"Code (4)"}},
+  PLB:{name:"Provider Level Adjustment",el:{1:"Provider ID",2:"Fiscal Period Date",3:"Adjustment Reason - composite",4:"Adjustment Amount"}},
   EB:{name:"Eligibility or Benefit Information",el:{1:"Eligibility/Benefit Info Code",2:"Coverage Level",3:"Service Type",4:"Insurance Type",5:"Plan Coverage Description"}},
   EQ:{name:"Eligibility or Benefit Inquiry",el:{1:"Service Type Code",2:"Medical Procedure ID",3:"Coverage Level"}},
   STC:{name:"Status Information",el:{1:"Health Care Claim Status",2:"Status Date",3:"Action Code",4:"Total Claim Charge",5:"Claim Payment Amount"}},
   INS:{name:"Insured Benefit (Enrollment)",el:{1:"Yes/No Member Indicator",2:"Relationship Code",3:"Maintenance Type",4:"Maintenance Reason"}},
-  TRN:{name:"Trace / Reassociation",el:{1:"Trace Type Code",2:"Reference ID",3:"Originating Company ID"}},
-  // --- Transportation segments ---
-  B10:{name:"Beginning Segment (Carrier Status)",el:{1:"Reference ID",2:"Shipment ID",3:"SCAC"}},
-  B2:{name:"Beginning Segment (Motor Carrier Load Tender)",el:{1:"(reserved)",2:"SCAC",4:"Shipment ID",5:"Weight Unit"}},
-  B3:{name:"Beginning Segment (Freight Invoice)",el:{2:"Invoice Number",3:"Shipment ID",4:"Shipment Method",5:"Weight Unit",7:"Net Amount Due"}},
-  L11:{name:"Business Instructions / Reference",el:{1:"Reference ID",2:"Reference Qualifier"}},
-  AT7:{name:"Shipment Status Details",el:{1:"Status Reason Code",2:"Status Reason",5:"Date",6:"Time"}},
-  MS3:{name:"Interline Information",el:{1:"SCAC",2:"Routing Sequence",3:"City"}},
-  SE:{name:"Transaction Set Trailer",el:{1:"Number of Segments",2:"Transaction Set Control Number"}},
-  GE:{name:"Functional Group Trailer",el:{1:"Number of Transaction Sets",2:"Group Control Number"}},
-  IEA:{name:"Interchange Control Trailer",el:{1:"Number of Functional Groups",2:"Interchange Control Number"}},
+  PWK:{name:"Paperwork",el:{1:"Report Type Code",2:"Transmission Code"}},
+  // --- 997 / 999 Acknowledgment ---
+  AK1:{name:"Functional Group Response Header",el:{1:"Functional ID Code",2:"Group Control Number"}},
+  AK2:{name:"Transaction Set Response Header",el:{1:"Transaction Set ID",2:"TS Control Number"}},
+  AK3:{name:"Data Segment Note",el:{1:"Segment ID",2:"Segment Position",3:"Loop ID",4:"Error Code"}},
+  AK4:{name:"Data Element Note",el:{1:"Position in Segment",2:"Element Reference Number",3:"Error Code",4:"Copy of Bad Element"}},
+  AK5:{name:"Transaction Set Response Trailer",el:{1:"TS Acknowledgment Code",2:"Error Code"}},
+  AK9:{name:"Functional Group Response Trailer",el:{1:"Group Acknowledgment Code",2:"Number of TS Included",3:"Number Received",4:"Number Accepted",5:"Error Code"}},
 };
 
-/* small code lookups that make output feel "smart" */
+/* ---------- Code-list translations ----------
+   Turns raw qualifier codes into their human-readable meaning,
+   e.g. BSN01 "00" -> "Original". */
 const ST_TYPES={
-  // Supply chain / retail
   "850":"Purchase Order","855":"PO Acknowledgment","860":"PO Change Request","865":"PO Change Ack",
-  "856":"Advance Ship Notice (ASN)","810":"Invoice","846":"Inventory Advice",
+  "856":"Advance Ship Notice (ASN)","810":"Invoice","846":"Inventory Advice","830":"Planning Schedule","862":"Shipping Schedule","832":"Price/Sales Catalog","852":"Product Activity Data",
   "940":"Warehouse Shipping Order","943":"Warehouse Stock Transfer","944":"Warehouse Stock Receipt","945":"Warehouse Shipping Advice",
-  // Finance
   "820":"Payment Order / Remittance","823":"Lockbox","824":"Application Advice",
-  // Healthcare (HIPAA)
   "837":"Health Care Claim","835":"Health Care Claim Payment/Remittance","834":"Benefit Enrollment & Maintenance",
   "270":"Eligibility/Benefit Inquiry","271":"Eligibility/Benefit Response",
   "276":"Claim Status Request","277":"Claim Status Response","278":"Health Services Review",
-  // Transportation
   "204":"Motor Carrier Load Tender","210":"Motor Carrier Freight Invoice","214":"Transportation Carrier Shipment Status","990":"Response to Load Tender",
-  // Acknowledgment
   "997":"Functional Acknowledgment","999":"Implementation Acknowledgment"
 };
-const N1_ENTITY={"BY":"Buyer","SE":"Seller","ST":"Ship To","BT":"Bill To","SF":"Ship From","VN":"Vendor","SU":"Supplier","RI":"Remit To","SH":"Shipper","CN":"Consignee","CA":"Carrier"};
+const PURPOSE={"00":"Original","01":"Cancellation","02":"Add","03":"Delete","04":"Change","05":"Replace","06":"Confirmation","07":"Duplicate","18":"Reissue","22":"Information Copy","24":"Draft","CN":"Completion Notification","SU":"Status Update"};
+const PO_TYPE={"SA":"Stand-alone Order","BK":"Blanket Order","RL":"Release / Delivery Order","DS":"Dropship","NE":"New Order","KN":"Purchase Order","OS":"Special Order","RO":"Rush Order","SS":"Supply or Service Order","CN":"Consigned Order"};
+const ACK_TYPE={"AC":"Acknowledge - With Detail and Change","AD":"Acknowledge - With Detail, No Change","AK":"Acknowledge - No Detail or Change","AT":"Accepted","RD":"Reject with Detail","RJ":"Rejected - No Detail"};
+const UOM={"EA":"Each","CA":"Case","LB":"Pound","KG":"Kilogram","GR":"Gram","BX":"Box","CT":"Carton","PL":"Pallet","DZ":"Dozen","PC":"Piece","UN":"Unit","GA":"Gallon","LT":"Liter","FT":"Foot","IN":"Inch","YD":"Yard","MR":"Meter","CM":"Centimeter","HR":"Hour","PK":"Package","RL":"Roll","SF":"Square Foot"};
+const DTM_Q={"002":"Delivery Requested","010":"Requested Ship","011":"Shipped","017":"Estimated Delivery","035":"Delivered","036":"Expiration","037":"Ship Not Before","038":"Ship No Later Than","063":"Do Not Deliver After","064":"Do Not Deliver Before","067":"Current Scheduled Delivery","068":"Current Scheduled Ship","118":"Requested Pickup","137":"Document Date","007":"Effective"};
+const G62_Q={"01":"Cancel After","02":"Requested Delivery","04":"Purchase Order Date","10":"Requested Ship","11":"Shipped","17":"Estimated Delivery","35":"Delivered","37":"Ship Not Before","38":"Ship No Later Than","63":"Do Not Deliver After","64":"Do Not Deliver Before","69":"Promised Delivery","76":"Scheduled for Delivery","78":"Scheduled for Pickup","86":"Actual Pickup"};
+const REF_Q={"BM":"Bill of Lading Number","PO":"Purchase Order Number","CN":"Carrier's Reference (PRO) Number","DP":"Department Number","IA":"Internal Vendor Number","VN":"Vendor Order Number","CO":"Customer Order Number","IV":"Seller's Invoice Number","PK":"Packing List Number","SN":"Seal Number","SI":"Shipper's ID for Shipment","TN":"Transaction Reference Number","2I":"Tracking Number","AW":"Air Waybill Number","MB":"Master Bill of Lading","ZZ":"Mutually Defined"};
+const HL_LEVEL={"S":"Shipment","O":"Order","P":"Pack","I":"Item","T":"Tare (Pallet)"};
+const BPR_HANDLE={"C":"Payment with Remittance","D":"Make Payment Only","I":"Remittance Only","P":"Prenotification","U":"Split Payment & Remittance","X":"Handling Party's Option"};
+const BPR_CD={"C":"Credit","D":"Debit"};
+const PAY_METHOD={"ACH":"Automated Clearing House","CHK":"Check","FWT":"Federal Reserve Wire","NON":"Non-Payment Data"};
+const SHIP_MODE={"M":"Motor (Common Carrier)","A":"Air","S":"Ocean","R":"Rail","U":"Private Parcel Service","T":"Best Way","E":"Expedited Truck","LT":"Less Than Trailer Load"};
+const AT7_STATUS={"AF":"Carrier Departed Pickup Location","AG":"Estimated Delivery","AH":"Attempted Delivery","AI":"Shipment on Hold","AJ":"Tendered for Delivery","AM":"Loaded on Truck","AN":"Diverted to Air Carrier","AP":"Delivery Not Completed","AR":"Rail Arrived at Destination","AV":"Available for Delivery","CA":"Shipment Canceled","CD":"Carrier Departed Delivery Location","CP":"Completed Loading at Pickup","D1":"Completed Unloading (Delivered)","J1":"Delivered to Connecting Line","K1":"Arrived at Customs","L1":"Loading","P1":"Departed Terminal","R1":"Received from Prior Carrier","S1":"Trailer Spotted at Consignee","X1":"Arrived at Delivery Location","X3":"Arrived at Pickup Location","X4":"Arrived at Terminal","X6":"En Route to Delivery"};
+const AT7_REASON={"NS":"Normal Status","A2":"Incorrect Address","AM":"Shipper Related","B1":"Consignee Closed","BG":"Other"};
+const CLP_STATUS={"1":"Processed as Primary","2":"Processed as Secondary","3":"Processed as Tertiary","4":"Denied","19":"Processed as Primary, Forwarded","20":"Processed as Secondary, Forwarded","22":"Reversal of Previous Payment","25":"Predetermination Pricing Only"};
+const SAC_IND={"A":"Allowance","C":"Charge","N":"No Allowance or Charge","S":"Service"};
+const ITD_TYPE={"01":"Basic","02":"End of Month","03":"Fixed Date","05":"Discount Not Applicable","08":"Basic Discount Offered","12":"10 Days After End of Month","14":"Previously Agreed Upon"};
+const ITD_BASIS={"1":"Ship Date","2":"Delivery Date","3":"Invoice Date","15":"Receipt of Goods"};
+const ACK_STATUS={"IA":"Item Accepted","IB":"Item Backordered","IC":"Item Accepted with Changes","ID":"Item Deleted","IH":"Item on Hold","IP":"Item Accepted - Price Changed","IQ":"Item Accepted - Quantity Changed","IR":"Item Rejected"};
+const AK_STATUS={"A":"Accepted","E":"Accepted with Errors Noted","P":"Partially Accepted","R":"Rejected"};
+const FOB_PAY={"PP":"Prepaid (by Seller)","CC":"Collect","PC":"Prepaid but Charged to Customer","TP":"Third Party Pay"};
+const MAN_Q={"GM":"SSCC-18 (UCC/EAN-128)","UC":"U.P.C. Shipping Container Code","CA":"Shipper-Assigned Case Number","CP":"Carrier-Assigned Package ID"};
+const CAS_GROUP={"CO":"Contractual Obligations","CR":"Correction and Reversals","OA":"Other Adjustments","PI":"Payer Initiated Reductions","PR":"Patient Responsibility"};
+const SBR_RESP={"P":"Primary","S":"Secondary","T":"Tertiary"};
+const WEIGHT_Q={"G":"Gross Weight","N":"Net Weight","T":"Tare Weight"};
+const WEIGHT_UNIT={"L":"Pounds","K":"Kilograms"};
+const W12_STATUS={"CC":"Shipment Complete","CP":"Partial Shipment"};
+const N1_ENTITY={"BY":"Buyer","SE":"Seller","ST":"Ship To","BT":"Bill To","SF":"Ship From","VN":"Vendor","SU":"Supplier","RI":"Remit To","SH":"Shipper","CN":"Consignee","CA":"Carrier","SO":"Sold To","PR":"Payer","PE":"Payee","MF":"Manufacturer","WH":"Warehouse","OB":"Ordered By","FW":"Forwarder"};
 const NM1_ENTITY={"41":"Submitter","40":"Receiver","85":"Billing Provider","87":"Pay-to Provider","82":"Rendering Provider","IL":"Insured/Subscriber","QC":"Patient","PR":"Payer","2B":"Third-Party Admin","1P":"Provider","DN":"Referring Provider","77":"Service Facility"};
 
+/* map of "SEG:position" -> code table */
+const QUAL={
+  "BEG:1":PURPOSE,"BSN:1":PURPOSE,"BHT:2":PURPOSE,"BGN:1":PURPOSE,"BAK:1":PURPOSE,"BCH:1":PURPOSE,"BCA:1":PURPOSE,"BIA:1":PURPOSE,"BFR:1":PURPOSE,"B2A:1":PURPOSE,
+  "BEG:2":PO_TYPE,"BCH:2":PO_TYPE,
+  "BAK:2":ACK_TYPE,"BCA:2":ACK_TYPE,
+  "PO1:3":UOM,"IT1:3":UOM,"SN1:3":UOM,"QTY:3":UOM,"IT3:2":UOM,"SLN:5":UOM,"SDQ:1":UOM,"SCH:2":UOM,"ACK:3":UOM,"SPO:3":UOM,"ISS:2":UOM,"W12:5":UOM,"PO4:3":UOM,
+  "DTM:1":DTM_Q,"DTP:1":DTM_Q,
+  "G62:1":G62_Q,
+  "REF:1":REF_Q,"N9:1":REF_Q,"L11:2":REF_Q,
+  "HL:3":HL_LEVEL,
+  "BPR:1":BPR_HANDLE,"BPR:3":BPR_CD,"BPR:4":PAY_METHOD,
+  "TD5:4":SHIP_MODE,"CAD:1":SHIP_MODE,"W27:1":SHIP_MODE,"MS3:4":SHIP_MODE,"R3:4":SHIP_MODE,
+  "AT7:1":AT7_STATUS,"AT7:2":AT7_REASON,
+  "CLP:2":CLP_STATUS,
+  "SAC:1":SAC_IND,
+  "ITD:1":ITD_TYPE,"ITD:2":ITD_BASIS,
+  "ACK:1":ACK_STATUS,
+  "AK5:1":AK_STATUS,"AK9:1":AK_STATUS,
+  "FOB:1":FOB_PAY,"B3:4":FOB_PAY,"CD3:7":FOB_PAY,
+  "MAN:1":MAN_Q,
+  "CAS:1":CAS_GROUP,
+  "SBR:1":SBR_RESP,
+  "AT8:1":WEIGHT_Q,"L0:5":WEIGHT_Q,"L3:2":WEIGHT_Q,"N7:4":WEIGHT_Q,"TD1:6":WEIGHT_Q,"CD3:1":WEIGHT_Q,
+  "AT8:2":WEIGHT_UNIT,
+  "W12:1":W12_STATUS,
+  "N1:1":N1_ENTITY,"NM1:1":NM1_ENTITY
+};
+
 function decodeHint(seg,pos,val){
+  const t=QUAL[seg+":"+pos];
+  if(t&&t[val]) return t[val];
   if(seg==="ST"&&pos===1&&ST_TYPES[val]) return ST_TYPES[val];
-  if(seg==="N1"&&pos===1&&N1_ENTITY[val]) return N1_ENTITY[val];
-  if(seg==="NM1"&&pos===1&&NM1_ENTITY[val]) return NM1_ENTITY[val];
   if(seg==="NM1"&&pos===2) return val==="1"?"Person":(val==="2"?"Organization":"");
   if(seg==="ISA"&&pos===15) return val==="P"?"Production":(val==="T"?"Test":"");
   return "";
@@ -452,6 +601,82 @@ function detectDelims(raw){
   if(segT===elem || !segT.trim() && segT!=="\n") segT="~";
   if(raw.indexOf(segT)===-1) segT="\n";
   return {elem,segT,comp};
+}
+
+
+/* ---------- Structural validation ----------
+   Standards-level integrity checks: envelope control numbers, segment
+   counts, line-item totals, and HL linkage. Not a full implementation-
+   guide validation (those are partner- and release-specific). */
+function validateX12(segs){
+  const issues=[];
+  const all=(id)=>segs.filter(x=>x.id===id);
+  const isa=segs.find(x=>x.id==="ISA"), iea=segs.find(x=>x.id==="IEA");
+  if(isa&&iea){
+    const a=(isa.fields[13]||"").trim(), b=(iea.fields[2]||"").trim();
+    if(a&&b&&a!==b) issues.push({sev:"err",msg:"ISA13 interchange control number \""+a+"\" does not match IEA02 \""+b+"\"."});
+  } else if(isa&&!iea){ issues.push({sev:"warn",msg:"ISA present but no matching IEA trailer found."}); }
+  const gs=segs.find(x=>x.id==="GS"), ge=segs.find(x=>x.id==="GE");
+  if(gs&&ge){
+    const a=(gs.fields[6]||"").trim(), b=(ge.fields[2]||"").trim();
+    if(a&&b&&a!==b) issues.push({sev:"err",msg:"GS06 group control number \""+a+"\" does not match GE02 \""+b+"\"."});
+  } else if(gs&&!ge){ issues.push({sev:"warn",msg:"GS present but no matching GE trailer found."}); }
+  if(ge){ const n=all("ST").length, d=parseInt(ge.fields[1],10);
+    if(!isNaN(d)&&n&&d!==n) issues.push({sev:"warn",msg:"GE01 declares "+d+" transaction set(s), but "+n+" ST segment(s) found."}); }
+  if(iea){ const n=all("GS").length, d=parseInt(iea.fields[1],10);
+    if(!isNaN(d)&&n&&d!==n) issues.push({sev:"warn",msg:"IEA01 declares "+d+" functional group(s), but "+n+" GS segment(s) found."}); }
+  // ST..SE segment count + control number match
+  let stI=-1, stCtl="";
+  segs.forEach((x,i)=>{
+    if(x.id==="ST"){ stI=i; stCtl=(x.fields[2]||"").trim(); }
+    if(x.id==="SE"&&stI>=0){
+      const cnt=i-stI+1, d=parseInt(x.fields[1],10), ctl=(x.fields[2]||"").trim();
+      if(!isNaN(d)&&d!==cnt) issues.push({sev:"err",msg:"SE01 declares "+d+" segments, but transaction "+(stCtl?("\""+stCtl+"\" "):"")+"actually contains "+cnt+" (ST through SE inclusive)."});
+      if(stCtl&&ctl&&stCtl!==ctl) issues.push({sev:"err",msg:"ST02 control number \""+stCtl+"\" does not match SE02 \""+ctl+"\"."});
+      stI=-1;
+    }
+  });
+  // CTT line count
+  const ctt=segs.find(x=>x.id==="CTT");
+  if(ctt){
+    const d=parseInt(ctt.fields[1],10);
+    const lineSeg = all("PO1").length?"PO1":(all("IT1").length?"IT1":(all("HL").length?"HL":(all("LIN").length?"LIN":"")));
+    if(lineSeg&&!isNaN(d)){
+      const n=all(lineSeg).length;
+      if(d!==n) issues.push({sev:"warn",msg:"CTT01 declares "+d+" line item(s), but "+n+" "+lineSeg+" segment(s) found."});
+    }
+  }
+  // TDS vs sum of IT1 lines (810)
+  const tds=segs.find(x=>x.id==="TDS");
+  const it1=all("IT1");
+  if(tds&&it1.length){
+    const stated=parseInt(tds.fields[1],10);
+    let sum=0, comp=true;
+    it1.forEach(x=>{ const q=parseFloat(x.fields[2]), p=parseFloat(x.fields[4]);
+      if(isNaN(q)||isNaN(p)) comp=false; else sum+=q*p; });
+    if(comp&&!isNaN(stated)&&Math.round(sum*100)!==stated){
+      issues.push({sev:"warn",msg:"TDS01 total "+stated+" ($"+(stated/100).toFixed(2)+", 2 implied decimals) does not equal the sum of IT1 lines ($"+sum.toFixed(2)+"). Allowances or charges (SAC) may account for the difference."});
+    }
+  }
+  // HL parent linkage (856)
+  const hls=all("HL");
+  if(hls.length){
+    const ids=new Set(hls.map(h=>(h.fields[1]||"").trim()));
+    hls.forEach(h=>{ const par=(h.fields[2]||"").trim();
+      if(par&&!ids.has(par)) issues.push({sev:"err",msg:"HL "+(h.fields[1]||"?")+" references parent \""+par+"\", which does not exist."}); });
+  }
+  // unknown segments (transparent about dictionary coverage)
+  const unknown=[...new Set(segs.filter(x=>!SEG[x.id]).map(x=>x.id))];
+  if(unknown.length) issues.push({sev:"info",msg:"Not yet in the segment dictionary (parsed generically): "+unknown.join(", ")+". Definitions for these are coming."});
+  return issues;
+}
+
+function renderValidation(issues){
+  const note='<div class="vn">Structural checks: envelope control numbers, ST/SE segment counts, CTT line counts, TDS vs line totals, HL linkage. Not a full implementation-guide validation.</div>';
+  if(!issues.length) return '<div class="val ok"><div class="vh">✓ Structural checks passed</div>'+note+'</div>';
+  let h='<div class="val"><div class="vh">Structural check results</div>';
+  issues.forEach(i=>{ h+='<div class="vitem"><span class="vtag '+i.sev+'">'+(i.sev==="err"?"ERROR":i.sev==="warn"?"WARN":"INFO")+'</span><span>'+esc(i.msg)+'</span></div>'; });
+  return h+note+'</div>';
 }
 
 function parse(){
@@ -486,6 +711,9 @@ function parse(){
       html+=metaCard("Segments",String(segments.length));
       html+='</div>';
     }
+
+    // structural validation panel
+    html+=renderValidation(validateX12(segments));
 
     segments.forEach((s,idx)=>{
       const def=SEG[s.id];
