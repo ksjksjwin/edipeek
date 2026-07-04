@@ -3,604 +3,151 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EDI Analyzer — Batch Validation &amp; Lifecycle Tracking | EdiPeek</title>
+<title>Free Online EDI Viewer — X12 &amp; UN/EDIFACT Parser (No Upload)</title>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2945012312110955"
      crossorigin="anonymous"></script>
-<meta name="description" content="Upload multiple EDI files at once. EdiPeek validates each file against business rules and links your 850, 856, and 810 into a transaction lifecycle, flagging quantity and amount discrepancies. Runs entirely in your browser.">
-<link rel="canonical" href="https://edipeek.com/analyze/">
-<meta property="og:title" content="EDI Analyzer — Batch Validation & Lifecycle Tracking">
-<meta property="og:description" content="Validate many EDI files at once and trace the order-to-invoice lifecycle. 100% in your browser, nothing uploaded.">
-<meta property="og:url" content="https://edipeek.com/analyze/">
+<meta name="description" content="Free in-browser EDI viewers. Parse and read X12 (850, 810, 856, 837, 835) and UN/EDIFACT (ORDERS, INVOIC, DESADV) messages instantly. Files never leave your computer.">
+<link rel="canonical" href="https://edipeek.com/">
+<meta property="og:title" content="Free Online EDI Viewer — X12 & UN/EDIFACT">
+<meta property="og:description" content="Read raw EDI in your browser. X12 and EDIFACT, with plain-English business summaries. No upload, no signup.">
+<meta property="og:url" content="https://edipeek.com/">
 <meta property="og:site_name" content="EdiPeek">
 <meta property="og:type" content="website">
 <meta name="robots" content="index, follow">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "WebApplication",
-  "name": "EdiPeek EDI Analyzer",
-  "url": "https://edipeek.com/analyze/",
-  "description": "Batch EDI validation and transaction lifecycle tracking that runs entirely in the browser. Validates X12 files against business rules and links related documents by PO number.",
-  "applicationCategory": "BusinessApplication",
-  "operatingSystem": "Any (web browser)",
-  "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
-  "publisher": {"@type": "Organization", "name": "EdiPeek", "url": "https://edipeek.com/"}
+  "@type": "WebSite",
+  "name": "EdiPeek",
+  "url": "https://edipeek.com/",
+  "description": "Free in-browser EDI viewers for ANSI X12 and UN/EDIFACT, with plain-English business summaries. Files are processed locally and never uploaded.",
+  "publisher": {
+    "@type": "Organization",
+    "name": "EdiPeek",
+    "url": "https://edipeek.com/"
+  }
 }
 </script>
 <style>
   :root{
     --bg:#0d1117;--panel:#161b22;--panel-2:#1c2330;--border:#2a3340;
-    --ink:#e6edf3;--ink-dim:#8b97a7;--accent:#58a6ff;--green:#3fb950;
-    --seg:#f0883e;--red:#f85149;--amber:#d29922;--purple:#bc8cff;
+    --ink:#e6edf3;--ink-dim:#8b97a7;--green:#3fb950;--blue:#58a6ff;
     --mono:"JetBrains Mono","SF Mono",ui-monospace,Menlo,Consolas,monospace;
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  html,body{background:var(--bg);color:var(--ink);font-family:var(--mono);line-height:1.6;font-size:14px}
-  body{background-image:radial-gradient(circle at 12% -8%,rgba(63,185,80,.05),transparent 42%),radial-gradient(circle at 100% 0%,rgba(88,166,255,.05),transparent 40%);min-height:100vh}
-  a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
-  header{border-bottom:1px solid var(--border);padding:16px 22px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-  .logo{font-weight:700;font-size:18px;letter-spacing:-.5px;display:flex;align-items:center;gap:9px;color:var(--ink)}
-  .logo .b{color:var(--accent)}
-  .logo-mark{color:var(--green);flex-shrink:0}
-  .spacer{flex:1}
-  .navlink{font-size:12px;color:var(--ink-dim);border:1px solid var(--border);padding:6px 12px;border-radius:6px}
-  .navlink:hover{border-color:var(--accent);color:var(--accent);text-decoration:none}
-  .pro-badge{font-size:10px;font-weight:700;color:var(--purple);border:1px solid rgba(188,140,255,.4);background:rgba(188,140,255,.1);padding:2px 7px;border-radius:99px;letter-spacing:.5px}
-  main{max-width:1080px;margin:0 auto;padding:26px 22px 80px}
-  .hero{margin-bottom:24px}
-  h1{font-size:24px;letter-spacing:-.5px;margin-bottom:7px}
-  .hero p{color:var(--ink-dim);font-size:14px;max-width:680px}
-  .privacy-note{margin-top:10px;font-size:12px;color:var(--green);display:flex;align-items:center;gap:6px}
-
-  /* dropzone */
-  .drop{border:2px dashed var(--border);border-radius:14px;padding:38px 24px;text-align:center;transition:.15s;cursor:pointer;background:var(--panel);margin-bottom:20px}
-  .drop:hover,.drop.over{border-color:var(--accent);background:var(--panel-2)}
-  .drop .icon{font-size:30px;margin-bottom:10px;opacity:.8}
-  .drop .big{font-size:15px;color:var(--ink);margin-bottom:5px}
-  .drop .sub{font-size:12px;color:var(--ink-dim)}
-  .drop input{display:none}
-
-  .toolbar{display:flex;gap:10px;align-items:center;margin-bottom:18px;flex-wrap:wrap}
-  .btn{font-family:inherit;font-size:13px;padding:9px 16px;border-radius:8px;border:1px solid var(--border);background:var(--panel-2);color:var(--ink);cursor:pointer;transition:.15s}
-  .btn:hover{border-color:var(--accent)}
-  .btn.primary{background:var(--green);color:#07210e;border-color:var(--green);font-weight:700}
-  .btn.primary:hover{filter:brightness(1.08)}
-  .btn:disabled{opacity:.4;cursor:not-allowed}
-  .count{font-size:12px;color:var(--ink-dim)}
-
-  /* summary strip */
-  .summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:22px}
-  .scard{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
-  .scard .n{font-size:26px;font-weight:700;letter-spacing:-1px}
-  .scard .l{font-size:11px;color:var(--ink-dim);text-transform:uppercase;letter-spacing:1px;margin-top:2px}
-  .scard.ok .n{color:var(--green)}
-  .scard.err .n{color:var(--red)}
-  .scard.warn .n{color:var(--amber)}
-
-  .section-title{font-size:12px;text-transform:uppercase;letter-spacing:1.5px;color:var(--accent);margin:26px 0 12px;display:flex;align-items:center;gap:8px}
-
-  /* file rows */
-  .files{display:flex;flex-direction:column;gap:10px}
-  .frow{background:var(--panel);border:1px solid var(--border);border-radius:10px;overflow:hidden}
-  .frow-head{display:flex;align-items:center;gap:12px;padding:13px 16px;cursor:pointer}
-  .frow-head:hover{background:var(--panel-2)}
-  .ftype{font-size:11px;font-weight:700;padding:3px 9px;border-radius:6px;background:rgba(88,166,255,.12);color:var(--accent);white-space:nowrap}
-  .ftype.x12{background:rgba(63,185,80,.12);color:var(--green)}
-  .fname{font-size:13px;color:var(--ink);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .fstat{font-size:11px;padding:3px 9px;border-radius:99px;white-space:nowrap}
-  .fstat.pass{background:rgba(63,185,80,.12);color:var(--green)}
-  .fstat.fail{background:rgba(248,81,73,.12);color:var(--red)}
-  .fstat.warns{background:rgba(210,153,34,.12);color:var(--amber)}
-  .chev{color:var(--ink-dim);font-size:11px;transition:.15s}
-  .frow.open .chev{transform:rotate(90deg)}
-  .frow-body{display:none;padding:0 16px 16px;border-top:1px solid var(--border)}
-  .frow.open .frow-body{display:block}
-  .issue{display:flex;gap:9px;padding:8px 0;border-bottom:1px dotted #223}
-  .issue:last-child{border-bottom:none}
-  .isev{font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px;height:fit-content;white-space:nowrap;margin-top:1px}
-  .isev.err{background:rgba(248,81,73,.15);color:var(--red)}
-  .isev.warn{background:rgba(210,153,34,.15);color:var(--amber)}
-  .isev.info{background:rgba(139,151,167,.15);color:var(--ink-dim)}
-  .isev.ok{background:rgba(63,185,80,.15);color:var(--green)}
-  .imsg{font-size:12.5px;color:#c4cdd9;line-height:1.5}
-  .meta-line{font-size:12px;color:var(--ink-dim);padding:8px 0 4px}
-  .meta-line b{color:var(--ink)}
-
-  /* lifecycle */
-  .lifecycle{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:4px}
-  .chain{padding:16px 18px;border-bottom:1px solid var(--border)}
-  .chain:last-child{border-bottom:none}
-  .chain-po{font-size:13px;color:var(--ink);margin-bottom:12px;font-weight:700}
-  .chain-po .po-num{color:var(--accent)}
-  .flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
-  .node{flex:1;min-width:120px;background:var(--panel-2);border:1px solid var(--border);border-radius:9px;padding:11px 13px;position:relative}
-  .node.missing{opacity:.4;border-style:dashed}
-  .node .nt{font-size:11px;font-weight:700;color:var(--accent);margin-bottom:3px}
-  .node .nd{font-size:11px;color:var(--ink-dim);line-height:1.45}
-  .arrow{display:flex;align-items:center;color:var(--ink-dim);padding:0 8px;font-size:14px}
-  .discrepancy{margin-top:12px;padding:10px 13px;border-radius:8px;background:rgba(248,81,73,.08);border:1px solid rgba(248,81,73,.25);font-size:12px;color:#f8b4b0}
-  .discrepancy.clean{background:rgba(63,185,80,.06);border-color:rgba(63,185,80,.2);color:#9ae6a4}
-  .discrepancy b{color:inherit}
-
-  /* freemium gate */
-  .gate{position:relative}
-  .locked .gate-content{filter:blur(6px);pointer-events:none;user-select:none}
-  .gate-overlay{display:none}
-  .locked .gate-overlay{display:flex;position:absolute;inset:0;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:linear-gradient(180deg,rgba(13,17,23,.55),rgba(13,17,23,.82));border-radius:12px;z-index:5;padding:20px;text-align:center}
-  .gate-overlay .glabel{font-size:14px;color:var(--ink);font-weight:700}
-  .gate-overlay .gsub{font-size:12px;color:var(--ink-dim);max-width:340px}
-  .lock-ico{font-size:22px}
-
-  .pro-panel{background:linear-gradient(135deg,rgba(188,140,255,.08),rgba(88,166,255,.05));border:1px solid rgba(188,140,255,.25);border-radius:12px;padding:20px 22px;margin-top:26px}
-  .pro-panel h3{font-size:15px;color:var(--ink);margin-bottom:6px;display:flex;align-items:center;gap:8px}
-  .pro-panel ul{list-style:none;margin:12px 0;display:grid;grid-template-columns:1fr 1fr;gap:8px}
-  @media(max-width:640px){.pro-panel ul{grid-template-columns:1fr}}
-  .pro-panel li{font-size:12.5px;color:#c4cdd9;padding-left:20px;position:relative}
-  .pro-panel li:before{content:"✓";position:absolute;left:0;color:var(--purple);font-weight:700}
-  .pro-cta{display:inline-flex;align-items:center;gap:8px;margin-top:8px;background:var(--purple);color:#1a0b2e;font-weight:700;font-size:13px;padding:10px 18px;border-radius:9px;cursor:pointer;border:none;font-family:inherit}
-  .pro-cta:hover{filter:brightness(1.08)}
-  .pro-note{font-size:11px;color:var(--ink-dim);margin-top:9px}
-
-  .empty{text-align:center;padding:40px 20px;color:var(--ink-dim);font-size:13px}
-  footer{border-top:1px solid var(--border);padding:24px 22px;text-align:center;color:var(--ink-dim);font-size:12px;margin-top:50px}
-  footer a{margin:0 7px}
-
-  .toggle-demo{font-size:11px;color:var(--ink-dim);cursor:pointer;border:1px dashed var(--border);padding:5px 11px;border-radius:6px;background:none;font-family:inherit}
-  .toggle-demo:hover{border-color:var(--purple);color:var(--purple)}
+  html,body{background:var(--bg);color:var(--ink);font-family:var(--mono);line-height:1.5;font-size:15px}
+  body{background-image:radial-gradient(circle at 20% -10%,rgba(63,185,80,.07),transparent 45%),radial-gradient(circle at 90% 0%,rgba(88,166,255,.07),transparent 40%);min-height:100vh}
+  a{text-decoration:none;color:inherit}
+  header{border-bottom:1px solid var(--border);padding:18px 22px;display:flex;align-items:center;gap:12px}
+  .logo{font-weight:700;font-size:18px;letter-spacing:-.5px}
+  .logo .b{color:var(--blue)}.logo .g{color:var(--green)}
+  .blink{color:var(--green);animation:blink 1.2s steps(2,start) infinite}
+  @keyframes blink{to{opacity:0}}
+  main{max-width:960px;margin:0 auto;padding:60px 22px 80px}
+  h1{font-size:32px;letter-spacing:-1px;line-height:1.15;margin-bottom:14px}
+  h1 .g{color:var(--green)}h1 .b{color:var(--blue)}
+  .sub{color:var(--ink-dim);max-width:620px;margin-bottom:14px;font-size:16px}
+  .privacy{color:var(--green);font-size:13px;display:inline-flex;gap:8px;align-items:center;border:1px solid rgba(63,185,80,.3);background:rgba(63,185,80,.06);padding:7px 12px;border-radius:8px;margin-bottom:44px}
+  .cards{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px}
+  @media(max-width:900px){.cards{grid-template-columns:1fr 1fr}}
+  @media(max-width:760px){.cards{grid-template-columns:1fr}}
+  .card{display:block;background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:26px;transition:.18s}
+  .card:hover{transform:translateY(-3px)}
+  .card.x12:hover{border-color:var(--green);box-shadow:0 10px 40px -18px rgba(63,185,80,.5)}
+  .card.edi:hover{border-color:var(--blue);box-shadow:0 10px 40px -18px rgba(88,166,255,.5)}
+  .card .badge{display:inline-block;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;padding:4px 10px;border-radius:99px;margin-bottom:16px}
+  .card.x12 .badge{color:var(--green);border:1px solid rgba(63,185,80,.4);background:rgba(63,185,80,.07)}
+  .card.edi .badge{color:var(--blue);border:1px solid rgba(88,166,255,.4);background:rgba(88,166,255,.07)}
+  .card h2{font-size:21px;margin-bottom:8px;letter-spacing:-.4px}
+  .card p{color:var(--ink-dim);font-size:14px;margin-bottom:16px;min-height:60px}
+  .card .types{color:var(--ink-dim);font-size:12px;line-height:1.9}
+  .card .types b{color:var(--ink)}
+  .card .go{margin-top:18px;font-size:13px;font-weight:700}
+  .card.x12 .go{color:var(--green)}.card.edi .go{color:var(--blue)}
+  .card.analyzer:hover{border-color:#bc8cff;box-shadow:0 10px 40px -18px rgba(188,140,255,.5)}
+  .card.analyzer .badge{color:#bc8cff;border:1px solid rgba(188,140,255,.4);background:rgba(188,140,255,.07)}
+  .card.analyzer .go{color:#bc8cff}
+  .why{margin-top:54px;border-top:1px solid var(--border);padding-top:32px}
+  .why h3{font-size:16px;margin-bottom:14px}
+  .why ul{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:760px){.why ul{grid-template-columns:1fr}}
+  .why li{color:var(--ink-dim);font-size:14px;padding-left:22px;position:relative}
+  .why li:before{content:"\25B8";position:absolute;left:0;color:var(--green)}
+  footer{border-top:1px solid var(--border);padding:24px 22px;text-align:center;color:var(--ink-dim);font-size:12px;margin-top:40px}
+  footer a{color:var(--blue)}
 </style>
 </head>
 <body>
 <header>
-  <a class="logo" href="/" style="text-decoration:none">
-    <svg class="logo-mark" viewBox="0 0 28 28" width="24" height="24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <a href="/" style="text-decoration:none;display:flex;align-items:center;gap:9px">
+    <svg viewBox="0 0 28 28" width="26" height="26" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="color:var(--green);flex-shrink:0">
       <circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/>
       <line x1="17.6" y1="17.6" x2="25" y2="25" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
       <line x1="8" y1="10" x2="16" y2="10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.9"/>
       <line x1="8" y1="13" x2="14" y2="13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
       <line x1="8" y1="16" x2="15" y2="16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
     </svg>
-    <span>EDI<span class="b">PEEK</span></span>
+    <span class="logo">EDI<span class="b">PEEK</span><span class="blink">_</span></span>
   </a>
-  <span class="pro-badge">ANALYZER</span>
-  <div class="spacer"></div>
-  <a class="navlink" href="/x12/">X12 viewer</a>
-  <a class="navlink" href="/edifact/">EDIFACT viewer</a>
-  <a class="navlink" href="/guides/">Guides</a>
 </header>
-
 <main>
-  <div class="hero">
-    <h1>EDI Analyzer</h1>
-    <p>Drop in a whole batch of EDI files at once. EdiPeek validates each one against business rules, then links related documents into a transaction lifecycle so you can spot where ordered, shipped, and billed quantities stop agreeing.</p>
-    <div class="privacy-note">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 2l7 4v6c0 5-3.5 8-7 10-3.5-2-7-5-7-10V6z"/></svg>
-      Every file is parsed locally in your browser. Nothing is uploaded.
-    </div>
+  <h1>Read raw <span class="g">EDI</span> in your <span class="b">browser</span>.</h1>
+  <p class="sub">Paste an EDI message and get a clean, human-readable breakdown of every segment, plus a plain-English summary of what the transaction actually means. Two standards, one place.</p>
+  <div class="privacy">&#128274; Your file never leaves your computer. All parsing happens locally in your browser.</div>
+
+  <div class="cards">
+    <a class="card x12" href="x12/">
+      <span class="badge">North America</span>
+      <h2>ANSI X12 Viewer</h2>
+      <p>The North American EDI standard. Purchase orders, invoices, shipping notices, healthcare claims and more.</p>
+      <div class="types">
+        <b>Supply chain:</b> 850, 855, 856, 810, 846, 940/945<br>
+        <b>Healthcare:</b> 837, 835, 270/271, 276/277, 834<br>
+        <b>Finance &amp; transport:</b> 820, 204, 210, 214, 990
+      </div>
+      <div class="go">Open X12 viewer &#8594;</div>
+    </a>
+
+    <a class="card edi" href="edifact/">
+      <span class="badge">International / EU</span>
+      <h2>UN/EDIFACT Viewer</h2>
+      <p>The international EDI standard used across Europe and worldwide. Orders, invoices, despatch, transport and customs.</p>
+      <div class="types">
+        <b>Supply chain:</b> ORDERS, ORDRSP, INVOIC, PRICAT, DELFOR<br>
+        <b>Logistics:</b> DESADV, IFTMIN, IFTSTA, COPARN<br>
+        <b>Finance &amp; customs:</b> REMADV, PAYMUL, CUSDEC, CUSRES
+      </div>
+      <div class="go">Open EDIFACT viewer &#8594;</div>
+    </a>
+
+    <a class="card analyzer" href="analyze/">
+      <span class="badge">New · Batch</span>
+      <h2>EDI Analyzer</h2>
+      <p>Upload many files at once. Validates each against business rules, then links your 850, 856, and 810 into a lifecycle and flags quantity and amount discrepancies.</p>
+      <div class="types">
+        <b>Batch validation:</b> envelope controls, counts, totals<br>
+        <b>Lifecycle:</b> order &#8594; ship &#8594; invoice by PO number<br>
+        <b>Discrepancies:</b> ordered vs shipped vs billed
+      </div>
+      <div class="go">Open EDI Analyzer &#8594;</div>
+    </a>
   </div>
 
-  <div class="drop" id="drop">
-    <div class="icon">⬍</div>
-    <div class="big">Drop EDI files here, or click to browse</div>
-    <div class="sub">Multiple files at once. .edi, .txt, .x12, or any raw EDI. Processed on your device only.</div>
-    <input type="file" id="fileInput" multiple accept=".edi,.txt,.x12,.dat,.edifact,text/plain">
-  </div>
-
-  <div class="toolbar">
-    <button class="btn primary" id="analyzeBtn" disabled>Analyze files</button>
-    <button class="btn" id="clearBtn" disabled>Clear</button>
-    <button class="toggle-demo" id="demoBtn">Load sample batch</button>
-    <span class="count" id="count"></span>
-  </div>
-
-  <div id="results"></div>
-
-  <div class="empty" id="emptyState">
-    No files yet. Drop a batch above, or load the sample to see how batch validation and lifecycle tracking work.
+  <div class="why">
+    <h3>Why this tool</h3>
+    <ul>
+      <li>100% in-browser, sensitive trading-partner data never gets uploaded</li>
+      <li>Auto-detects delimiters from the ISA / UNA service string</li>
+      <li>Plain-English business summary, not just a segment dump</li>
+      <li>Free, no sign-up, works on mobile and desktop</li>
+    </ul>
   </div>
 </main>
-
 <footer>
-  <div style="margin-bottom:10px"><a href="/">Home</a> · <a href="/guides/">Guides</a> · <a href="/about/">About</a> · <a href="/contact/">Contact</a> · <a href="/privacy/">Privacy</a> · <a href="/terms/">Terms</a></div>
-  EdiPeek — free in-browser EDI viewers. Files are processed locally and never uploaded.
+  <div style="margin-bottom:12px"><a href="https://ko-fi.com/edipeek" target="_blank" rel="noopener" style="display:inline-block;color:#13c3ff;border:1px solid rgba(19,195,255,.4);background:rgba(19,195,255,.08);padding:8px 16px;border-radius:8px;font-size:13px">☕ Support EdiPeek — keep it free</a></div>
+  <div style="margin-bottom:10px"><a href="/guides/">Guides</a> &middot; <a href="/about/">About</a> &middot; <a href="/contact/">Contact</a> &middot; <a href="/privacy/">Privacy</a> &middot; <a href="/terms/">Terms</a></div>
+  EdiPeek, free in-browser EDI parsers. Not affiliated with any standards body. Files are processed locally and never uploaded.
 </footer>
-
-<script>
-/* =========================================================================
-   EdiPeek Analyzer - 100% client-side
-   - Parses multiple X12 files
-   - Runs a business-rule validation engine on each
-   - Links documents by PO number into a lifecycle (850 -> 855 -> 856 -> 810)
-   - Flags ordered vs shipped vs billed discrepancies
-   - Free tier: per-file pass/fail + counts. Pro tier (gated/blurred):
-     full issue detail, lifecycle discrepancy breakdown, export.
-   ========================================================================= */
-
-/* ---- Pro flag. In production this is set by your auth/billing check
-        (e.g. Clerk session + Lemon Squeezy subscription status).
-        Here it is false so the Pro sections render locked/blurred. ---- */
-let IS_PRO = false;
-
-/* ---------- minimal X12 helpers (shared logic with the viewer) ---------- */
-const ST_TYPES={
-  "850":"Purchase Order","855":"PO Acknowledgment","860":"PO Change","865":"PO Change Ack",
-  "856":"Advance Ship Notice","810":"Invoice","846":"Inventory Advice","832":"Price/Sales Catalog",
-  "852":"Product Activity","940":"Warehouse Shipping Order","945":"Warehouse Shipping Advice",
-  "820":"Payment/Remittance","824":"Application Advice","837":"Health Care Claim","835":"Claim Payment",
-  "214":"Shipment Status","210":"Freight Invoice","204":"Load Tender","997":"Func Acknowledgment","999":"Impl Acknowledgment"
-};
-
-function detectDelims(raw){
-  let elem="*", segT="~", comp=":";
-  const i=raw.indexOf("ISA");
-  if(i!==-1 && raw.length>=i+4){
-    elem=raw[i+3];
-    let p=i+3, count=0;
-    while(p<raw.length && count<16){ if(raw[p]===elem) count++; p++; }
-    if(p<raw.length){ comp=raw[p]; segT=raw[p+1]||"~"; }
-  }
-  if(segT===elem) segT="~";
-  return {elem,segT,comp};
-}
-
-function parseX12(raw){
-  const {elem,segT}=detectDelims(raw);
-  const clean=raw.replace(/\r/g,"").trim();
-  const rawSegs=clean.split(segT).map(s=>s.replace(/\n/g,"").trim()).filter(Boolean);
-  const segs=rawSegs.map(line=>{
-    const fields=line.split(elem);
-    return {id:(fields[0]||"").trim().toUpperCase(), fields};
-  });
-  return {segs,elem,segT};
-}
-
-function stType(segs){
-  const st=segs.find(s=>s.id==="ST");
-  return st?(st.fields[1]||"").trim():"";
-}
-
-/* ---------- validation engine (business rules) ---------- */
-function validate(segs){
-  const issues=[];
-  const all=id=>segs.filter(x=>x.id===id);
-  const one=id=>segs.find(x=>x.id===id);
-  const F=(s,i)=>s&&s.fields[i]!==undefined?String(s.fields[i]).trim():"";
-
-  // envelope control-number matches
-  const isa=one("ISA"),iea=one("IEA");
-  if(isa&&iea){ const a=F(isa,13),b=F(iea,2);
-    if(a&&b&&a!==b) issues.push({sev:"err",msg:'ISA13 interchange control number "'+a+'" does not match IEA02 "'+b+'".'});
-  } else if(isa&&!iea){ issues.push({sev:"warn",msg:"ISA header present but no IEA trailer found."}); }
-
-  const gs=one("GS"),ge=one("GE");
-  if(gs&&ge){ const a=F(gs,6),b=F(ge,2);
-    if(a&&b&&a!==b) issues.push({sev:"err",msg:'GS06 group control number "'+a+'" does not match GE02 "'+b+'".'});
-  }
-
-  // ST/SE count + control number
-  let stI=-1,stCtl="";
-  segs.forEach((x,i)=>{
-    if(x.id==="ST"){stI=i;stCtl=F(x,2);}
-    if(x.id==="SE"&&stI>=0){
-      const cnt=i-stI+1,d=parseInt(F(x,1),10),ctl=F(x,2);
-      if(!isNaN(d)&&d!==cnt) issues.push({sev:"err",msg:"SE01 declares "+d+" segments but the transaction contains "+cnt+" (ST through SE)."});
-      if(stCtl&&ctl&&stCtl!==ctl) issues.push({sev:"err",msg:'ST02 control number "'+stCtl+'" does not match SE02 "'+ctl+'".'});
-      stI=-1;
-    }
-  });
-
-  // CTT line count
-  const ctt=one("CTT");
-  if(ctt){
-    const d=parseInt(F(ctt,1),10);
-    const lineSeg=all("PO1").length?"PO1":(all("IT1").length?"IT1":(all("HL").length?"HL":""));
-    if(lineSeg&&!isNaN(d)){ const n=all(lineSeg).length;
-      if(d!==n) issues.push({sev:"warn",msg:"CTT01 declares "+d+" line(s) but "+n+" "+lineSeg+" segment(s) were found."}); }
-  }
-
-  // 810: TDS total vs sum of IT1 lines
-  const tds=one("TDS"),it1=all("IT1");
-  if(tds&&it1.length){
-    const stated=parseInt(F(tds,1),10);
-    let sum=0,ok=true;
-    it1.forEach(x=>{const q=parseFloat(F(x,2)),p=parseFloat(F(x,4)); if(isNaN(q)||isNaN(p))ok=false;else sum+=q*p;});
-    if(ok&&!isNaN(stated)&&Math.round(sum*100)!==stated)
-      issues.push({sev:"warn",msg:"TDS01 total $"+(stated/100).toFixed(2)+" does not equal the sum of IT1 lines ($"+sum.toFixed(2)+"). Check SAC allowances or charges."});
-  }
-
-  // 856: HL parent references
-  const hls=all("HL");
-  if(hls.length){
-    const ids=new Set(hls.map(h=>F(h,1)));
-    hls.forEach(h=>{const par=F(h,2); if(par&&!ids.has(par))
-      issues.push({sev:"err",msg:"HL "+F(h,1)+' references parent "'+par+'" which does not exist.'});});
-  }
-
-  // mandatory header presence by type
-  const t=stType(segs);
-  const need={"850":["BEG"],"855":["BAK"],"856":["BSN"],"810":["BIG"],"820":["BPR"],"837":["BHT"]};
-  (need[t]||[]).forEach(seg=>{ if(!one(seg))
-    issues.push({sev:"err",msg:"A "+t+" ("+(ST_TYPES[t]||t)+") is missing its mandatory "+seg+" header segment."}); });
-
-  if(!issues.length) issues.push({sev:"ok",msg:"No business-rule violations detected. Envelope controls, counts, and totals reconcile."});
-  return issues;
-}
-
-/* ---------- extract key business facts for lifecycle linking ---------- */
-function extract(segs){
-  const t=stType(segs);
-  const one=id=>segs.find(x=>x.id===id);
-  const all=id=>segs.filter(x=>x.id===id);
-  const F=(s,i)=>s&&s.fields[i]!==undefined?String(s.fields[i]).trim():"";
-  let po="",lines=[],totalCents=null,shipId="",invNo="";
-
-  if(t==="850"){ const beg=one("BEG"); po=F(beg,3);
-    lines=all("PO1").map(x=>({qty:parseFloat(F(x,2))||0,uom:F(x,3),price:parseFloat(F(x,4))||0,id:F(x,7)})); }
-  else if(t==="855"){ const bak=one("BAK"); po=F(bak,3); }
-  else if(t==="856"){ const bsn=one("BSN"); shipId=F(bsn,2);
-    const prf=one("PRF"); if(prf)po=F(prf,1);
-    lines=all("SN1").map(x=>({qty:parseFloat(F(x,2))||0,uom:F(x,3),id:""})); }
-  else if(t==="810"){ const big=one("BIG"); invNo=F(big,2); po=F(big,4);
-    lines=all("IT1").map(x=>({qty:parseFloat(F(x,2))||0,uom:F(x,3),price:parseFloat(F(x,4))||0,id:F(x,7)}));
-    const tds=one("TDS"); if(tds){const c=parseInt(F(tds,1),10); if(!isNaN(c))totalCents=c;} }
-
-  const qtyTotal=lines.reduce((a,b)=>a+(b.qty||0),0);
-  return {type:t,po,lines,qtyTotal,totalCents,shipId,invNo};
-}
-
-/* ---------- state ---------- */
-let FILES=[]; // {name, raw, segs, type, issues, facts}
-
-function classify(issues){
-  if(issues.some(i=>i.sev==="err")) return "fail";
-  if(issues.some(i=>i.sev==="warn")) return "warns";
-  return "pass";
-}
-
-/* ---------- rendering ---------- */
-function render(){
-  const box=document.getElementById("results");
-  const empty=document.getElementById("emptyState");
-  if(!FILES.length){ box.innerHTML=""; empty.style.display="block"; return; }
-  empty.style.display="none";
-
-  let nFail=0,nWarn=0,nPass=0,nErr=0,nWarnIssues=0;
-  FILES.forEach(f=>{ const c=classify(f.issues);
-    if(c==="fail")nFail++; else if(c==="warns")nWarn++; else nPass++;
-    f.issues.forEach(i=>{ if(i.sev==="err")nErr++; if(i.sev==="warn")nWarnIssues++; });
-  });
-
-  let html="";
-
-  // summary strip (FREE)
-  html+='<div class="summary">'+
-    scard(FILES.length,"Files","")+
-    scard(nPass,"Clean","ok")+
-    scard(nWarn,"Warnings","warn")+
-    scard(nFail,"Errors","err")+
-    scard(nErr+nWarnIssues,"Total issues","")+
-    '</div>';
-
-  // per-file results (FREE: type + status; PRO: full issue detail)
-  html+='<div class="section-title">Per-file validation</div>';
-  html+='<div class="files">';
-  FILES.forEach((f,idx)=>{
-    const c=classify(f.issues);
-    const statLabel=c==="fail"?"Errors":(c==="warns"?"Warnings":"Clean");
-    const errN=f.issues.filter(i=>i.sev==="err").length;
-    const warnN=f.issues.filter(i=>i.sev==="warn").length;
-    const badge=(errN||warnN)?(errN+" err · "+warnN+" warn"):"clean";
-    html+='<div class="frow" data-i="'+idx+'">'+
-      '<div class="frow-head">'+
-        '<span class="ftype x12">X12 '+esc(f.type||"?")+'</span>'+
-        '<span class="fname">'+esc(f.name)+' <span style="color:var(--ink-dim)">· '+esc(ST_TYPES[f.type]||"Unknown type")+'</span></span>'+
-        '<span class="fstat '+c+'">'+statLabel+' ('+badge+')</span>'+
-        '<span class="chev">▶</span>'+
-      '</div>'+
-      '<div class="frow-body">'+
-        '<div class="meta-line">Transaction <b>'+esc(f.type||"?")+'</b>'+(f.facts.po?' · PO <b>'+esc(f.facts.po)+'</b>':'')+(f.facts.invNo?' · Invoice <b>'+esc(f.facts.invNo)+'</b>':'')+' · <b>'+f.segs.length+'</b> segments</div>'+
-        renderIssues(f.issues)+
-      '</div>'+
-    '</div>';
-  });
-  html+='</div>';
-
-  // lifecycle (PRO, gated)
-  html+=renderLifecycle();
-
-  // pro upsell
-  html+=renderProPanel();
-
-  box.innerHTML=html;
-  bindRows();
-}
-
-function scard(n,label,cls){
-  return '<div class="scard '+(cls||"")+'"><div class="n">'+n+'</div><div class="l">'+esc(label)+'</div></div>';
-}
-
-function renderIssues(issues){
-  // FREE users: show counts only for err/warn, but blur the actual messages.
-  // We render the full content and let the gate blur it when not Pro,
-  // EXCEPT the "ok" all-clear which is always visible (no value to hide).
-  const allOk=issues.length===1&&issues[0].sev==="ok";
-  const inner=issues.map(i=>
-    '<div class="issue"><span class="isev '+i.sev+'">'+
-    (i.sev==="err"?"ERROR":i.sev==="warn"?"WARN":i.sev==="info"?"INFO":"OK")+
-    '</span><span class="imsg">'+esc(i.msg)+'</span></div>'
-  ).join("");
-
-  if(allOk || IS_PRO){
-    return '<div>'+inner+'</div>';
-  }
-  // gated
-  return '<div class="gate locked">'+
-    '<div class="gate-content">'+inner+'</div>'+
-    '<div class="gate-overlay">'+
-      '<div class="lock-ico">🔒</div>'+
-      '<div class="glabel">'+issues.length+' finding'+(issues.length>1?"s":"")+' detected</div>'+
-      '<div class="gsub">Unlock EdiPeek Pro to see the exact rule violations, the segments involved, and how to fix them.</div>'+
-    '</div>'+
-  '</div>';
-}
-
-/* ---------- lifecycle linking by PO ---------- */
-function buildChains(){
-  const byPo={};
-  FILES.forEach(f=>{ const po=f.facts.po; if(!po)return;
-    (byPo[po]=byPo[po]||[]).push(f); });
-  return byPo;
-}
-
-function renderLifecycle(){
-  const byPo=buildChains();
-  const pos=Object.keys(byPo).filter(po=>byPo[po].length>=1);
-  if(!pos.length) return "";
-
-  let html='<div class="section-title">Transaction lifecycle <span class="pro-badge">PRO</span></div>';
-
-  let inner="";
-  pos.forEach(po=>{
-    const docs=byPo[po];
-    const find=t=>docs.find(d=>d.type===t);
-    const order=find("850"),ack=find("855"),ship=find("856"),inv=find("810");
-    const node=(label,doc,desc)=>{
-      if(!doc) return '<div class="node missing"><div class="nt">'+label+'</div><div class="nd">not in batch</div></div>';
-      return '<div class="node"><div class="nt">'+label+'</div><div class="nd">'+desc+'</div></div>';
-    };
-    const arrow='<div class="arrow">→</div>';
-
-    // discrepancy analysis
-    let disc="";
-    if(order&&(ship||inv)){
-      const oQ=order.facts.qtyTotal;
-      const sQ=ship?ship.facts.qtyTotal:null;
-      const iQ=inv?inv.facts.qtyTotal:null;
-      const parts=[];
-      if(sQ!==null&&Math.abs(oQ-sQ)>0.001) parts.push("ordered <b>"+oQ+"</b> but shipped <b>"+sQ+"</b> ("+(sQ-oQ>0?"+":"")+(sQ-oQ)+")");
-      if(iQ!==null&&Math.abs(oQ-iQ)>0.001) parts.push("ordered <b>"+oQ+"</b> but billed <b>"+iQ+"</b> ("+(iQ-oQ>0?"+":"")+(iQ-oQ)+")");
-      if(ship&&inv){ const s2=ship.facts.qtyTotal,i2=inv.facts.qtyTotal;
-        if(Math.abs(s2-i2)>0.001) parts.push("shipped <b>"+s2+"</b> but billed <b>"+i2+"</b> ("+(i2-s2>0?"+":"")+(i2-s2)+")"); }
-      if(parts.length) disc='<div class="discrepancy">⚠ Quantity discrepancy: '+parts.join("; ")+".</div>";
-      else disc='<div class="discrepancy clean">✓ Ordered, shipped, and billed quantities all reconcile.</div>';
-    }
-
-    inner+='<div class="chain">'+
-      '<div class="chain-po">Purchase order <span class="po-num">'+esc(po)+'</span> · '+docs.length+' document'+(docs.length>1?"s":"")+' in batch</div>'+
-      '<div class="flow">'+
-        node("850 Order",order,order?("Qty "+order.facts.qtyTotal+" · "+order.facts.lines.length+" line(s)"):"")+arrow+
-        node("855 Ack",ack,ack?"Acknowledged":"")+arrow+
-        node("856 Ship",ship,ship?("Qty "+ship.facts.qtyTotal+(ship.facts.shipId?" · "+esc(ship.facts.shipId):"")):"")+arrow+
-        node("810 Invoice",inv,inv?("Qty "+inv.facts.qtyTotal+(inv.facts.totalCents!=null?" · $"+(inv.facts.totalCents/100).toFixed(2):"")):"")+
-      '</div>'+
-      disc+
-    '</div>';
-  });
-
-  if(IS_PRO){
-    html+='<div class="lifecycle">'+inner+'</div>';
-  } else {
-    html+='<div class="gate locked"><div class="gate-content"><div class="lifecycle">'+inner+'</div></div>'+
-      '<div class="gate-overlay">'+
-        '<div class="lock-ico">🔒</div>'+
-        '<div class="glabel">'+pos.length+' linked transaction chain'+(pos.length>1?"s":"")+' found</div>'+
-        '<div class="gsub">EdiPeek Pro maps each PO across its 850, 855, 856, and 810, and flags every quantity and amount discrepancy across the chain.</div>'+
-      '</div></div>';
-  }
-  return html;
-}
-
-function renderProPanel(){
-  if(IS_PRO) return "";
-  return '<div class="pro-panel">'+
-    '<h3>🔓 EdiPeek Pro</h3>'+
-    '<div style="font-size:12.5px;color:var(--ink-dim)">Everything stays in your browser. Pro just unlocks the deeper analysis on top of the free viewer.</div>'+
-    '<ul>'+
-      '<li>Full validation detail, not just counts</li>'+
-      '<li>Transaction lifecycle across 850 to 810</li>'+
-      '<li>Quantity and amount discrepancy flags</li>'+
-      '<li>Unlimited files per batch</li>'+
-      '<li>Export a validation report</li>'+
-      '<li>Payment (820) to invoice matching</li>'+
-    '</ul>'+
-    '<button class="pro-cta" id="proBtn">Unlock Pro</button>'+
-    '<div class="pro-note">Preview how Pro looks with the toggle below. Billing is handled by a merchant of record, so tax is taken care of for you.</div>'+
-    '<button class="toggle-demo" id="proToggle" style="margin-top:10px">Preview Pro view (demo)</button>'+
-    '</div>';
-}
-
-/* ---------- events ---------- */
-function bindRows(){
-  document.querySelectorAll(".frow-head").forEach(h=>{
-    h.onclick=()=>h.parentElement.classList.toggle("open");
-  });
-  const pt=document.getElementById("proToggle");
-  if(pt) pt.onclick=()=>{ IS_PRO=!IS_PRO; render();
-    if(IS_PRO){ setTimeout(()=>{ const b=document.getElementById("proToggleBack"); },0); } };
-  const pb=document.getElementById("proBtn");
-  if(pb) pb.onclick=()=>{
-    alert("In production this opens checkout via a merchant of record (Lemon Squeezy / Paddle / Polar), which handles VAT and sales tax for you. After payment, your session is marked Pro and these panels unlock automatically.");
-  };
-}
-
-function refreshCount(){
-  const c=document.getElementById("count");
-  c.textContent=FILES.length?(FILES.length+" file"+(FILES.length>1?"s":"")+" loaded"):"";
-  document.getElementById("analyzeBtn").disabled=!FILES.length;
-  document.getElementById("clearBtn").disabled=!FILES.length;
-}
-
-function ingest(fileList){
-  const arr=[...fileList];
-  let pending=arr.length;
-  if(!pending) return;
-  arr.forEach(file=>{
-    const reader=new FileReader();
-    reader.onload=e=>{
-      const raw=String(e.target.result||"");
-      try{
-        const {segs}=parseX12(raw);
-        const type=stType(segs);
-        FILES.push({name:file.name,raw,segs,type,issues:validate(segs),facts:extract(segs)});
-      }catch(err){
-        FILES.push({name:file.name,raw,segs:[],type:"",issues:[{sev:"err",msg:"Could not parse this file as X12: "+err.message}],facts:{type:"",po:"",lines:[],qtyTotal:0}});
-      }
-      if(--pending===0){ refreshCount(); }
-    };
-    reader.readAsText(file);
-  });
-}
-
-const drop=document.getElementById("drop");
-const fileInput=document.getElementById("fileInput");
-drop.onclick=()=>fileInput.click();
-fileInput.onchange=e=>ingest(e.target.files);
-["dragover","dragenter"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add("over");}));
-["dragleave","drop"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove("over");}));
-drop.addEventListener("drop",e=>{ if(e.dataTransfer&&e.dataTransfer.files) ingest(e.dataTransfer.files); });
-
-document.getElementById("analyzeBtn").onclick=render;
-document.getElementById("clearBtn").onclick=()=>{ FILES=[]; refreshCount(); render(); };
-
-/* ---------- sample batch (850 + 856 with a shortage + 810 with overbill) ---------- */
-document.getElementById("demoBtn").onclick=()=>{
-  FILES=[];
-  const samples=[
-    {name:"850_PO-99831.edi",raw:
-"ISA*00*          *00*          *ZZ*BIGRETAIL      *ZZ*ACMESUPPLY     *240115*1430*U*00401*000000123*0*P*:~GS*PO*BIGRETAIL*ACMESUPPLY*20240115*1430*123*X*004010~ST*850*0001~BEG*00*SA*PO-99831**20240115~N1*BY*BIG RETAILER INC~PO1*1*100*EA*12.50**UP*012345678905~PO1*2*50*EA*8.75**UP*012345678912~CTT*2~SE*7*0001~GE*1*123~IEA*1*000000123~"},
-    {name:"856_SHIP-5521.edi",raw:
-"ISA*00*          *00*          *ZZ*ACMESUPPLY     *ZZ*BIGRETAIL      *240220*0900*U*00401*000000200*0*P*:~GS*SH*ACMESUPPLY*BIGRETAIL*20240220*0900*200*X*004010~ST*856*0001~BSN*00*SHIP-5521*20240220*0900~HL*1**S~PRF*PO-99831~HL*2*1*I~SN1**90*EA~CTT*2~SE*8*0001~GE*1*200~IEA*1*000000200~"},
-    {name:"810_INV-3391.edi",raw:
-"ISA*00*          *00*          *ZZ*ACMESUPPLY     *ZZ*BIGRETAIL      *240225*1000*U*00401*000000205*0*P*:~GS*IN*ACMESUPPLY*BIGRETAIL*20240225*1000*205*X*004010~ST*810*0001~BIG*20240225*INV-3391*20240115*PO-99831~IT1*1*100*EA*12.50**UP*012345678905~IT1*2*50*EA*8.75**UP*012345678912~TDS*168750~SE*6*0001~GE*1*205~IEA*1*000000205~"}
-  ];
-  samples.forEach(s=>{
-    try{ const {segs}=parseX12(s.raw); const type=stType(segs);
-      FILES.push({name:s.name,raw:s.raw,segs,type,issues:validate(segs),facts:extract(segs)});
-    }catch(err){}
-  });
-  refreshCount();
-  render();
-};
-</script>
 </body>
 </html>
